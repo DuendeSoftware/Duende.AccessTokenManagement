@@ -8,5 +8,5 @@ namespace Duende.TokenManagement.ClientCredentials;
 internal class TokenRequestSynchronization : ITokenRequestSynchronization
 {
     /// <inheritdoc />
-    public ConcurrentDictionary<string, Lazy<Task<string?>>> Dictionary { get; } = new();
+    public ConcurrentDictionary<string, Lazy<Task<AccessToken>>> Dictionary { get; } = new();
 }

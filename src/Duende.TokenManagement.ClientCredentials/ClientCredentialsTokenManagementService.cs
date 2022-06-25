@@ -35,7 +35,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     }
 
     /// <inheritdoc/>
-    public async Task<string?> GetAccessTokenAsync(
+    public async Task<AccessToken> GetAccessTokenAsync(
         string clientName = TokenManagementDefaults.DefaultTokenClientName, 
         AccessTokenParameters? parameters = null,
         CancellationToken cancellationToken = default)
@@ -47,7 +47,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
             var item = await _distributedAccessTokenCache.GetAsync(clientName, parameters, cancellationToken);
             if (item != null)
             {
-                return item.Value;
+                return item;
             }
         }
 
@@ -55,18 +55,28 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
         {
             return await _sync.Dictionary.GetOrAdd(clientName, _ =>
             {
-                return new Lazy<Task<string?>>(async () =>
+                return new Lazy<Task<AccessToken>>(async () =>
                 {
                     var response = await _clientCredentialsTokenEndpointService.RequestToken(clientName, parameters, cancellationToken);
 
                     if (response.IsError)
                     {
                         _logger.LogError("Error requesting access token for client {clientName}. Error = {error}. Error description = {errorDescription}", clientName, response.Error, response.ErrorDescription);
-                        return null;
+                        return new AccessToken();
                     }
 
-                    await _distributedAccessTokenCache.SetAsync(clientName, response.AccessToken, response.ExpiresIn, parameters, cancellationToken);
-                    return response.AccessToken;
+                    var token = new AccessToken
+                    {
+                        Value = response.AccessToken,
+                        Expiration = response.ExpiresIn == 0
+                            ? null
+                            : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
+                        Scope = response.Scope,
+                        Resource = response.TryGet("resource")
+                    };
+                    
+                    await _distributedAccessTokenCache.SetAsync(clientName, token, parameters, cancellationToken);
+                    return token;
                 });
             }).Value;
         }

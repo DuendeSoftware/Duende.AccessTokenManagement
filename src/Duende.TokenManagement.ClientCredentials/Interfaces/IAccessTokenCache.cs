@@ -13,14 +13,12 @@ public interface IAccessTokenCache
     /// </summary>
     /// <param name="clientName"></param>
     /// <param name="accessToken"></param>
-    /// <param name="expiresIn"></param>
     /// <param name="parameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task SetAsync(
         string clientName,
-        string accessToken,
-        int expiresIn,
+        AccessToken accessToken,
         AccessTokenParameters parameters,
         CancellationToken cancellationToken = default);
 

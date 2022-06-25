@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,7 +16,6 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     private readonly IDistributedCache _cache;
     private readonly ILogger<DistributedAccessTokenCache> _logger;
     private readonly ClientCredentialsTokenManagementOptions _options;
-    private const string EntrySeparator = "___";
 
     /// <summary>
     /// ctor
@@ -33,24 +33,21 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     /// <inheritdoc/>
     public async Task SetAsync(
         string clientName,
-        string accessToken,
-        int expiresIn,
+        AccessToken accessToken,
         AccessTokenParameters parameters,
         CancellationToken cancellationToken = default)
     {
         if (clientName is null) throw new ArgumentNullException(nameof(clientName));
             
         // if the token service does not return expiresIn, cache forever and wait for 401
-        if (expiresIn == 0)
+        var expiration = DateTimeOffset.MaxValue;
+        if (accessToken.Expiration.HasValue)
         {
-            expiresIn = Int32.MaxValue;
+            expiration = accessToken.Expiration.Value;
         }
-
-        var expiration = DateTimeOffset.UtcNow.AddSeconds(expiresIn);
-        var expirationEpoch = expiration.ToUnixTimeSeconds();
+        
         var cacheExpiration = expiration.AddSeconds(-_options.CacheLifetimeBuffer);
-
-        var data = $"{accessToken}{EntrySeparator}{expirationEpoch}";
+        var data = JsonSerializer.Serialize(accessToken);
 
         var entryOptions = new DistributedCacheEntryOptions
         {
@@ -79,14 +76,7 @@ public class DistributedAccessTokenCache : IAccessTokenCache
             try
             {
                 _logger.LogDebug("Cache hit for access token for client: {clientName}", clientName);
-
-                var index = entry.LastIndexOf(EntrySeparator, StringComparison.Ordinal);
-
-                return new AccessToken
-                {
-                    Value = entry[..index],
-                    Expiration = DateTimeOffset.FromUnixTimeSeconds(long.Parse(entry.AsSpan(index + EntrySeparator.Length)))
-                };
+                return JsonSerializer.Deserialize<AccessToken>(entry);
             }
             catch (Exception ex)
             {
