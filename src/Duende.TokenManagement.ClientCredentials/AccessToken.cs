@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
+
 namespace Duende.TokenManagement.ClientCredentials;
 
 /// <summary>
@@ -21,10 +23,10 @@ public class AccessToken
     /// <summary>
     /// The scope of the access tokens
     /// </summary>
-    public string Scope { get; set; }
+    public string? Scope { get; set; }
 
     /// <summary>
     /// The resource of the access token
     /// </summary>
-    public string Resource { get; set; }
+    public string? Resource { get; set; }
 }

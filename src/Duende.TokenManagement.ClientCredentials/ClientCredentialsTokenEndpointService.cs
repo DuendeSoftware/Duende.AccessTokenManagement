@@ -1,6 +1,10 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
 
@@ -33,29 +37,23 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
 
     /// <inheritdoc/>
     public async Task<TokenResponse> RequestToken(
-        string? clientName = TokenManagementDefaults.DefaultTokenClientName,
+        string clientName = TokenManagementDefaults.DefaultTokenClientName,
         AccessTokenParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        if (clientName == null) throw new ArgumentNullException(nameof(clientName));
-        if (clientName == null) throw new ArgumentNullException(nameof(clientName));
-        _logger.LogDebug("Requesting client access token for client: {client}", clientName);
-
         parameters ??= new AccessTokenParameters();
-
+        
         var requestDetails = await _configService.GetClientCredentialsRequestAsync(clientName, parameters);
-
-
         requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
-
-
+        
         if (!string.IsNullOrWhiteSpace(parameters.Resource))
         {
             requestDetails.Resource.Add(parameters.Resource);
         }
 
         var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);
+        
+        _logger.LogDebug("Requesting client access token for client: {client}", clientName);
         return await httpClient.RequestClientCredentialsTokenAsync(requestDetails, cancellationToken);
     }
-
 }
