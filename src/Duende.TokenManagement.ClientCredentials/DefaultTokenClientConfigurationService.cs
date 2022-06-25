@@ -2,81 +2,77 @@ using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Duende.TokenManagement.ClientCredentials
+namespace Duende.TokenManagement.ClientCredentials;
+
+/// <summary>
+/// Options-based configuration service for token clients
+/// </summary>
+public class DefaultClientCredentialsConfigurationService : IClientCredentialsConfigurationService
 {
-    /// <summary>
-    /// Options-based configuration service for token clients
-    /// </summary>
-    public class DefaultClientCredentialsConfigurationService : IClientCredentialsConfigurationService
-    {
-        private readonly ClientCredentialsTokenManagementOptions _clientAccessTokenManagementOptions;
-        private readonly ILogger<DefaultClientCredentialsConfigurationService> _logger;
+    private readonly ClientCredentialsTokenManagementOptions _clientAccessTokenManagementOptions;
+    private readonly ILogger<DefaultClientCredentialsConfigurationService> _logger;
         
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="userAccessTokenManagementOptions"></param>
-        /// <param name="clientAccessTokenManagementOptions"></param>
-        /// <param name="oidcOptions"></param>
-        /// <param name="schemeProvider"></param>
-        /// <param name="logger"></param>
-        public DefaultClientCredentialsConfigurationService(
-            IOptions<ClientCredentialsTokenManagementOptions> clientAccessTokenManagementOptions,
-            ILogger<DefaultClientCredentialsConfigurationService> logger)
-        {
-            _clientAccessTokenManagementOptions = clientAccessTokenManagementOptions.Value;
-            _logger = logger;
-        }
+    /// <summary>
+    /// ctor
+    /// </summary>
+    /// <param name="clientAccessTokenManagementOptions"></param>
+    /// <param name="logger"></param>
+    public DefaultClientCredentialsConfigurationService(
+        IOptions<ClientCredentialsTokenManagementOptions> clientAccessTokenManagementOptions,
+        ILogger<DefaultClientCredentialsConfigurationService> logger)
+    {
+        _clientAccessTokenManagementOptions = clientAccessTokenManagementOptions.Value;
+        _logger = logger;
+    }
 
-        /// <inheritdoc />
-        public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(
-            string clientName,
-            ClientAccessTokenParameters parameters)
-        {
-            ClientCredentialsTokenRequest? requestDetails = null;
+    /// <inheritdoc />
+    public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(
+        string clientName,
+        ClientAccessTokenParameters parameters)
+    {
+        ClientCredentialsTokenRequest? requestDetails = null;
 
-            // if a named client configuration was passed in, try to load it
-            if (string.Equals(clientName, TokenManagementDefaults.DefaultTokenClientName))
+        // if a named client configuration was passed in, try to load it
+        if (string.Equals(clientName, TokenManagementDefaults.DefaultTokenClientName))
+        {
+            // if only one client configuration exists, load that
+            if (_clientAccessTokenManagementOptions.Clients.Count == 1)
             {
-                // if only one client configuration exists, load that
-                if (_clientAccessTokenManagementOptions.Clients.Count == 1)
-                {
-                    _logger.LogDebug("Reading token client configuration from single configuration entry.");
-                    requestDetails = _clientAccessTokenManagementOptions.Clients.First().Value;
-                }
-                else
-                {
-                    throw new InvalidOperationException("More than one client configured. Specify the client name.");
-                }
+                _logger.LogDebug("Reading token client configuration from single configuration entry.");
+                requestDetails = _clientAccessTokenManagementOptions.Clients.First().Value;
             }
             else
             {
-                if (!_clientAccessTokenManagementOptions.Clients.TryGetValue(clientName, out requestDetails!))
-                {
-                    throw new InvalidOperationException(
-                        $"No access token client configuration found for client: {clientName}");
-                }
-
-                _logger.LogDebug("Returning token client configuration for client: {client}", clientName);
+                throw new InvalidOperationException("More than one client configured. Specify the client name.");
             }
-
-            var assertion = await CreateAssertionAsync(clientName);
-            if (assertion != null)
-            {
-                requestDetails.ClientAssertion = assertion;
-            }
-            
-            return requestDetails;
         }
-
-        /// <summary>
-        /// Allows injecting a client assertion into outgoing requests
-        /// </summary>
-        /// <param name="clientName">Name of client (if present)</param>
-        /// <returns></returns>
-        protected virtual Task<ClientAssertion?> CreateAssertionAsync(string? clientName = null)
+        else
         {
-            return Task.FromResult<ClientAssertion?>(null);
+            if (!_clientAccessTokenManagementOptions.Clients.TryGetValue(clientName, out requestDetails!))
+            {
+                throw new InvalidOperationException(
+                    $"No access token client configuration found for client: {clientName}");
+            }
+
+            _logger.LogDebug("Returning token client configuration for client: {client}", clientName);
         }
+
+        var assertion = await CreateAssertionAsync(clientName);
+        if (assertion != null)
+        {
+            requestDetails.ClientAssertion = assertion;
+        }
+            
+        return requestDetails;
+    }
+
+    /// <summary>
+    /// Allows injecting a client assertion into outgoing requests
+    /// </summary>
+    /// <param name="clientName">Name of client (if present)</param>
+    /// <returns></returns>
+    protected virtual Task<ClientAssertion?> CreateAssertionAsync(string? clientName = null)
+    {
+        return Task.FromResult<ClientAssertion?>(null);
     }
 }

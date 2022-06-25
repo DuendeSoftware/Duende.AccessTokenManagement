@@ -3,23 +3,22 @@
 
 using IdentityModel.Client;
 
-namespace Duende.TokenManagement.ClientCredentials
+namespace Duende.TokenManagement.ClientCredentials;
+
+/// <summary>
+/// Abstraction for token endpoint operations
+/// </summary>
+public interface IClientCredentialsTokenEndpointService
 {
     /// <summary>
-    /// Abstraction for token endpoint operations
+    /// Requests a client credentials access token.
     /// </summary>
-    public interface IClientCredentialsTokenEndpointService
-    {
-        /// <summary>
-        /// Requests a client credentials access token.
-        /// </summary>
-        /// <param name="clientName"></param>
-        /// <param name="parameters"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<TokenResponse> RequestToken(
-            string? clientName = null,
-            ClientAccessTokenParameters? parameters = null,
-            CancellationToken cancellationToken = default);
-    }
+    /// <param name="clientName"></param>
+    /// <param name="parameters"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<TokenResponse> RequestToken(
+        string? clientName = null,
+        ClientAccessTokenParameters? parameters = null,
+        CancellationToken cancellationToken = default);
 }

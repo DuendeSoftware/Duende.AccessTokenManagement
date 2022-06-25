@@ -3,26 +3,25 @@
 
 using IdentityModel.Client;
 
-namespace Duende.TokenManagement.ClientCredentials
+namespace Duende.TokenManagement.ClientCredentials;
+
+/// <summary>
+/// Additional optional parameters for a client access token request
+/// </summary>
+public class ClientAccessTokenParameters
 {
     /// <summary>
-    /// Additional optional parameters for a client access token request
+    /// Force renewal of token.
     /// </summary>
-    public class ClientAccessTokenParameters
-    {
-        /// <summary>
-        /// Force renewal of token.
-        /// </summary>
-        public bool ForceRenewal { get; set; }
+    public bool ForceRenewal { get; set; }
 
-        /// <summary>
-        /// Specifies the resource parameter.
-        /// </summary>
-        public string? Resource { get; set; }
+    /// <summary>
+    /// Specifies the resource parameter.
+    /// </summary>
+    public string? Resource { get; set; }
 
-        /// <summary>
-        /// Additional context that might be relevant in the pipeline
-        /// </summary>
-        public Parameters Context { get; set; } = new();
-    }
+    /// <summary>
+    /// Additional context that might be relevant in the pipeline
+    /// </summary>
+    public Parameters Context { get; set; } = new();
 }

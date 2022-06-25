@@ -5,125 +5,124 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Duende.TokenManagement.ClientCredentials
+namespace Duende.TokenManagement.ClientCredentials;
+
+/// <summary>
+/// Client access token cache using IDistributedCache
+/// </summary>
+public class DistributedAccessTokenCache : IAccessTokenCache
 {
+    private readonly IDistributedCache _cache;
+    private readonly ILogger<DistributedAccessTokenCache> _logger;
+    private readonly ClientCredentialsTokenManagementOptions _options;
+    private const string EntrySeparator = "___";
+
     /// <summary>
-    /// Client access token cache using IDistributedCache
+    /// ctor
     /// </summary>
-    public class DistributedAccessTokenCache : IAccessTokenCache
+    /// <param name="cache"></param>
+    /// <param name="options"></param>
+    /// <param name="logger"></param>
+    public DistributedAccessTokenCache(IDistributedCache cache, IOptions<ClientCredentialsTokenManagementOptions> options, ILogger<DistributedAccessTokenCache> logger)
     {
-        private readonly IDistributedCache _cache;
-        private readonly ILogger<DistributedAccessTokenCache> _logger;
-        private readonly ClientCredentialsTokenManagementOptions _options;
-        private const string EntrySeparator = "___";
-
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="options"></param>
-        /// <param name="logger"></param>
-        public DistributedAccessTokenCache(IDistributedCache cache, IOptions<ClientCredentialsTokenManagementOptions> options, ILogger<DistributedAccessTokenCache> logger)
-        {
-            _cache = cache;
-            _logger = logger;
-            _options = options.Value;
-        }
+        _cache = cache;
+        _logger = logger;
+        _options = options.Value;
+    }
         
-        /// <inheritdoc/>
-        public async Task SetAsync(
-            string clientName,
-            string accessToken,
-            int expiresIn,
-            ClientAccessTokenParameters parameters,
-            CancellationToken cancellationToken = default)
+    /// <inheritdoc/>
+    public async Task SetAsync(
+        string clientName,
+        string accessToken,
+        int expiresIn,
+        ClientAccessTokenParameters parameters,
+        CancellationToken cancellationToken = default)
+    {
+        if (clientName is null) throw new ArgumentNullException(nameof(clientName));
+            
+        // if the token service does not return expiresIn, cache forever and wait for 401
+        if (expiresIn == 0)
         {
-            if (clientName is null) throw new ArgumentNullException(nameof(clientName));
-            
-            // if the token service does not return expiresIn, cache forever and wait for 401
-            if (expiresIn == 0)
-            {
-                expiresIn = Int32.MaxValue;
-            }
-
-            var expiration = DateTimeOffset.UtcNow.AddSeconds(expiresIn);
-            var expirationEpoch = expiration.ToUnixTimeSeconds();
-            var cacheExpiration = expiration.AddSeconds(-_options.CacheLifetimeBuffer);
-
-            var data = $"{accessToken}{EntrySeparator}{expirationEpoch}";
-
-            var entryOptions = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpiration = cacheExpiration
-            };
-
-            _logger.LogDebug("Caching access token for client: {clientName}. Expiration: {expiration}", clientName, cacheExpiration);
-            
-            var cacheKey = GenerateCacheKey(_options, clientName, parameters);
-            await _cache.SetStringAsync(cacheKey, data, entryOptions, token: cancellationToken);
+            expiresIn = Int32.MaxValue;
         }
 
-        /// <inheritdoc/>
-        public async Task<ClientAccessToken?> GetAsync(
-            string clientName, 
-            ClientAccessTokenParameters parameters,
-            CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(clientName);
-            
-            var cacheKey = GenerateCacheKey(_options, clientName, parameters);
-            var entry = await _cache.GetStringAsync(cacheKey, token: cancellationToken);
+        var expiration = DateTimeOffset.UtcNow.AddSeconds(expiresIn);
+        var expirationEpoch = expiration.ToUnixTimeSeconds();
+        var cacheExpiration = expiration.AddSeconds(-_options.CacheLifetimeBuffer);
 
-            if (entry != null)
+        var data = $"{accessToken}{EntrySeparator}{expirationEpoch}";
+
+        var entryOptions = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpiration = cacheExpiration
+        };
+
+        _logger.LogDebug("Caching access token for client: {clientName}. Expiration: {expiration}", clientName, cacheExpiration);
+            
+        var cacheKey = GenerateCacheKey(_options, clientName, parameters);
+        await _cache.SetStringAsync(cacheKey, data, entryOptions, token: cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<ClientAccessToken?> GetAsync(
+        string clientName, 
+        ClientAccessTokenParameters parameters,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(clientName);
+            
+        var cacheKey = GenerateCacheKey(_options, clientName, parameters);
+        var entry = await _cache.GetStringAsync(cacheKey, token: cancellationToken);
+
+        if (entry != null)
+        {
+            try
             {
-                try
+                _logger.LogDebug("Cache hit for access token for client: {clientName}", clientName);
+
+                var index = entry.LastIndexOf(EntrySeparator, StringComparison.Ordinal);
+
+                return new ClientAccessToken
                 {
-                    _logger.LogDebug("Cache hit for access token for client: {clientName}", clientName);
-
-                    var index = entry.LastIndexOf(EntrySeparator, StringComparison.Ordinal);
-
-                    return new ClientAccessToken
-                    {
-                        AccessToken = entry.Substring(0, index),
-                        Expiration = DateTimeOffset.FromUnixTimeSeconds(long.Parse(entry.AsSpan(index + EntrySeparator.Length)))
-                    };
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogCritical(ex, "Error parsing cached access token for client {clientName}", clientName);
-                    return null;
-                }
+                    AccessToken = entry[..index],
+                    Expiration = DateTimeOffset.FromUnixTimeSeconds(long.Parse(entry.AsSpan(index + EntrySeparator.Length)))
+                };
             }
-
-            _logger.LogDebug("Cache miss for access token for client: {clientName}", clientName);
-            return null;
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Error parsing cached access token for client {clientName}", clientName);
+                return null;
+            }
         }
 
-        /// <inheritdoc/>
-        public Task DeleteAsync(
-            string clientName,
-            ClientAccessTokenParameters parameters,
-            CancellationToken cancellationToken = default)
-        {
-            if (clientName is null) throw new ArgumentNullException(nameof(clientName));
+        _logger.LogDebug("Cache miss for access token for client: {clientName}", clientName);
+        return null;
+    }
 
-            var cacheKey = GenerateCacheKey(_options, clientName, parameters);
-            return _cache.RemoveAsync(cacheKey, cancellationToken);
-        }
+    /// <inheritdoc/>
+    public Task DeleteAsync(
+        string clientName,
+        ClientAccessTokenParameters parameters,
+        CancellationToken cancellationToken = default)
+    {
+        if (clientName is null) throw new ArgumentNullException(nameof(clientName));
 
-        /// <summary>
-        /// Generates the cache key based on various inputs
-        /// </summary>
-        /// <param name="options"></param>
-        /// <param name="clientName"></param>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        protected virtual string GenerateCacheKey(
-            ClientCredentialsTokenManagementOptions options, 
-            string clientName,
-            ClientAccessTokenParameters? parameters = null)
-        {
-            return options.CacheKeyPrefix + "::" + clientName + "::" + parameters?.Resource ?? "";
-        }
+        var cacheKey = GenerateCacheKey(_options, clientName, parameters);
+        return _cache.RemoveAsync(cacheKey, cancellationToken);
+    }
+
+    /// <summary>
+    /// Generates the cache key based on various inputs
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="clientName"></param>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    protected virtual string GenerateCacheKey(
+        ClientCredentialsTokenManagementOptions options, 
+        string clientName,
+        ClientAccessTokenParameters? parameters = null)
+    {
+        return options.CacheKeyPrefix + "::" + clientName + "::" + parameters?.Resource ?? "";
     }
 }
