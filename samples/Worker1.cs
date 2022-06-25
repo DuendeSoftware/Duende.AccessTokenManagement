@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace WorkerService;
 
-public class Worker : BackgroundService
+public class Worker1 : BackgroundService
 {
-    private readonly ILogger<Worker> _logger;
+    private readonly ILogger<Worker1> _logger;
     private readonly IHttpClientFactory _clientFactory;
 
-    public Worker(ILogger<Worker> logger, IHttpClientFactory factory)
+    public Worker1(ILogger<Worker1> logger, IHttpClientFactory factory)
     {
         _logger = logger;
         _clientFactory = factory;
@@ -25,7 +25,7 @@ public class Worker : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             Console.WriteLine("\n\n");
-            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("Worker1 running at: {time}", DateTimeOffset.Now);
 
             var client = _clientFactory.CreateClient("client");
             var response = await client.GetAsync("test", stoppingToken);
