@@ -13,5 +13,5 @@ public interface IClientCredentialsConfigurationService
     /// <param name="clientName"></param>
     /// <param name="parameters"></param>
     /// <returns></returns>
-    Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(string clientName, ClientAccessTokenParameters parameters);
+    Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(string clientName, AccessTokenParameters parameters);
 }

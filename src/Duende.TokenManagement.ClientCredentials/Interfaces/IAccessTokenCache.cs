@@ -4,7 +4,7 @@
 namespace Duende.TokenManagement.ClientCredentials;
 
 /// <summary>
-/// Abstraction for caching client access tokens
+/// Abstraction for caching client credentials access tokens
 /// </summary>
 public interface IAccessTokenCache
 {
@@ -21,7 +21,7 @@ public interface IAccessTokenCache
         string clientName,
         string accessToken,
         int expiresIn,
-        ClientAccessTokenParameters parameters,
+        AccessTokenParameters parameters,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -31,9 +31,9 @@ public interface IAccessTokenCache
     /// <param name="parameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<ClientAccessToken?> GetAsync(
+    Task<AccessToken?> GetAsync(
         string clientName,
-        ClientAccessTokenParameters parameters,
+        AccessTokenParameters parameters,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -45,6 +45,6 @@ public interface IAccessTokenCache
     /// <returns></returns>
     Task DeleteAsync(
         string clientName,
-        ClientAccessTokenParameters parameters,
+        AccessTokenParameters parameters,
         CancellationToken cancellationToken = default);
 }

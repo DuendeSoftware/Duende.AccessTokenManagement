@@ -34,14 +34,14 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     /// <inheritdoc/>
     public async Task<TokenResponse> RequestToken(
         string? clientName = TokenManagementDefaults.DefaultTokenClientName,
-        ClientAccessTokenParameters? parameters = null,
+        AccessTokenParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         if (clientName == null) throw new ArgumentNullException(nameof(clientName));
         if (clientName == null) throw new ArgumentNullException(nameof(clientName));
         _logger.LogDebug("Requesting client access token for client: {client}", clientName);
 
-        parameters ??= new ClientAccessTokenParameters();
+        parameters ??= new AccessTokenParameters();
 
         var requestDetails = await _configService.GetClientCredentialsRequestAsync(clientName, parameters);
 

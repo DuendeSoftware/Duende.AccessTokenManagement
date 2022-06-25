@@ -6,15 +6,25 @@ namespace Duende.TokenManagement.ClientCredentials;
 /// <summary>
 /// Represents a client access token
 /// </summary>
-public class ClientAccessToken
+public class AccessToken
 {
     /// <summary>
     /// The access token
     /// </summary>
-    public string? AccessToken { get; set; }
+    public string? Value { get; set; }
         
     /// <summary>
     /// The access token expiration
     /// </summary>
-    public DateTimeOffset Expiration { get; set; }
+    public DateTimeOffset? Expiration { get; set; }
+
+    /// <summary>
+    /// The scope of the access tokens
+    /// </summary>
+    public string Scope { get; set; }
+
+    /// <summary>
+    /// The resource of the access token
+    /// </summary>
+    public string Resource { get; set; }
 }

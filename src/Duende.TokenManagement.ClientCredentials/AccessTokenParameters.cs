@@ -6,9 +6,9 @@ using IdentityModel.Client;
 namespace Duende.TokenManagement.ClientCredentials;
 
 /// <summary>
-/// Additional optional parameters for a client access token request
+/// Additional optional parameters for a client credentials access token request
 /// </summary>
-public class ClientAccessTokenParameters
+public class AccessTokenParameters
 {
     /// <summary>
     /// Force renewal of token.

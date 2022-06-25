@@ -35,7 +35,7 @@ public class DistributedAccessTokenCache : IAccessTokenCache
         string clientName,
         string accessToken,
         int expiresIn,
-        ClientAccessTokenParameters parameters,
+        AccessTokenParameters parameters,
         CancellationToken cancellationToken = default)
     {
         if (clientName is null) throw new ArgumentNullException(nameof(clientName));
@@ -64,9 +64,9 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     }
 
     /// <inheritdoc/>
-    public async Task<ClientAccessToken?> GetAsync(
+    public async Task<AccessToken?> GetAsync(
         string clientName, 
-        ClientAccessTokenParameters parameters,
+        AccessTokenParameters parameters,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(clientName);
@@ -82,9 +82,9 @@ public class DistributedAccessTokenCache : IAccessTokenCache
 
                 var index = entry.LastIndexOf(EntrySeparator, StringComparison.Ordinal);
 
-                return new ClientAccessToken
+                return new AccessToken
                 {
-                    AccessToken = entry[..index],
+                    Value = entry[..index],
                     Expiration = DateTimeOffset.FromUnixTimeSeconds(long.Parse(entry.AsSpan(index + EntrySeparator.Length)))
                 };
             }
@@ -102,7 +102,7 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     /// <inheritdoc/>
     public Task DeleteAsync(
         string clientName,
-        ClientAccessTokenParameters parameters,
+        AccessTokenParameters parameters,
         CancellationToken cancellationToken = default)
     {
         if (clientName is null) throw new ArgumentNullException(nameof(clientName));
@@ -121,7 +121,7 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     protected virtual string GenerateCacheKey(
         ClientCredentialsTokenManagementOptions options, 
         string clientName,
-        ClientAccessTokenParameters? parameters = null)
+        AccessTokenParameters? parameters = null)
     {
         return options.CacheKeyPrefix + "::" + clientName + "::" + parameters?.Resource ?? "";
     }

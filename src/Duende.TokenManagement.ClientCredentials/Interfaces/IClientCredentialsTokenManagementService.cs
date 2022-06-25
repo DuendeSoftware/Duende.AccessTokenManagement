@@ -17,7 +17,7 @@ public interface IClientCredentialsTokenManagementService
     /// <returns>The access token or null if the no token can be requested.</returns>
     Task<string?> GetAccessTokenAsync(
         string clientName = TokenManagementDefaults.DefaultTokenClientName, 
-        ClientAccessTokenParameters? parameters = null, 
+        AccessTokenParameters? parameters = null, 
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -29,6 +29,6 @@ public interface IClientCredentialsTokenManagementService
     /// <returns>The access token or null if the no token can be requested.</returns>
     Task DeleteAccessTokenAsync(
         string clientName = TokenManagementDefaults.DefaultTokenClientName, 
-        ClientAccessTokenParameters? parameters = null, 
+        AccessTokenParameters? parameters = null, 
         CancellationToken cancellationToken = default);
 }

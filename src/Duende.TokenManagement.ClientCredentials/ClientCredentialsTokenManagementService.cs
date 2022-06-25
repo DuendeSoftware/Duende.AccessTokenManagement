@@ -37,17 +37,17 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     /// <inheritdoc/>
     public async Task<string?> GetAccessTokenAsync(
         string clientName = TokenManagementDefaults.DefaultTokenClientName, 
-        ClientAccessTokenParameters? parameters = null,
+        AccessTokenParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        parameters ??= new ClientAccessTokenParameters();
+        parameters ??= new AccessTokenParameters();
             
         if (parameters.ForceRenewal == false)
         {
             var item = await _distributedAccessTokenCache.GetAsync(clientName, parameters, cancellationToken);
             if (item != null)
             {
-                return item.AccessToken;
+                return item.Value;
             }
         }
 
@@ -79,10 +79,10 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     /// <inheritdoc/>
     public Task DeleteAccessTokenAsync(
         string clientName = TokenManagementDefaults.DefaultTokenClientName, 
-        ClientAccessTokenParameters? parameters = null, 
+        AccessTokenParameters? parameters = null, 
         CancellationToken cancellationToken = default)
     {
-        parameters ??= new ClientAccessTokenParameters();
+        parameters ??= new AccessTokenParameters();
             
         return _distributedAccessTokenCache.DeleteAsync(clientName, parameters, cancellationToken);
     }

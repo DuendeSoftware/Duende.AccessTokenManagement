@@ -53,7 +53,7 @@ public class ClientCredentialsTokenHandler : DelegatingHandler
     /// <returns></returns>
     protected virtual async Task SetTokenAsync(HttpRequestMessage request, bool forceRenewal, CancellationToken cancellationToken)
     {
-        var parameters = new ClientAccessTokenParameters
+        var parameters = new AccessTokenParameters
         {
             ForceRenewal = forceRenewal
         };

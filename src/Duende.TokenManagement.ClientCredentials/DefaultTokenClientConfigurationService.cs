@@ -28,7 +28,7 @@ public class DefaultClientCredentialsConfigurationService : IClientCredentialsCo
     /// <inheritdoc />
     public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(
         string clientName,
-        ClientAccessTokenParameters parameters)
+        AccessTokenParameters parameters)
     {
         ClientCredentialsTokenRequest? requestDetails = null;
 
