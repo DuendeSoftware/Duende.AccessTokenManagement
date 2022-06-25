@@ -7,10 +7,10 @@ namespace Duende.TokenManagement.ClientCredentials
     /// <summary>
     /// Options-based configuration service for token clients
     /// </summary>
-    public class DefaultTokenClientConfigurationService : ITokenClientConfigurationService
+    public class DefaultClientCredentialsConfigurationService : IClientCredentialsConfigurationService
     {
         private readonly ClientCredentialsTokenManagementOptions _clientAccessTokenManagementOptions;
-        private readonly ILogger<DefaultTokenClientConfigurationService> _logger;
+        private readonly ILogger<DefaultClientCredentialsConfigurationService> _logger;
         
         /// <summary>
         /// ctor
@@ -20,9 +20,9 @@ namespace Duende.TokenManagement.ClientCredentials
         /// <param name="oidcOptions"></param>
         /// <param name="schemeProvider"></param>
         /// <param name="logger"></param>
-        public DefaultTokenClientConfigurationService(
+        public DefaultClientCredentialsConfigurationService(
             IOptions<ClientCredentialsTokenManagementOptions> clientAccessTokenManagementOptions,
-            ILogger<DefaultTokenClientConfigurationService> logger)
+            ILogger<DefaultClientCredentialsConfigurationService> logger)
         {
             _clientAccessTokenManagementOptions = clientAccessTokenManagementOptions.Value;
             _logger = logger;

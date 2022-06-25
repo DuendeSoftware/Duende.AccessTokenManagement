@@ -5,7 +5,7 @@ namespace Duende.TokenManagement.ClientCredentials
     /// <summary>
     /// Retrieves request details for client credentials, refresh and revocation requests
     /// </summary>
-    public interface ITokenClientConfigurationService
+    public interface IClientCredentialsConfigurationService
     {
         /// <summary>
         /// Returns the request details for a client credentials token request

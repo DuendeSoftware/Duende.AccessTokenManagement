@@ -8,7 +8,7 @@ namespace Duende.TokenManagement.ClientCredentials
     /// <summary>
     /// Delegating handler that injects a client access token into an outgoing request
     /// </summary>
-    public class ClientCredentialsAccessTokenHandler : DelegatingHandler
+    public class ClientCredentialsTokenHandler : DelegatingHandler
     {
         private readonly IClientCredentialsTokenManagementService _accessTokenManagementService;
         private readonly string _tokenClientName;
@@ -18,7 +18,7 @@ namespace Duende.TokenManagement.ClientCredentials
         /// </summary>
         /// <param name="accessTokenManagementService">The Access Token Management Service</param>
         /// <param name="tokenClientName">The name of the token client configuration</param>
-        public ClientCredentialsAccessTokenHandler(
+        public ClientCredentialsTokenHandler(
             IClientCredentialsTokenManagementService accessTokenManagementService, 
             string tokenClientName = TokenManagementDefaults.DefaultTokenClientName)
         {

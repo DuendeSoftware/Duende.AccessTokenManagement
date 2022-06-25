@@ -16,11 +16,11 @@ namespace Duende.TokenManagement.ClientCredentials
         /// <summary>
         /// Name of the back-channel HTTP client
         /// </summary>
-        public const string BackChannelHttpClientName = "IdentityModel.AspNetCore.AccessTokenManagement.TokenEndpointService";
+        public const string BackChannelHttpClientName = "Duende.TokenManagement.TokenEndpointService";
         
         /// <summary>
         /// Name used to propagate access token parameters to HttpRequestMessage
         /// </summary>
-        public const string AccessTokenParametersOptionsName = "IdentityModel.AspNetCore.AccessTokenParameters";
+        public const string AccessTokenParametersOptionsName = "Duende.TokenManagement.AccessTokenParameters";
     }
 }

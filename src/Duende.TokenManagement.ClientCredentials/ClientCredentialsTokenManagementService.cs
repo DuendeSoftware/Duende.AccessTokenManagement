@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Duende.TokenManagement.ClientCredentials
 {
     /// <summary>
-    /// Implements basic token management logic
+    /// Implements token management logic
     /// </summary>
     public class ClientCredentialsTokenManagementService : IClientCredentialsTokenManagementService
     {
@@ -20,7 +20,7 @@ namespace Duende.TokenManagement.ClientCredentials
         /// </summary>
         /// <param name="sync"></param>
         /// <param name="clientCredentialsTokenEndpointService"></param>
-        /// <param name="distributedAccessTokenCachenCache"></param>
+        /// <param name="distributedAccessTokenCache"></param>
         /// <param name="logger"></param>
         public ClientCredentialsTokenManagementService(
             ITokenRequestSynchronization sync,
