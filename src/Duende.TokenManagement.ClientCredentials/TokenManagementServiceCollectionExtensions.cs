@@ -5,7 +5,6 @@ using System;
 using System.Net.Http;
 using Duende.TokenManagement.ClientCredentials;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Internal;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -19,15 +18,11 @@ public static class TokenManagementServiceCollectionExtensions
     {
         services.Configure(configureAction);
 
-
-        //services.AddDistributedMemoryCache();
-        services.TryAddSingleton<ISystemClock, SystemClock>();
-
         services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
         services.TryAddTransient<IAccessTokenCache, DistributedAccessTokenCache>();
         services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
         services.TryAddTransient<IClientCredentialsConfigurationService, DefaultClientCredentialsConfigurationService>();
-        services.TryAddTransient<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
+        services.TryAddTransient<ITokenEndpointService, TokenEndpointService>();
 
         services.AddHttpClient(TokenManagementDefaults.BackChannelHttpClientName);
 

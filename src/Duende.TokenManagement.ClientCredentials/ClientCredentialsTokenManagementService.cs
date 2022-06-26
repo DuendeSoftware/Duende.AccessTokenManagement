@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
 
 namespace Duende.TokenManagement.ClientCredentials;
@@ -14,37 +15,41 @@ namespace Duende.TokenManagement.ClientCredentials;
 public class ClientCredentialsTokenManagementService : IClientCredentialsTokenManagementService
 {
     private readonly ITokenRequestSynchronization _sync;
-    private readonly IClientCredentialsTokenEndpointService _clientCredentialsTokenEndpointService;
+    private readonly ITokenEndpointService _tokenEndpointService;
     private readonly IAccessTokenCache _distributedAccessTokenCache;
+    private readonly IClientCredentialsConfigurationService _configurationService;
     private readonly ILogger<ClientCredentialsTokenManagementService> _logger;
 
     /// <summary>
     /// ctor
     /// </summary>
     /// <param name="sync"></param>
-    /// <param name="clientCredentialsTokenEndpointService"></param>
+    /// <param name="tokenEndpointService"></param>
     /// <param name="distributedAccessTokenCache"></param>
     /// <param name="logger"></param>
     public ClientCredentialsTokenManagementService(
         ITokenRequestSynchronization sync,
-        IClientCredentialsTokenEndpointService clientCredentialsTokenEndpointService,
+        ITokenEndpointService tokenEndpointService,
         IAccessTokenCache distributedAccessTokenCache,
+        IClientCredentialsConfigurationService configurationService,
         ILogger<ClientCredentialsTokenManagementService> logger)
     {
         _sync = sync;
-        _clientCredentialsTokenEndpointService = clientCredentialsTokenEndpointService;
+        _tokenEndpointService = tokenEndpointService;
         _distributedAccessTokenCache = distributedAccessTokenCache;
+        _configurationService = configurationService;
         _logger = logger;
     }
 
     /// <inheritdoc/>
     public async Task<AccessToken> GetAccessTokenAsync(
-        string clientName = TokenManagementDefaults.DefaultTokenClientName, 
+        string clientName = TokenManagementDefaults.DefaultTokenClientName,
+        ClientCredentialsTokenRequest? request = null,
         AccessTokenParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         parameters ??= new AccessTokenParameters();
-            
+
         if (parameters.ForceRenewal == false)
         {
             var item = await _distributedAccessTokenCache.GetAsync(clientName, parameters, cancellationToken);
@@ -60,11 +65,15 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
             {
                 return new Lazy<Task<AccessToken>>(async () =>
                 {
-                    var response = await _clientCredentialsTokenEndpointService.RequestToken(clientName, parameters, cancellationToken);
-
+                    request ??= await _configurationService.GetClientCredentialsRequestAsync(clientName, parameters);
+                    
+                    var response = await _tokenEndpointService.RequestToken(request, parameters, cancellationToken);
                     if (response.IsError)
                     {
-                        _logger.LogError("Error requesting access token for client {clientName}. Error = {error}. Error description = {errorDescription}", clientName, response.Error, response.ErrorDescription);
+                        _logger.LogError(
+                            "Error requesting access token for client {clientName}. Error = {error}. Error description = {errorDescription}",
+                            request.ClientId, response.Error, response.ErrorDescription);
+                        
                         return new AccessToken();
                     }
 
@@ -77,7 +86,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
                         Scope = response.Scope,
                         Resource = response.TryGet("resource")
                     };
-                    
+
                     await _distributedAccessTokenCache.SetAsync(clientName, token, parameters, cancellationToken);
                     return token;
                 });
@@ -89,14 +98,15 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
         }
     }
 
+
     /// <inheritdoc/>
     public Task DeleteAccessTokenAsync(
-        string clientName = TokenManagementDefaults.DefaultTokenClientName, 
-        AccessTokenParameters? parameters = null, 
+        string clientName = TokenManagementDefaults.DefaultTokenClientName,
+        AccessTokenParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         parameters ??= new AccessTokenParameters();
-            
+
         return _distributedAccessTokenCache.DeleteAsync(clientName, parameters, cancellationToken);
     }
 }

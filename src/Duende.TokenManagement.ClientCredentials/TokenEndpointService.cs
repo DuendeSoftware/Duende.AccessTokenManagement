@@ -13,11 +13,11 @@ namespace Duende.TokenManagement.ClientCredentials;
 /// <summary>
 /// Implements token endpoint operations using IdentityModel
 /// </summary>
-public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndpointService
+public class TokenEndpointService : ITokenEndpointService
 {
     private readonly IClientCredentialsConfigurationService _configService;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<ClientCredentialsTokenEndpointService> _logger;
+    private readonly ILogger<TokenEndpointService> _logger;
 
     /// <summary>
     /// ctor
@@ -25,10 +25,10 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     /// <param name="configService"></param>
     /// <param name="httpClientFactory"></param>
     /// <param name="logger"></param>
-    public ClientCredentialsTokenEndpointService(
+    public TokenEndpointService(
         IClientCredentialsConfigurationService configService,
         IHttpClientFactory httpClientFactory,
-        ILogger<ClientCredentialsTokenEndpointService> logger)
+        ILogger<TokenEndpointService> logger)
     {
         _configService = configService;
         _httpClientFactory = httpClientFactory;
@@ -37,23 +37,21 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
 
     /// <inheritdoc/>
     public async Task<TokenResponse> RequestToken(
-        string clientName = TokenManagementDefaults.DefaultTokenClientName,
+        ClientCredentialsTokenRequest request,
         AccessTokenParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         parameters ??= new AccessTokenParameters();
-        
-        var requestDetails = await _configService.GetClientCredentialsRequestAsync(clientName, parameters);
-        requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+        request.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
         
         if (!string.IsNullOrWhiteSpace(parameters.Resource))
         {
-            requestDetails.Resource.Add(parameters.Resource);
+            request.Resource.Add(parameters.Resource);
         }
 
         var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);
         
-        _logger.LogDebug("Requesting client access token for client: {client}", clientName);
-        return await httpClient.RequestClientCredentialsTokenAsync(requestDetails, cancellationToken);
+        _logger.LogDebug("Requesting client credentials access token at endpoint: {endpoint}", request.Address);
+        return await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken);
     }
 }

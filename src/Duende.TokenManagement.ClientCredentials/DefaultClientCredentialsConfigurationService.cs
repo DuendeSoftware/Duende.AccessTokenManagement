@@ -34,7 +34,7 @@ public class DefaultClientCredentialsConfigurationService : IClientCredentialsCo
     /// <inheritdoc />
     public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(
         string clientName,
-        AccessTokenParameters parameters)
+        AccessTokenParameters? parameters)
     {
         ClientCredentialsTokenRequest? requestDetails = null;
 
@@ -63,7 +63,7 @@ public class DefaultClientCredentialsConfigurationService : IClientCredentialsCo
             _logger.LogDebug("Returning token client configuration for client: {client}", clientName);
         }
 
-        var assertion = await CreateAssertionAsync(clientName);
+        var assertion = await CreateAssertionAsync(clientName, parameters);
         if (assertion != null)
         {
             requestDetails.ClientAssertion = assertion;
@@ -77,7 +77,7 @@ public class DefaultClientCredentialsConfigurationService : IClientCredentialsCo
     /// </summary>
     /// <param name="clientName">Name of client (if present)</param>
     /// <returns></returns>
-    protected virtual Task<ClientAssertion?> CreateAssertionAsync(string? clientName = null)
+    protected virtual Task<ClientAssertion?> CreateAssertionAsync(string? clientName = null, AccessTokenParameters? parameters = null)
     {
         return Task.FromResult<ClientAssertion?>(null);
     }

@@ -61,7 +61,7 @@ public class ClientCredentialsTokenHandler : DelegatingHandler
             ForceRenewal = forceRenewal
         };
             
-        var token = await _accessTokenManagementService.GetAccessTokenAsync(_tokenClientName, parameters, cancellationToken);
+        var token = await _accessTokenManagementService.GetAccessTokenAsync(_tokenClientName, parameters: parameters, cancellationToken: cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(token.Value))
         {

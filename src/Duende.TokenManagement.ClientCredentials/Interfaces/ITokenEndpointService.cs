@@ -10,17 +10,17 @@ namespace Duende.TokenManagement.ClientCredentials;
 /// <summary>
 /// Abstraction for token endpoint operations
 /// </summary>
-public interface IClientCredentialsTokenEndpointService
+public interface ITokenEndpointService
 {
     /// <summary>
     /// Requests a client credentials access token.
     /// </summary>
-    /// <param name="clientName"></param>
+    /// <param name="request"></param>
     /// <param name="parameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<TokenResponse> RequestToken(
-        string clientName = TokenManagementDefaults.DefaultTokenClientName,
+        ClientCredentialsTokenRequest request,
         AccessTokenParameters? parameters = null,
         CancellationToken cancellationToken = default);
 }
