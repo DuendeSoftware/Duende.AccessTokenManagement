@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace Duende.TokenManagement.OpenIdConnect
         private readonly IUserTokenStore _userAccessTokenStore;
         private readonly ISystemClock _clock;
         private readonly UserAccessTokenManagementOptions _options;
+        private readonly IUserTokenConfigurationService _userTokenConfigurationService;
         private readonly IUserTokenEndpointService _tokenEndpointService;
         private readonly ILogger<UserAccessAccessTokenManagementService> _logger;
 
@@ -29,6 +31,7 @@ namespace Duende.TokenManagement.OpenIdConnect
         /// <param name="userAccessTokenStore"></param>
         /// <param name="clock"></param>
         /// <param name="options"></param>
+        /// <param name="userTokenConfigurationService"></param>
         /// <param name="tokenEndpointService"></param>
         /// <param name="logger"></param>
         public UserAccessAccessTokenManagementService(
@@ -36,6 +39,7 @@ namespace Duende.TokenManagement.OpenIdConnect
             IUserTokenStore userAccessTokenStore,
             ISystemClock clock,
             UserAccessTokenManagementOptions options,
+            IUserTokenConfigurationService userTokenConfigurationService,
             IUserTokenEndpointService tokenEndpointService,
             ILogger<UserAccessAccessTokenManagementService> logger)
         {
@@ -43,6 +47,7 @@ namespace Duende.TokenManagement.OpenIdConnect
             _userAccessTokenStore = userAccessTokenStore;
             _clock = clock;
             _options = options;
+            _userTokenConfigurationService = userTokenConfigurationService;
             _tokenEndpointService = tokenEndpointService;
             _logger = logger;
         }
@@ -57,7 +62,7 @@ namespace Duende.TokenManagement.OpenIdConnect
             
             if (!user.Identity!.IsAuthenticated)
             {
-                return null;
+                return new UserAccessToken();
             }
 
             var userName = user.FindFirst(JwtClaimTypes.Name)?.Value ?? user.FindFirst(JwtClaimTypes.Subject)?.Value ?? "unknown";
@@ -66,7 +71,7 @@ namespace Duende.TokenManagement.OpenIdConnect
             if (userToken == null)
             {
                 _logger.LogDebug("No token data found in user token store for user {user}.", userName);
-                return null;
+                return new UserAccessToken();
             }
             
             if (userToken.Value.IsPresent() && userToken.RefreshToken.IsMissing())
@@ -129,11 +134,17 @@ namespace Duende.TokenManagement.OpenIdConnect
             CancellationToken cancellationToken = default)
         {
             parameters ??= new UserAccessTokenRequestParameters();
+            
             var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-
+            var requestDetails = await _userTokenConfigurationService.GetTokenRevocationRequestAsync(parameters);
+            
+            requestDetails.Token = userToken.RefreshToken;
+            requestDetails.TokenTypeHint = OidcConstants.TokenTypes.RefreshToken;
+            requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+            
             if (!string.IsNullOrEmpty(userToken?.RefreshToken))
             {
-                var response = await _tokenEndpointService.RevokeRefreshTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
+                var response = await _tokenEndpointService.RevokeRefreshTokenAsync(requestDetails, cancellationToken);
 
                 if (response.IsError)
                 {
@@ -148,7 +159,12 @@ namespace Duende.TokenManagement.OpenIdConnect
             CancellationToken cancellationToken = default)
         {
             var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-            var response = await _tokenEndpointService.RefreshAccessTokenAsync(userToken?.RefreshToken ?? "", parameters, cancellationToken);
+            var requestDetails = await _userTokenConfigurationService.GetRefreshTokenRequestAsync(parameters);
+            
+            requestDetails.RefreshToken = userToken.RefreshToken;
+            requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+
+            var response = await _tokenEndpointService.RefreshAccessTokenAsync(requestDetails, cancellationToken);
 
             if (!response.IsError)
             {

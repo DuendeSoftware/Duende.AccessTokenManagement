@@ -36,48 +36,24 @@ namespace Duende.TokenManagement.OpenIdConnect
 
         /// <inheritdoc/>
         public async Task<TokenResponse> RefreshAccessTokenAsync(
-            string refreshToken, 
-            UserAccessTokenRequestParameters? parameters = null, 
+            RefreshTokenRequest request,
             CancellationToken cancellationToken = default)
         {
-            _logger.LogDebug("Refreshing refresh token: {token}", refreshToken);
+            _logger.LogDebug("Refreshing refresh token: {token}",  request.RefreshToken);
             
-            parameters ??= new UserAccessTokenRequestParameters();
-            
-            var requestDetails = await _configService.GetRefreshTokenRequestAsync(parameters);
-            requestDetails.RefreshToken = refreshToken;
-            
-
-            requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
-
-            
-            if (!string.IsNullOrEmpty(parameters.Resource))
-            {
-                requestDetails.Resource.Add(parameters.Resource);
-            }
-
             var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);
-            return await httpClient.RequestRefreshTokenAsync(requestDetails, cancellationToken);
+            return await httpClient.RequestRefreshTokenAsync(request, cancellationToken);
         }
 
         /// <inheritdoc/>
         public async Task<TokenRevocationResponse> RevokeRefreshTokenAsync(
-            string refreshToken, 
-            UserAccessTokenRequestParameters? parameters = null, 
+            TokenRevocationRequest request, 
             CancellationToken cancellationToken = default)
         {
-            _logger.LogDebug("Revoking refresh token: {token}", refreshToken);
-            
-            parameters ??= new UserAccessTokenRequestParameters();
-            
-            var requestDetails = await _configService.GetTokenRevocationRequestAsync(parameters);
-            requestDetails.Token = refreshToken;
-            requestDetails.TokenTypeHint = OidcConstants.TokenTypes.RefreshToken;
-            
-            requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+            _logger.LogDebug("Revoking refresh token: {token}", request.Token);
             
             var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);
-            return await httpClient.RevokeTokenAsync(requestDetails, cancellationToken);
+            return await httpClient.RevokeTokenAsync(request, cancellationToken);
         }
     }
 }

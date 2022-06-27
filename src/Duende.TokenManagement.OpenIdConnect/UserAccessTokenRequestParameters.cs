@@ -29,6 +29,11 @@ namespace Duende.TokenManagement.OpenIdConnect
         /// Specifies the resource parameter.
         /// </summary>
         public string? Resource { get; set; }
+        
+        /// <summary>
+        /// Specifies the resource parameter.
+        /// </summary>
+        public ClientAssertion? Assertion { get; set; }
 
         /// <summary>
         /// Additional context that might be relevant in the pipeline

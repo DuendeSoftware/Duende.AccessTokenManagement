@@ -42,9 +42,9 @@ namespace Duende.TokenManagement.OpenIdConnect
         }
         
         /// <inheritdoc />
-        public virtual async Task<RefreshTokenRequest> GetRefreshTokenRequestAsync(UserAccessTokenRequestParameters? parameters = null)
+        public virtual async Task<RefreshTokenRequest> GetRefreshTokenRequestAsync(UserAccessTokenRequestParameters parameters)
         {
-            var (options, configuration) = await GetOpenIdConnectSettingsAsync(parameters?.ChallengeScheme ?? _userAccessTokenManagementOptions.SchemeName);
+            var (options, configuration) = await GetOpenIdConnectSettingsAsync(parameters.ChallengeScheme ?? _userAccessTokenManagementOptions.SchemeName);
 
             var requestDetails = new RefreshTokenRequest
             {
@@ -55,20 +55,33 @@ namespace Duende.TokenManagement.OpenIdConnect
                 ClientSecret = options.ClientSecret
             };
             
-            var assertion = await CreateAssertionAsync();
-            if (assertion != null)
+            if (!string.IsNullOrEmpty(parameters.Resource))
             {
-                requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
-                requestDetails.ClientAssertion = assertion;
+                requestDetails.Resource.Add(parameters.Resource);
             }
 
+            if (parameters.Assertion != null)
+            {
+                requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+                requestDetails.ClientAssertion = parameters.Assertion;
+            }
+            else
+            {
+                var assertion = await CreateAssertionAsync();
+                if (assertion != null)
+                {
+                    requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+                    requestDetails.ClientAssertion = assertion;
+                }
+            }
+            
             return requestDetails;
         }
 
         /// <inheritdoc />
-        public virtual async Task<TokenRevocationRequest> GetTokenRevocationRequestAsync(UserAccessTokenRequestParameters? parameters = null)
+        public virtual async Task<TokenRevocationRequest> GetTokenRevocationRequestAsync(UserAccessTokenRequestParameters parameters)
         {
-            var (options, configuration) = await GetOpenIdConnectSettingsAsync(parameters?.ChallengeScheme ?? _userAccessTokenManagementOptions.SchemeName);
+            var (options, configuration) = await GetOpenIdConnectSettingsAsync(parameters.ChallengeScheme ?? _userAccessTokenManagementOptions.SchemeName);
             
             var requestDetails = new TokenRevocationRequest
             {
@@ -79,11 +92,19 @@ namespace Duende.TokenManagement.OpenIdConnect
                 ClientSecret = options.ClientSecret
             };
             
-            var assertion = await CreateAssertionAsync();
-            if (assertion != null)
+            if (parameters.Assertion != null)
             {
                 requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
-                requestDetails.ClientAssertion = assertion;
+                requestDetails.ClientAssertion = parameters.Assertion;
+            }
+            else
+            {
+                var assertion = await CreateAssertionAsync();
+                if (assertion != null)
+                {
+                    requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+                    requestDetails.ClientAssertion = assertion;
+                }
             }
 
             return requestDetails;
