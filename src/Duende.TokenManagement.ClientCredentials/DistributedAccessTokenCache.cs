@@ -37,7 +37,7 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     public async Task SetAsync(
         string clientName,
         AccessToken accessToken,
-        AccessTokenParameters parameters,
+        AccessTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
         if (clientName is null) throw new ArgumentNullException(nameof(clientName));
@@ -59,19 +59,19 @@ public class DistributedAccessTokenCache : IAccessTokenCache
 
         _logger.LogDebug("Caching access token for client: {clientName}. Expiration: {expiration}", clientName, cacheExpiration);
             
-        var cacheKey = GenerateCacheKey(_options, clientName, parameters);
+        var cacheKey = GenerateCacheKey(_options, clientName, requestParameters);
         await _cache.SetStringAsync(cacheKey, data, entryOptions, token: cancellationToken);
     }
 
     /// <inheritdoc/>
     public async Task<AccessToken?> GetAsync(
         string clientName, 
-        AccessTokenParameters parameters,
+        AccessTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(clientName);
             
-        var cacheKey = GenerateCacheKey(_options, clientName, parameters);
+        var cacheKey = GenerateCacheKey(_options, clientName, requestParameters);
         var entry = await _cache.GetStringAsync(cacheKey, token: cancellationToken);
 
         if (entry != null)
@@ -95,12 +95,12 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     /// <inheritdoc/>
     public Task DeleteAsync(
         string clientName,
-        AccessTokenParameters parameters,
+        AccessTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
         if (clientName is null) throw new ArgumentNullException(nameof(clientName));
 
-        var cacheKey = GenerateCacheKey(_options, clientName, parameters);
+        var cacheKey = GenerateCacheKey(_options, clientName, requestParameters);
         return _cache.RemoveAsync(cacheKey, cancellationToken);
     }
 
@@ -114,7 +114,7 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     protected virtual string GenerateCacheKey(
         ClientCredentialsTokenManagementOptions options, 
         string clientName,
-        AccessTokenParameters? parameters = null)
+        AccessTokenRequestParameters? parameters = null)
     {
         return options.CacheKeyPrefix + "::" + clientName + "::" + parameters?.Resource ?? "";
     }

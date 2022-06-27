@@ -21,6 +21,6 @@ public interface ITokenEndpointService
     /// <returns></returns>
     Task<TokenResponse> RequestToken(
         ClientCredentialsTokenRequest request,
-        AccessTokenParameters? parameters = null,
+        AccessTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default);
 }

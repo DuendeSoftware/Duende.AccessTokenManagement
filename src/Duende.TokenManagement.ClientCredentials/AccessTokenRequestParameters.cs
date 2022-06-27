@@ -8,7 +8,7 @@ namespace Duende.TokenManagement.ClientCredentials;
 /// <summary>
 /// Additional optional parameters for a client credentials access token request
 /// </summary>
-public class AccessTokenParameters
+public class AccessTokenRequestParameters
 {
     /// <summary>
     /// Force renewal of token.
@@ -16,9 +16,19 @@ public class AccessTokenParameters
     public bool ForceRenewal { get; set; }
 
     /// <summary>
-    /// Specifies the resource parameter.
+    /// Override the statically configured scope parameter.
+    /// </summary>
+    public string? Scope { get; set; }
+    
+    /// <summary>
+    /// Override the statically configured resource parameter.
     /// </summary>
     public string? Resource { get; set; }
+    
+    /// <summary>
+    /// Specifies the client assertion.
+    /// </summary>
+    public ClientAssertion? Assertion { get; set; }
 
     /// <summary>
     /// Additional context that might be relevant in the pipeline

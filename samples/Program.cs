@@ -40,13 +40,14 @@ public class Program
                     });
                 });
                     
-                services.AddClientCredentialsTokenHttpClient("client", "demo", configureClient: client =>
+                services.AddClientCredentialsHttpClient("client", "demo", client =>
                 {
                     client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
                 });
                 
-                services.AddHostedService<Worker1>();
-                services.AddHostedService<Worker2>();
+                // services.AddHostedService<Worker1>();
+                // services.AddHostedService<Worker2>();
+                services.AddHostedService<Worker3>();
             });
 
         return host;

@@ -38,7 +38,7 @@ public static class TokenManagementServiceCollectionExtensions
     /// <param name="tokenClientName">The name of the token client.</param>
     /// <param name="configureClient">A delegate that is used to configure a <see cref="HttpClient"/>.</param>
     /// <returns></returns>
-    public static IHttpClientBuilder AddClientCredentialsTokenHttpClient(
+    public static IHttpClientBuilder AddClientCredentialsHttpClient(
         this IServiceCollection services, 
         string clientName,
         string tokenClientName = TokenManagementDefaults.DefaultTokenClientName,
@@ -62,7 +62,7 @@ public static class TokenManagementServiceCollectionExtensions
     /// <param name="tokenClientName">The name of the token client.</param>
     /// <param name="configureClient">Additional configuration with service provider instance.</param>
     /// <returns></returns>
-    public static IHttpClientBuilder AddClientCredentialsTokenHttpClient(
+    public static IHttpClientBuilder AddClientCredentialsHttpClient(
         this IServiceCollection services,
         string clientName,
         string tokenClientName = TokenManagementDefaults.DefaultTokenClientName,

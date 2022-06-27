@@ -38,15 +38,26 @@ public class TokenEndpointService : ITokenEndpointService
     /// <inheritdoc/>
     public async Task<TokenResponse> RequestToken(
         ClientCredentialsTokenRequest request,
-        AccessTokenParameters? parameters = null,
+        AccessTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        parameters ??= new AccessTokenParameters();
+        parameters ??= new AccessTokenRequestParameters();
         request.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+        
+        if (!string.IsNullOrWhiteSpace(parameters.Scope))
+        {
+            request.Scope = parameters.Scope;
+        }
         
         if (!string.IsNullOrWhiteSpace(parameters.Resource))
         {
+            request.Resource.Clear();
             request.Resource.Add(parameters.Resource);
+        }
+
+        if (parameters.Assertion != null)
+        {
+            request.ClientAssertion = parameters.Assertion;
         }
 
         var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);

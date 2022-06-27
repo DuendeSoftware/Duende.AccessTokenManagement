@@ -16,36 +16,36 @@ public interface IAccessTokenCache
     /// </summary>
     /// <param name="clientName"></param>
     /// <param name="accessToken"></param>
-    /// <param name="parameters"></param>
+    /// <param name="requestParameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task SetAsync(
         string clientName,
         AccessToken accessToken,
-        AccessTokenParameters parameters,
+        AccessTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a client access token from the cache
     /// </summary>
     /// <param name="clientName"></param>
-    /// <param name="parameters"></param>
+    /// <param name="requestParameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<AccessToken?> GetAsync(
         string clientName,
-        AccessTokenParameters parameters,
+        AccessTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes a client access token from the cache
     /// </summary>
     /// <param name="clientName"></param>
-    /// <param name="parameters"></param>
+    /// <param name="requestParameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task DeleteAsync(
         string clientName,
-        AccessTokenParameters parameters,
+        AccessTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default);
 }
