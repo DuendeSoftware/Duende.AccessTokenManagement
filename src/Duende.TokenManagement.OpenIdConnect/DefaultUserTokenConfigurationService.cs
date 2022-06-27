@@ -30,22 +30,19 @@ namespace Duende.TokenManagement.OpenIdConnect
         /// <param name="schemeProvider"></param>
         /// <param name="logger"></param>
         public DefaultUserTokenConfigurationService(
-            UserAccessTokenManagementOptions userAccessTokenManagementOptions,
-            ClientAccessTokenManagementOptions clientAccessTokenManagementOptions,
+            IOptions<UserAccessTokenManagementOptions> userAccessTokenManagementOptions,
             IOptionsMonitor<OpenIdConnectOptions> oidcOptions,
             IAuthenticationSchemeProvider schemeProvider,
-            ILogger<DefaultTokenClientConfigurationService> logger)
+            ILogger<DefaultUserTokenConfigurationService> logger)
         {
-            _userAccessTokenManagementOptions = userAccessTokenManagementOptions;
-            _clientAccessTokenManagementOptions = clientAccessTokenManagementOptions;
-            
+            _userAccessTokenManagementOptions = userAccessTokenManagementOptions.Value;
             _oidcOptions = oidcOptions;
             _schemeProvider = schemeProvider;
             _logger = logger;
         }
         
         /// <inheritdoc />
-        public virtual async Task<RefreshTokenRequest> GetRefreshTokenRequestAsync(UserAccessTokenParameters? parameters = null)
+        public virtual async Task<RefreshTokenRequest> GetRefreshTokenRequestAsync(UserAccessTokenRequestParameters? parameters = null)
         {
             var (options, configuration) = await GetOpenIdConnectSettingsAsync(parameters?.ChallengeScheme ?? _userAccessTokenManagementOptions.SchemeName);
 
@@ -69,7 +66,7 @@ namespace Duende.TokenManagement.OpenIdConnect
         }
 
         /// <inheritdoc />
-        public virtual async Task<TokenRevocationRequest> GetTokenRevocationRequestAsync(UserAccessTokenParameters? parameters = null)
+        public virtual async Task<TokenRevocationRequest> GetTokenRevocationRequestAsync(UserAccessTokenRequestParameters? parameters = null)
         {
             var (options, configuration) = await GetOpenIdConnectSettingsAsync(parameters?.ChallengeScheme ?? _userAccessTokenManagementOptions.SchemeName);
             

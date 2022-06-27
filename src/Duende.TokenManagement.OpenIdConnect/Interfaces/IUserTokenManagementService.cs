@@ -19,7 +19,7 @@ namespace Duende.TokenManagement.OpenIdConnect
         /// <returns></returns>
         Task<UserAccessToken> GetAccessTokenAsync(
             ClaimsPrincipal user, 
-            UserAccessTokenParameters? parameters = null, 
+            UserAccessTokenRequestParameters? parameters = null, 
             CancellationToken cancellationToken = default);
         
         /// <summary>
@@ -28,7 +28,7 @@ namespace Duende.TokenManagement.OpenIdConnect
         /// <returns></returns>
         Task RevokeRefreshTokenAsync(
             ClaimsPrincipal user, 
-            UserAccessTokenParameters? parameters = null, 
+            UserAccessTokenRequestParameters? parameters = null, 
             CancellationToken cancellationToken = default);
     }
 }

@@ -18,22 +18,18 @@ namespace Duende.TokenManagement.OpenIdConnect
     /// </summary>
     public class UserTokenEndpointService : IUserTokenEndpointService
     {
-        private readonly IUserTokenConfigurationService _configService;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<UserTokenEndpointService> _logger;
         
         /// <summary>
         /// ctor
         /// </summary>
-        /// <param name="configService"></param>
         /// <param name="httpClientFactory"></param>
         /// <param name="logger"></param>
         public UserTokenEndpointService(
-            IUserTokenConfigurationService configService,
             IHttpClientFactory httpClientFactory,
             ILogger<UserTokenEndpointService> logger)
         {
-            _configService = configService;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
         }
@@ -41,12 +37,12 @@ namespace Duende.TokenManagement.OpenIdConnect
         /// <inheritdoc/>
         public async Task<TokenResponse> RefreshAccessTokenAsync(
             string refreshToken, 
-            UserAccessTokenParameters? parameters = null, 
+            UserAccessTokenRequestParameters? parameters = null, 
             CancellationToken cancellationToken = default)
         {
             _logger.LogDebug("Refreshing refresh token: {token}", refreshToken);
             
-            parameters ??= new UserAccessTokenParameters();
+            parameters ??= new UserAccessTokenRequestParameters();
             
             var requestDetails = await _configService.GetRefreshTokenRequestAsync(parameters);
             requestDetails.RefreshToken = refreshToken;
@@ -67,12 +63,12 @@ namespace Duende.TokenManagement.OpenIdConnect
         /// <inheritdoc/>
         public async Task<TokenRevocationResponse> RevokeRefreshTokenAsync(
             string refreshToken, 
-            UserAccessTokenParameters? parameters = null, 
+            UserAccessTokenRequestParameters? parameters = null, 
             CancellationToken cancellationToken = default)
         {
             _logger.LogDebug("Revoking refresh token: {token}", refreshToken);
             
-            parameters ??= new UserAccessTokenParameters();
+            parameters ??= new UserAccessTokenRequestParameters();
             
             var requestDetails = await _configService.GetTokenRevocationRequestAsync(parameters);
             requestDetails.Token = refreshToken;

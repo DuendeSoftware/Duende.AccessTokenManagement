@@ -12,12 +12,12 @@ namespace Duende.TokenManagement.OpenIdConnect
         /// Returns the request details for a refresh token request
         /// </summary>
         /// <returns></returns>
-        Task<RefreshTokenRequest> GetRefreshTokenRequestAsync(UserAccessTokenParameters parameters);
+        Task<RefreshTokenRequest> GetRefreshTokenRequestAsync(UserAccessTokenRequestParameters requestParameters);
 
         /// <summary>
         /// Returns the request details for a token revocation request
         /// </summary>
         /// <returns></returns>
-        Task<TokenRevocationRequest> GetTokenRevocationRequestAsync(UserAccessTokenParameters parameters);
+        Task<TokenRevocationRequest> GetTokenRevocationRequestAsync(UserAccessTokenRequestParameters requestParameters);
     }
 }

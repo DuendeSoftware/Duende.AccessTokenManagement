@@ -8,7 +8,7 @@ namespace Duende.TokenManagement.OpenIdConnect
     /// <summary>
     /// Additional optional parameters for a user access token request
     /// </summary>
-    public class UserAccessTokenParameters
+    public class UserAccessTokenRequestParameters
     {
         /// <summary>
         /// Overrides the default sign-in scheme. This information may be used for state management.

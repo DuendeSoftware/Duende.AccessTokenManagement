@@ -5,12 +5,12 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Folder Include="Interfaces" />
-    </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Duende.TokenManagement.ClientCredentials\Duende.TokenManagement.ClientCredentials.csproj" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect"  Version="6.0.0" />
+
+        <ProjectReference Include="..\Duende.TokenManagement.ClientCredentials\Duende.TokenManagement.ClientCredentials.csproj" />
     </ItemGroup>
 
 </Project>
