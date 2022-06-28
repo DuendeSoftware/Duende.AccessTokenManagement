@@ -77,8 +77,8 @@ public class HomeController : Controller
         client.SetBearerToken(token.Value);
             
         var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/test");
+        
         ViewBag.Json = PrettyPrint(response);
-
         return View("CallApi");
     }
     
@@ -86,10 +86,9 @@ public class HomeController : Controller
     public async Task<IActionResult> CallApiAsClientFactory()
     {
         var client = _httpClientFactory.CreateClient("client");
-
         var response = await client.GetStringAsync("test");
-        //ViewBag.Json = JArray.Parse(response).ToString();
-
+        
+        ViewBag.Json = PrettyPrint(response);
         return View("CallApi");
     }
 

@@ -67,6 +67,12 @@ public class Startup
         {
             client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
         });
+        
+        // registers HTTP client that uses the managed client access token
+        services.AddClientAccessTokenHttpClient("client", configureClient: client =>
+        {
+            client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
+        });
 
         // // adds user and client access token management
         // services.AddAccessTokenManagement(options =>
