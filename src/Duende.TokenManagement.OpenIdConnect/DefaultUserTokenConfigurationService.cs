@@ -17,7 +17,7 @@ namespace Duende.TokenManagement.OpenIdConnect
     public class DefaultUserTokenConfigurationService : IUserTokenConfigurationService
     {
         private readonly UserAccessTokenManagementOptions _userAccessTokenManagementOptions;
-        private readonly IOptionsMonitor<OpenIdConnectOptions> _oidcOptions;
+        private readonly IOptionsMonitor<OpenIdConnectOptions> _oidcOptionsMonitor;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly ILogger<DefaultUserTokenConfigurationService> _logger;
 
@@ -25,18 +25,17 @@ namespace Duende.TokenManagement.OpenIdConnect
         /// ctor
         /// </summary>
         /// <param name="userAccessTokenManagementOptions"></param>
-        /// <param name="clientAccessTokenManagementOptions"></param>
-        /// <param name="oidcOptions"></param>
+        /// <param name="oidcOptionsMonitor"></param>
         /// <param name="schemeProvider"></param>
         /// <param name="logger"></param>
         public DefaultUserTokenConfigurationService(
             IOptions<UserAccessTokenManagementOptions> userAccessTokenManagementOptions,
-            IOptionsMonitor<OpenIdConnectOptions> oidcOptions,
+            IOptionsMonitor<OpenIdConnectOptions> oidcOptionsMonitor,
             IAuthenticationSchemeProvider schemeProvider,
             ILogger<DefaultUserTokenConfigurationService> logger)
         {
             _userAccessTokenManagementOptions = userAccessTokenManagementOptions.Value;
-            _oidcOptions = oidcOptions;
+            _oidcOptionsMonitor = oidcOptionsMonitor;
             _schemeProvider = schemeProvider;
             _logger = logger;
         }
@@ -129,11 +128,11 @@ namespace Duende.TokenManagement.OpenIdConnect
                     throw new InvalidOperationException("No OpenID Connect authentication scheme configured for getting client configuration. Either set the scheme name explicitly or set the default challenge scheme");
                 }
 
-                options = _oidcOptions.Get(scheme.Name);
+                options = _oidcOptionsMonitor.Get(scheme.Name);
             }
             else
             {
-                options = _oidcOptions.Get(schemeName);
+                options = _oidcOptionsMonitor.Get(schemeName);
             }
 
             OpenIdConnectConfiguration configuration;

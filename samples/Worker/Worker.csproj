@@ -10,6 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Duende.TokenManagement.ClientCredentials\Duende.TokenManagement.ClientCredentials.csproj" />
+    <ProjectReference Include="..\..\src\Duende.TokenManagement.ClientCredentials\Duende.TokenManagement.ClientCredentials.csproj" />
   </ItemGroup>
 </Project>

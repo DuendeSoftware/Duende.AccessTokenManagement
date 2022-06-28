@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Duende.TokenManagement.ClientCredentials;
 
 namespace Duende.TokenManagement.OpenIdConnect;
 

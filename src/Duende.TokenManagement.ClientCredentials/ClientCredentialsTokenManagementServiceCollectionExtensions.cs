@@ -11,13 +11,10 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// <summary>
 /// Extension methods for IServiceCollection to register the client credentials token management services
 /// </summary>
-public static class TokenManagementServiceCollectionExtensions
+public static class ClientCredentialsTokenManagementServiceCollectionExtensions
 {
-    public static IServiceCollection AddClientCredentialsTokenManagement(this IServiceCollection services,
-        Action<ClientCredentialsTokenManagementOptions> configureAction)
+    public static IServiceCollection AddClientCredentialsTokenManagement(this IServiceCollection services)
     {
-        services.Configure(configureAction);
-
         services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
         services.TryAddTransient<IAccessTokenCache, DistributedAccessTokenCache>();
         services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
@@ -27,6 +24,14 @@ public static class TokenManagementServiceCollectionExtensions
         services.AddHttpClient(TokenManagementDefaults.BackChannelHttpClientName);
 
         return services;
+    }
+        
+    public static IServiceCollection AddClientCredentialsTokenManagement(this IServiceCollection services,
+        Action<ClientCredentialsTokenManagementOptions> configureAction)
+    {
+        services.Configure(configureAction);
+
+        return services.AddClientCredentialsTokenManagement();
     }
 
         

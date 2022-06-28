@@ -8,6 +8,7 @@ using IdentityModel;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Duende.TokenManagement.OpenIdConnect
 {
@@ -38,7 +39,7 @@ namespace Duende.TokenManagement.OpenIdConnect
             ITokenRequestSynchronization sync,
             IUserTokenStore userAccessTokenStore,
             ISystemClock clock,
-            UserAccessTokenManagementOptions options,
+            IOptions<UserAccessTokenManagementOptions> options,
             IUserTokenConfigurationService userTokenConfigurationService,
             IUserTokenEndpointService tokenEndpointService,
             ILogger<UserAccessAccessTokenManagementService> logger)
@@ -46,7 +47,7 @@ namespace Duende.TokenManagement.OpenIdConnect
             _sync = sync;
             _userAccessTokenStore = userAccessTokenStore;
             _clock = clock;
-            _options = options;
+            _options = options.Value;
             _userTokenConfigurationService = userTokenConfigurationService;
             _tokenEndpointService = tokenEndpointService;
             _logger = logger;
