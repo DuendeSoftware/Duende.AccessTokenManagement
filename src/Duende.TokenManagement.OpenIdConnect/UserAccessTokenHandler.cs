@@ -8,68 +8,67 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Duende.TokenManagement.OpenIdConnect
+namespace Duende.TokenManagement.OpenIdConnect;
+
+/// <summary>
+/// Delegating handler that injects the current access token into an outgoing request
+/// </summary>
+public class UserAccessTokenHandler : DelegatingHandler
 {
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly UserAccessTokenRequestParameters _parameters;
+
     /// <summary>
-    /// Delegating handler that injects the current access token into an outgoing request
+    /// ctor
     /// </summary>
-    public class UserAccessTokenHandler : DelegatingHandler
+    /// <param name="httpContextAccessor"></param>
+    /// <param name="parameters"></param>
+    public UserAccessTokenHandler(IHttpContextAccessor httpContextAccessor, UserAccessTokenRequestParameters? parameters = null)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly UserAccessTokenRequestParameters _parameters;
+        _httpContextAccessor = httpContextAccessor;
+        _parameters = parameters ?? new UserAccessTokenRequestParameters();
+    }
 
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="httpContextAccessor"></param>
-        /// <param name="parameters"></param>
-        public UserAccessTokenHandler(IHttpContextAccessor httpContextAccessor, UserAccessTokenRequestParameters? parameters = null)
+    /// <inheritdoc/>
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        await SetTokenAsync(request, forceRenewal: false);
+        var response = await base.SendAsync(request, cancellationToken);
+
+        // retry if 401
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            _httpContextAccessor = httpContextAccessor;
-            _parameters = parameters ?? new UserAccessTokenRequestParameters();
+            response.Dispose();
+
+            await SetTokenAsync(request, forceRenewal: true);
+            return await base.SendAsync(request, cancellationToken);
         }
 
-        /// <inheritdoc/>
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        return response;
+    }
+
+    /// <summary>
+    /// Set an access token on the HTTP request
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="forceRenewal"></param>
+    /// <returns></returns>
+    protected virtual async Task SetTokenAsync(HttpRequestMessage request, bool forceRenewal)
+    {
+        var parameters = new UserAccessTokenRequestParameters
         {
-            await SetTokenAsync(request, forceRenewal: false);
-            var response = await base.SendAsync(request, cancellationToken);
-
-            // retry if 401
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                response.Dispose();
-
-                await SetTokenAsync(request, forceRenewal: true);
-                return await base.SendAsync(request, cancellationToken);
-            }
-
-            return response;
-        }
-
-        /// <summary>
-        /// Set an access token on the HTTP request
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="forceRenewal"></param>
-        /// <returns></returns>
-        protected virtual async Task SetTokenAsync(HttpRequestMessage request, bool forceRenewal)
-        {
-            var parameters = new UserAccessTokenRequestParameters
-            {
-                SignInScheme = _parameters.SignInScheme,
-                ChallengeScheme = _parameters.ChallengeScheme,
-                Resource = _parameters.Resource,
-                ForceRenewal = forceRenewal,
-                Context =  _parameters.Context
-            };
+            SignInScheme = _parameters.SignInScheme,
+            ChallengeScheme = _parameters.ChallengeScheme,
+            Resource = _parameters.Resource,
+            ForceRenewal = forceRenewal,
+            Context =  _parameters.Context
+        };
               
-            var token = await _httpContextAccessor!.HttpContext!.GetUserAccessTokenAsync(parameters);
+        var token = await _httpContextAccessor!.HttpContext!.GetUserAccessTokenAsync(parameters);
 
-            if (!string.IsNullOrWhiteSpace(token.Value))
-            {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
-            }
+        if (!string.IsNullOrWhiteSpace(token.Value))
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
         }
     }
 }

@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Duende.TokenManagement.ClientCredentials;
 using IdentityModel.Client;
-using Microsoft.AspNetCore.Server.HttpSys;
 
 namespace WorkerService;
 

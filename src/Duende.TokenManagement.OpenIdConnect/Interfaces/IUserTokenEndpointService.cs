@@ -5,33 +5,32 @@ using System.Threading;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 
-namespace Duende.TokenManagement.OpenIdConnect
+namespace Duende.TokenManagement.OpenIdConnect;
+
+/// <summary>
+/// Abstraction for token endpoint operations
+/// </summary>
+public interface IUserTokenEndpointService
 {
     /// <summary>
-    /// Abstraction for token endpoint operations
+    /// Refreshes a user access token.
     /// </summary>
-    public interface IUserTokenEndpointService
-    {
-        /// <summary>
-        /// Refreshes a user access token.
-        /// </summary>
-        /// <param name="refreshToken"></param>
-        /// <param name="parameters"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<TokenResponse> RefreshAccessTokenAsync(
-            RefreshTokenRequest request,
-            CancellationToken cancellationToken = default);
+    /// <param name="refreshToken"></param>
+    /// <param name="parameters"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<TokenResponse> RefreshAccessTokenAsync(
+        RefreshTokenRequest request,
+        CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Revokes a refresh token.
-        /// </summary>
-        /// <param name="refreshToken"></param>
-        /// <param name="parameters"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<TokenRevocationResponse> RevokeRefreshTokenAsync(
-            TokenRevocationRequest request,
-            CancellationToken cancellationToken = default);
-    }
+    /// <summary>
+    /// Revokes a refresh token.
+    /// </summary>
+    /// <param name="refreshToken"></param>
+    /// <param name="parameters"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<TokenRevocationResponse> RevokeRefreshTokenAsync(
+        TokenRevocationRequest request,
+        CancellationToken cancellationToken = default);
 }

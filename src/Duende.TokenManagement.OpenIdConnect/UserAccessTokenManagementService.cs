@@ -10,190 +10,189 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Duende.TokenManagement.OpenIdConnect
+namespace Duende.TokenManagement.OpenIdConnect;
+
+/// <summary>
+/// Implements basic token management logic
+/// </summary>
+public class UserAccessAccessTokenManagementService : IUserTokenManagementService
 {
+    private readonly ITokenRequestSynchronization _sync;
+    private readonly IUserTokenStore _userAccessTokenStore;
+    private readonly ISystemClock _clock;
+    private readonly UserAccessTokenManagementOptions _options;
+    private readonly IUserTokenConfigurationService _userTokenConfigurationService;
+    private readonly IUserTokenEndpointService _tokenEndpointService;
+    private readonly ILogger<UserAccessAccessTokenManagementService> _logger;
+
     /// <summary>
-    /// Implements basic token management logic
+    /// ctor
     /// </summary>
-    public class UserAccessAccessTokenManagementService : IUserTokenManagementService
+    /// <param name="sync"></param>
+    /// <param name="userAccessTokenStore"></param>
+    /// <param name="clock"></param>
+    /// <param name="options"></param>
+    /// <param name="userTokenConfigurationService"></param>
+    /// <param name="tokenEndpointService"></param>
+    /// <param name="logger"></param>
+    public UserAccessAccessTokenManagementService(
+        ITokenRequestSynchronization sync,
+        IUserTokenStore userAccessTokenStore,
+        ISystemClock clock,
+        IOptions<UserAccessTokenManagementOptions> options,
+        IUserTokenConfigurationService userTokenConfigurationService,
+        IUserTokenEndpointService tokenEndpointService,
+        ILogger<UserAccessAccessTokenManagementService> logger)
     {
-        private readonly ITokenRequestSynchronization _sync;
-        private readonly IUserTokenStore _userAccessTokenStore;
-        private readonly ISystemClock _clock;
-        private readonly UserAccessTokenManagementOptions _options;
-        private readonly IUserTokenConfigurationService _userTokenConfigurationService;
-        private readonly IUserTokenEndpointService _tokenEndpointService;
-        private readonly ILogger<UserAccessAccessTokenManagementService> _logger;
-
-        /// <summary>
-        /// ctor
-        /// </summary>
-        /// <param name="sync"></param>
-        /// <param name="userAccessTokenStore"></param>
-        /// <param name="clock"></param>
-        /// <param name="options"></param>
-        /// <param name="userTokenConfigurationService"></param>
-        /// <param name="tokenEndpointService"></param>
-        /// <param name="logger"></param>
-        public UserAccessAccessTokenManagementService(
-            ITokenRequestSynchronization sync,
-            IUserTokenStore userAccessTokenStore,
-            ISystemClock clock,
-            IOptions<UserAccessTokenManagementOptions> options,
-            IUserTokenConfigurationService userTokenConfigurationService,
-            IUserTokenEndpointService tokenEndpointService,
-            ILogger<UserAccessAccessTokenManagementService> logger)
-        {
-            _sync = sync;
-            _userAccessTokenStore = userAccessTokenStore;
-            _clock = clock;
-            _options = options.Value;
-            _userTokenConfigurationService = userTokenConfigurationService;
-            _tokenEndpointService = tokenEndpointService;
-            _logger = logger;
-        }
+        _sync = sync;
+        _userAccessTokenStore = userAccessTokenStore;
+        _clock = clock;
+        _options = options.Value;
+        _userTokenConfigurationService = userTokenConfigurationService;
+        _tokenEndpointService = tokenEndpointService;
+        _logger = logger;
+    }
         
-        /// <inheritdoc/>
-        public async Task<UserAccessToken> GetAccessTokenAsync(
-            ClaimsPrincipal user, 
-            UserAccessTokenRequestParameters? parameters = null, 
-            CancellationToken cancellationToken = default)
+    /// <inheritdoc/>
+    public async Task<UserAccessToken> GetAccessTokenAsync(
+        ClaimsPrincipal user, 
+        UserAccessTokenRequestParameters? parameters = null, 
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogTrace("Starting user token acquisition");
+            
+        parameters ??= new UserAccessTokenRequestParameters();
+            
+        if (!user.Identity!.IsAuthenticated)
         {
-            _logger.LogTrace("Starting user token acquisition");
+            _logger.LogDebug("No active user. Cannot retrieve token");
+            return new UserAccessToken();
+        }
+
+        var userName = user.FindFirst(JwtClaimTypes.Name)?.Value ?? user.FindFirst(JwtClaimTypes.Subject)?.Value ?? "unknown";
+        var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
             
-            parameters ??= new UserAccessTokenRequestParameters();
+        if (userToken.Value.IsMissing() && userToken.RefreshToken.IsMissing())
+        {
+            _logger.LogDebug("No token data found in user token store for user {user}.", userName);
+            return new UserAccessToken();
+        }
             
-            if (!user.Identity!.IsAuthenticated)
-            {
-                _logger.LogDebug("No active user. Cannot retrieve token");
-                return new UserAccessToken();
-            }
-
-            var userName = user.FindFirst(JwtClaimTypes.Name)?.Value ?? user.FindFirst(JwtClaimTypes.Subject)?.Value ?? "unknown";
-            var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-            
-            if (userToken.Value.IsMissing() && userToken.RefreshToken.IsMissing())
-            {
-                _logger.LogDebug("No token data found in user token store for user {user}.", userName);
-                return new UserAccessToken();
-            }
-            
-            if (userToken.Value.IsPresent() && userToken.RefreshToken.IsMissing())
-            {
-                _logger.LogDebug("No refresh token found in user token store for user {user} / resource {resource}. Returning current access token.", userName, parameters.Resource ?? "default");
-                return userToken;
-            }
-
-            if (userToken.Value.IsMissing() && userToken.RefreshToken.IsPresent())
-            {
-                _logger.LogDebug(
-                    "No access token found in user token store for user {user} / resource {resource}. Trying to refresh.",
-                    userName, parameters.Resource ?? "default");
-            }
-
-            var dtRefresh = DateTimeOffset.MinValue;
-            if (userToken.Expiration.HasValue)
-            {
-                dtRefresh = userToken.Expiration.Value.Subtract(_options.RefreshBeforeExpiration);
-            }
-            
-            if (dtRefresh < _clock.UtcNow || parameters.ForceRenewal)
-            {
-                _logger.LogDebug("Token for user {user} needs refreshing.", userName);
-
-                try
-                {
-                    return await _sync.Dictionary.GetOrAdd(userToken.RefreshToken!, _ =>
-                    {
-                        return new Lazy<Task<UserAccessToken>>(async () =>
-                        {
-                            var refreshed = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
-
-                            var token = new UserAccessToken
-                            {
-                                Value = refreshed.AccessToken,
-                                Expiration = DateTimeOffset.UtcNow.AddSeconds(refreshed.ExpiresIn),
-                                RefreshToken = refreshed.RefreshToken,
-                                Scope = refreshed.Scope,
-                                Resource = refreshed.TryGet("resource")
-                            };
-
-                            _logger.LogTrace("Returning refreshed token for user: {user}", userName);
-                            return token;
-                        });
-                    }).Value;
-                }
-                finally
-                {
-                    _sync.Dictionary.TryRemove(userToken.RefreshToken!, out _);
-                }
-            }
-
-            _logger.LogTrace("Returning current token for user: {user}", userName);
+        if (userToken.Value.IsPresent() && userToken.RefreshToken.IsMissing())
+        {
+            _logger.LogDebug("No refresh token found in user token store for user {user} / resource {resource}. Returning current access token.", userName, parameters.Resource ?? "default");
             return userToken;
         }
 
-        /// <inheritdoc/>
-        public async Task RevokeRefreshTokenAsync(
-            ClaimsPrincipal user, 
-            UserAccessTokenRequestParameters? parameters = null, 
-            CancellationToken cancellationToken = default)
+        if (userToken.Value.IsMissing() && userToken.RefreshToken.IsPresent())
         {
-            parameters ??= new UserAccessTokenRequestParameters();
-            
-            var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-            var requestDetails = await _userTokenConfigurationService.GetTokenRevocationRequestAsync(parameters);
-            
-            requestDetails.Token = userToken.RefreshToken;
-            requestDetails.TokenTypeHint = OidcConstants.TokenTypes.RefreshToken;
-            requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
-            
-            if (!string.IsNullOrEmpty(userToken?.RefreshToken))
-            {
-                var response = await _tokenEndpointService.RevokeRefreshTokenAsync(requestDetails, cancellationToken);
+            _logger.LogDebug(
+                "No access token found in user token store for user {user} / resource {resource}. Trying to refresh.",
+                userName, parameters.Resource ?? "default");
+        }
 
-                if (response.IsError)
+        var dtRefresh = DateTimeOffset.MinValue;
+        if (userToken.Expiration.HasValue)
+        {
+            dtRefresh = userToken.Expiration.Value.Subtract(_options.RefreshBeforeExpiration);
+        }
+            
+        if (dtRefresh < _clock.UtcNow || parameters.ForceRenewal)
+        {
+            _logger.LogDebug("Token for user {user} needs refreshing.", userName);
+
+            try
+            {
+                return await _sync.Dictionary.GetOrAdd(userToken.RefreshToken!, _ =>
                 {
-                    _logger.LogError("Error revoking refresh token. Error = {error}", response.Error);
-                }
+                    return new Lazy<Task<UserAccessToken>>(async () =>
+                    {
+                        var refreshed = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
+
+                        var token = new UserAccessToken
+                        {
+                            Value = refreshed.AccessToken,
+                            Expiration = DateTimeOffset.UtcNow.AddSeconds(refreshed.ExpiresIn),
+                            RefreshToken = refreshed.RefreshToken,
+                            Scope = refreshed.Scope,
+                            Resource = refreshed.TryGet("resource")
+                        };
+
+                        _logger.LogTrace("Returning refreshed token for user: {user}", userName);
+                        return token;
+                    });
+                }).Value;
+            }
+            finally
+            {
+                _sync.Dictionary.TryRemove(userToken.RefreshToken!, out _);
             }
         }
 
-        private async Task<TokenResponse> RefreshUserAccessTokenAsync(
-            ClaimsPrincipal user,
-            UserAccessTokenRequestParameters parameters,
-            CancellationToken cancellationToken = default)
-        {
-            var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-            var requestDetails = await _userTokenConfigurationService.GetRefreshTokenRequestAsync(parameters);
+        _logger.LogTrace("Returning current token for user: {user}", userName);
+        return userToken;
+    }
+
+    /// <inheritdoc/>
+    public async Task RevokeRefreshTokenAsync(
+        ClaimsPrincipal user, 
+        UserAccessTokenRequestParameters? parameters = null, 
+        CancellationToken cancellationToken = default)
+    {
+        parameters ??= new UserAccessTokenRequestParameters();
             
-            requestDetails.RefreshToken = userToken.RefreshToken;
-            requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+        var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
+        var requestDetails = await _userTokenConfigurationService.GetTokenRevocationRequestAsync(parameters);
+            
+        requestDetails.Token = userToken.RefreshToken;
+        requestDetails.TokenTypeHint = OidcConstants.TokenTypes.RefreshToken;
+        requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+            
+        if (!string.IsNullOrEmpty(userToken?.RefreshToken))
+        {
+            var response = await _tokenEndpointService.RevokeRefreshTokenAsync(requestDetails, cancellationToken);
 
-            var response = await _tokenEndpointService.RefreshAccessTokenAsync(requestDetails, cancellationToken);
-
-            if (!response.IsError)
+            if (response.IsError)
             {
-                // todo: what to do if expires_in is missing?
-                var expiration = DateTime.UtcNow + TimeSpan.FromSeconds(response.ExpiresIn);
-
-                var token = new UserAccessToken
-                {
-                    Value = response.AccessToken,
-                    Expiration = expiration,
-                    RefreshToken = response.RefreshToken,
-                    Scope = response.Scope,
-                    Resource = response.TryGet("resource")
-                };
-
-                await _userAccessTokenStore.StoreTokenAsync(user, token, parameters);
+                _logger.LogError("Error revoking refresh token. Error = {error}", response.Error);
             }
-            else
-            {
-                _logger.LogError("Error refreshing access token. Error = {error}", response.Error);
-            }
-
-            return response;
         }
+    }
+
+    private async Task<TokenResponse> RefreshUserAccessTokenAsync(
+        ClaimsPrincipal user,
+        UserAccessTokenRequestParameters parameters,
+        CancellationToken cancellationToken = default)
+    {
+        var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
+        var requestDetails = await _userTokenConfigurationService.GetRefreshTokenRequestAsync(parameters);
+            
+        requestDetails.RefreshToken = userToken.RefreshToken;
+        requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+
+        var response = await _tokenEndpointService.RefreshAccessTokenAsync(requestDetails, cancellationToken);
+
+        if (!response.IsError)
+        {
+            // todo: what to do if expires_in is missing?
+            var expiration = DateTime.UtcNow + TimeSpan.FromSeconds(response.ExpiresIn);
+
+            var token = new UserAccessToken
+            {
+                Value = response.AccessToken,
+                Expiration = expiration,
+                RefreshToken = response.RefreshToken,
+                Scope = response.Scope,
+                Resource = response.TryGet("resource")
+            };
+
+            await _userAccessTokenStore.StoreTokenAsync(user, token, parameters);
+        }
+        else
+        {
+            _logger.LogError("Error refreshing access token. Error = {error}", response.Error);
+        }
+
+        return response;
     }
 }

@@ -1,34 +1,33 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace MvcCode
+namespace MvcCode;
+
+public abstract class TypedClient
 {
-    public abstract class TypedClient
+    private readonly HttpClient _client;
+
+    public TypedClient(HttpClient client)
     {
-        private readonly HttpClient _client;
-
-        public TypedClient(HttpClient client)
-        {
-            _client = client;
-        }
-
-        public virtual async Task<string> CallApi()
-        {
-            return await _client.GetStringAsync("test");
-        }
+        _client = client;
     }
 
-    public class TypedUserClient : TypedClient
+    public virtual async Task<string> CallApi()
     {
-        public TypedUserClient(HttpClient client) : base(client)
-        {
-        }
+        return await _client.GetStringAsync("test");
     }
+}
 
-    public class TypedClientClient : TypedClient
+public class TypedUserClient : TypedClient
+{
+    public TypedUserClient(HttpClient client) : base(client)
     {
-        public TypedClientClient(HttpClient client) : base(client)
-        {
-        }
+    }
+}
+
+public class TypedClientClient : TypedClient
+{
+    public TypedClientClient(HttpClient client) : base(client)
+    {
     }
 }
