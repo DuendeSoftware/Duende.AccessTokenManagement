@@ -1,6 +1,8 @@
 using System;
+using System.Net.Http;
 using Duende.TokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -30,5 +32,69 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         services.Configure(configureAction);
 
         return services.AddOpenIdConnectTokenManagement();
+    }
+    
+    /// <summary>
+    /// Adds a named HTTP client for the factory that automatically sends the current user access token
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/>.</param>
+    /// <param name="name">The name of the client.</param>
+    /// <param name="parameters"></param>
+    /// <param name="configureClient">Additional configuration with service provider instance.</param>
+    /// <returns></returns>
+    public static IHttpClientBuilder AddUserAccessTokenHttpClient(this IServiceCollection services,
+        string name,
+        UserAccessTokenRequestParameters? parameters = null,
+        Action<IServiceProvider, HttpClient>? configureClient = null)
+    {
+        if (configureClient != null)
+        {
+            return services.AddHttpClient(name, configureClient)
+                .AddUserAccessTokenHandler(parameters);
+        }
+
+        return services.AddHttpClient(name)
+            .AddUserAccessTokenHandler(parameters);
+    }
+    
+    /// <summary>
+    /// Adds a named HTTP client for the factory that automatically sends the current user access token
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/>.</param>
+    /// <param name="name">The name of the client.</param>
+    /// <param name="parameters"></param>
+    /// <param name="configureClient">Additional configuration with service provider instance.</param>
+    /// <returns></returns>
+    public static IHttpClientBuilder AddUserAccessTokenHttpClient(this IServiceCollection services,
+        string name,
+        UserAccessTokenRequestParameters? parameters = null,
+        Action<HttpClient>? configureClient = null)
+    {
+        if (configureClient != null)
+        {
+            return services.AddHttpClient(name, configureClient)
+                .AddUserAccessTokenHandler(parameters);
+        }
+
+        return services.AddHttpClient(name)
+            .AddUserAccessTokenHandler(parameters);
+    }
+    
+    /// <summary>
+    /// Adds the user access token handler to an HttpClient
+    /// </summary>
+    /// <param name="httpClientBuilder"></param>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    public static IHttpClientBuilder AddUserAccessTokenHandler(
+        this IHttpClientBuilder httpClientBuilder,
+        UserAccessTokenRequestParameters? parameters = null)
+    {
+        return httpClientBuilder.AddHttpMessageHandler(provider =>
+        {
+            var contextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+
+            return new UserAccessTokenHandler(contextAccessor, parameters);
+        });
     }
 }

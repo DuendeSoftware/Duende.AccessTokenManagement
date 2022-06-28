@@ -51,12 +51,12 @@ public class HomeController : Controller
         return View("CallApi");
     }
         
-    public async Task<IActionResult> CallApiAsUser()
+    public async Task<IActionResult> CallApiAsUserFactory()
     {
         var client = _httpClientFactory.CreateClient("user_client");
 
         var response = await client.GetStringAsync("test");
-        //ViewBag.Json = JArray.Parse(response).ToString();
+        ViewBag.Json = PrettyPrint(response);
 
         return View("CallApi");
     }

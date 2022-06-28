@@ -1,7 +1,9 @@
+using System;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 namespace MvcCode;
 
@@ -59,6 +61,12 @@ public class Startup
             });
 
         services.AddOpenIdConnectTokenManagement();
+        
+        // registers HTTP client that uses the managed user access token
+        services.AddUserAccessTokenHttpClient("user_client", configureClient: client =>
+        {
+            client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
+        });
 
         // // adds user and client access token management
         // services.AddAccessTokenManagement(options =>
@@ -75,11 +83,7 @@ public class Startup
         //             TimeSpan.FromSeconds(3)
         //         }));
         //
-        // // registers HTTP client that uses the managed user access token
-        // services.AddUserAccessTokenHttpClient("user_client", configureClient: client =>
-        // {
-        //     client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
-        // });
+        
 
         // registers HTTP client that uses the managed client access token
         // services.AddClientAccessTokenHttpClient("client", configureClient: client =>
@@ -103,6 +107,8 @@ public class Startup
 
     public void Configure(IApplicationBuilder app)
     {
+        app.UseSerilogRequestLogging();
+        
         app.UseDeveloperExceptionPage();
         app.UseHttpsRedirection();
         app.UseStaticFiles();
