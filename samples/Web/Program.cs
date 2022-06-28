@@ -12,6 +12,7 @@ namespace MvcCode
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
+                .MinimumLevel.Override("Duende", LogEventLevel.Verbose)
                 .MinimumLevel.Override("System", LogEventLevel.Error)
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
                 .MinimumLevel.Override("System.Net.Http", LogEventLevel.Information)

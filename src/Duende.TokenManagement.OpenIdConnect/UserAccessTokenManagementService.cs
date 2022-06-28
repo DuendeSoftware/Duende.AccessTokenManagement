@@ -59,17 +59,20 @@ namespace Duende.TokenManagement.OpenIdConnect
             UserAccessTokenRequestParameters? parameters = null, 
             CancellationToken cancellationToken = default)
         {
+            _logger.LogTrace("Starting user token acquisition");
+            
             parameters ??= new UserAccessTokenRequestParameters();
             
             if (!user.Identity!.IsAuthenticated)
             {
+                _logger.LogDebug("No active user. Cannot retrieve token");
                 return new UserAccessToken();
             }
 
             var userName = user.FindFirst(JwtClaimTypes.Name)?.Value ?? user.FindFirst(JwtClaimTypes.Subject)?.Value ?? "unknown";
             var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-
-            if (userToken == null)
+            
+            if (userToken.Value.IsMissing() && userToken.RefreshToken.IsMissing())
             {
                 _logger.LogDebug("No token data found in user token store for user {user}.", userName);
                 return new UserAccessToken();
@@ -115,6 +118,7 @@ namespace Duende.TokenManagement.OpenIdConnect
                                 Resource = refreshed.TryGet("resource")
                             };
 
+                            _logger.LogTrace("Returning refreshed token for user: {user}", userName);
                             return token;
                         });
                     }).Value;
@@ -125,6 +129,7 @@ namespace Duende.TokenManagement.OpenIdConnect
                 }
             }
 
+            _logger.LogTrace("Returning current token for user: {user}", userName);
             return userToken;
         }
 

@@ -51,7 +51,7 @@ namespace Duende.TokenManagement.OpenIdConnect
             {
                 _logger.LogInformation("Cannot authenticate scheme: {scheme}", parameters.SignInScheme ?? "default signin scheme");
 
-                return null;
+                return new UserAccessToken();
             }
 
             if (result.Properties == null)
@@ -151,6 +151,7 @@ namespace Duende.TokenManagement.OpenIdConnect
             }
 
 
+            // todo: deal with missing expires_in
             result.Properties!.Items[$"{TokenPrefix}{tokenName}"] = token.Value;
             result.Properties!.Items[$"{TokenPrefix}{expiresName}"] = token.Expiration.Value.ToString("o", CultureInfo.InvariantCulture);
 

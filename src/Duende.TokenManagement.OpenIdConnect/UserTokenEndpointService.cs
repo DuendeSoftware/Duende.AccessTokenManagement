@@ -39,7 +39,7 @@ namespace Duende.TokenManagement.OpenIdConnect
             RefreshTokenRequest request,
             CancellationToken cancellationToken = default)
         {
-            _logger.LogDebug("Refreshing refresh token: {token}",  request.RefreshToken);
+            _logger.LogTrace("Refreshing refresh token: {token}",  request.RefreshToken);
             
             var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);
             return await httpClient.RequestRefreshTokenAsync(request, cancellationToken);
