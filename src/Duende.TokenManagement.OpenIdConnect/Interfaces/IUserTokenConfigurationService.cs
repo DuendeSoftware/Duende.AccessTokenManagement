@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Duende.TokenManagement.ClientCredentials;
 using IdentityModel.Client;
 
 namespace Duende.TokenManagement.OpenIdConnect;
@@ -19,4 +20,11 @@ public interface IUserTokenConfigurationService
     /// </summary>
     /// <returns></returns>
     Task<TokenRevocationRequest> GetTokenRevocationRequestAsync(UserAccessTokenRequestParameters requestParameters);
+
+    /// <summary>
+    /// Returns a client credentials token request with inferred configuration from the OpenID Connect handler
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync();
 }

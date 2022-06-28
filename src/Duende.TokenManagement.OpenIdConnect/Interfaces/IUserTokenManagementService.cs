@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Duende.TokenManagement.ClientCredentials;
 
 namespace Duende.TokenManagement.OpenIdConnect;
 
@@ -28,5 +29,9 @@ public interface IUserTokenManagementService
     Task RevokeRefreshTokenAsync(
         ClaimsPrincipal user, 
         UserAccessTokenRequestParameters? parameters = null, 
+        CancellationToken cancellationToken = default);
+
+    Task<AccessToken> GetClientCredentialAccessTokenAsync(
+        AccessTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default);
 }

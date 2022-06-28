@@ -70,7 +70,20 @@ public class HomeController : Controller
     }
 
     [AllowAnonymous]
-    public async Task<IActionResult> CallApiAsClient()
+    public async Task<IActionResult> CallApiAsClientExtensionMethod()
+    {
+        var token = await HttpContext.GetClientAccessTokenAsync();
+        var client = _httpClientFactory.CreateClient();
+        client.SetBearerToken(token.Value);
+            
+        var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/test");
+        ViewBag.Json = PrettyPrint(response);
+
+        return View("CallApi");
+    }
+    
+    [AllowAnonymous]
+    public async Task<IActionResult> CallApiAsClientFactory()
     {
         var client = _httpClientFactory.CreateClient("client");
 

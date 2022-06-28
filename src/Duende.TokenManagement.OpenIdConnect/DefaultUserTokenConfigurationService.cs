@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Duende.TokenManagement.ClientCredentials;
 using IdentityModel;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
@@ -38,11 +39,14 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
         _schemeProvider = schemeProvider;
         _logger = logger;
     }
-        
+
     /// <inheritdoc />
-    public virtual async Task<RefreshTokenRequest> GetRefreshTokenRequestAsync(UserAccessTokenRequestParameters parameters)
+    public virtual async Task<RefreshTokenRequest> GetRefreshTokenRequestAsync(
+        UserAccessTokenRequestParameters parameters)
     {
-        var (options, configuration) = await GetOpenIdConnectSettingsAsync(parameters.ChallengeScheme ?? _userAccessTokenManagementOptions.SchemeName);
+        var (options, configuration) =
+            await GetOpenIdConnectSettingsAsync(parameters.ChallengeScheme ??
+                                                _userAccessTokenManagementOptions.SchemeName);
 
         var requestDetails = new RefreshTokenRequest
         {
@@ -52,7 +56,7 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
             ClientId = options.ClientId,
             ClientSecret = options.ClientSecret
         };
-            
+
         if (!string.IsNullOrEmpty(parameters.Resource))
         {
             requestDetails.Resource.Add(parameters.Resource);
@@ -72,24 +76,27 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
                 requestDetails.ClientAssertion = assertion;
             }
         }
-            
+
         return requestDetails;
     }
 
     /// <inheritdoc />
-    public virtual async Task<TokenRevocationRequest> GetTokenRevocationRequestAsync(UserAccessTokenRequestParameters parameters)
+    public virtual async Task<TokenRevocationRequest> GetTokenRevocationRequestAsync(
+        UserAccessTokenRequestParameters parameters)
     {
-        var (options, configuration) = await GetOpenIdConnectSettingsAsync(parameters.ChallengeScheme ?? _userAccessTokenManagementOptions.SchemeName);
-            
+        var (options, configuration) =
+            await GetOpenIdConnectSettingsAsync(parameters.ChallengeScheme ??
+                                                _userAccessTokenManagementOptions.SchemeName);
+
         var requestDetails = new TokenRevocationRequest
         {
             Address = configuration.AdditionalData[OidcConstants.Discovery.RevocationEndpoint].ToString(),
             ClientCredentialStyle = _userAccessTokenManagementOptions.ClientCredentialStyle,
 
             ClientId = options.ClientId,
-            ClientSecret = options.ClientSecret
+            ClientSecret = options.ClientSecret,
         };
-            
+
         if (parameters.Assertion != null)
         {
             requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
@@ -107,14 +114,50 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
 
         return requestDetails;
     }
+
+    // todo: need to apply per request parameters here!
+    public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync()
+    {
+        var (options, configuration) =
+            await GetOpenIdConnectSettingsAsync(_userAccessTokenManagementOptions.SchemeName);
+
+        var requestDetails = new ClientCredentialsTokenRequest
+        {
+            Address = configuration.TokenEndpoint,
+            ClientCredentialStyle = _userAccessTokenManagementOptions.ClientCredentialStyle,
+
+            ClientId = options.ClientId,
+            ClientSecret = options.ClientSecret,
+        };
+
+        if (_userAccessTokenManagementOptions.ClientCredentialsScope.IsPresent())
+        {
+            requestDetails.Scope = _userAccessTokenManagementOptions.ClientCredentialsScope;
+        }
+
+        if (_userAccessTokenManagementOptions.ClientCredentialsResource.IsPresent())
+        {
+            requestDetails.Resource.Add(_userAccessTokenManagementOptions.ClientCredentialsResource);
+        }
+
+        var assertion = await CreateAssertionAsync();
+        if (assertion != null)
+        {
+            requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+            requestDetails.ClientAssertion = assertion;
+        }
         
+        return requestDetails;
+    }
+
     /// <summary>
     /// Retrieves configuration from a named OpenID Connect handler
     /// </summary>
     /// <param name="schemeName"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public virtual async Task<(OpenIdConnectOptions options, OpenIdConnectConfiguration configuration)> GetOpenIdConnectSettingsAsync(string? schemeName)
+    public virtual async Task<(OpenIdConnectOptions options, OpenIdConnectConfiguration configuration)>
+        GetOpenIdConnectSettingsAsync(string? schemeName)
     {
         OpenIdConnectOptions options;
 
@@ -124,7 +167,8 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
 
             if (scheme is null)
             {
-                throw new InvalidOperationException("No OpenID Connect authentication scheme configured for getting client configuration. Either set the scheme name explicitly or set the default challenge scheme");
+                throw new InvalidOperationException(
+                    "No OpenID Connect authentication scheme configured for getting client configuration. Either set the scheme name explicitly or set the default challenge scheme");
             }
 
             options = _oidcOptionsMonitor.Get(scheme.Name);
@@ -141,7 +185,8 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
         }
         catch (Exception e)
         {
-            throw new InvalidOperationException($"Unable to load OpenID configuration for configured scheme: {e.Message}");
+            throw new InvalidOperationException(
+                $"Unable to load OpenID configuration for configured scheme: {e.Message}");
         }
 
         return (options, configuration);

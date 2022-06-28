@@ -5,6 +5,7 @@ using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
+using Duende.TokenManagement.ClientCredentials;
 using Duende.TokenManagement.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication;
@@ -29,6 +30,23 @@ public static class TokenManagementHttpContextExtensions
         var service = httpContext.RequestServices.GetRequiredService<IUserTokenManagementService>();
 
         return await service.GetAccessTokenAsync(httpContext.User, parameters, cancellationToken);
+    }
+    
+    /// <summary>
+    /// Returns (and refreshes if needed) the current access token for the logged on user
+    /// </summary>
+    /// <param name="httpContext">The HTTP context</param>
+    /// <param name="parameters">Extra optional parameters</param>
+    /// <param name="cancellationToken">A cancellation token to cancel operation.</param>
+    /// <returns></returns>
+    public static async Task<AccessToken> GetClientAccessTokenAsync(
+        this HttpContext httpContext,
+        AccessTokenRequestParameters? parameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        var service = httpContext.RequestServices.GetRequiredService<IUserTokenManagementService>();
+
+        return await service.GetClientCredentialAccessTokenAsync(parameters, cancellationToken);
     }
 
     //     /// <summary>

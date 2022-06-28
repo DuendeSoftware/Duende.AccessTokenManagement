@@ -23,6 +23,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     private readonly UserAccessTokenManagementOptions _options;
     private readonly IUserTokenConfigurationService _userTokenConfigurationService;
     private readonly IUserTokenEndpointService _tokenEndpointService;
+    private readonly IClientCredentialsTokenManagementService _clientCredentialsTokenManagementService;
     private readonly ILogger<UserAccessAccessTokenManagementService> _logger;
 
     /// <summary>
@@ -34,6 +35,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     /// <param name="options"></param>
     /// <param name="userTokenConfigurationService"></param>
     /// <param name="tokenEndpointService"></param>
+    /// <param name="clientCredentialsTokenManagementService"></param>
     /// <param name="logger"></param>
     public UserAccessAccessTokenManagementService(
         ITokenRequestSynchronization sync,
@@ -42,6 +44,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         IOptions<UserAccessTokenManagementOptions> options,
         IUserTokenConfigurationService userTokenConfigurationService,
         IUserTokenEndpointService tokenEndpointService,
+        IClientCredentialsTokenManagementService clientCredentialsTokenManagementService,
         ILogger<UserAccessAccessTokenManagementService> logger)
     {
         _sync = sync;
@@ -50,6 +53,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         _options = options.Value;
         _userTokenConfigurationService = userTokenConfigurationService;
         _tokenEndpointService = tokenEndpointService;
+        _clientCredentialsTokenManagementService = clientCredentialsTokenManagementService;
         _logger = logger;
     }
         
@@ -194,5 +198,20 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         }
 
         return response;
+    }
+
+    public async Task<AccessToken> GetClientCredentialAccessTokenAsync(
+        AccessTokenRequestParameters? parameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        parameters ??= new AccessTokenRequestParameters();
+
+        var request = await _userTokenConfigurationService.GetClientCredentialsRequestAsync();
+        
+        return await _clientCredentialsTokenManagementService.GetAccessTokenAsync(
+            "oidc", 
+            request: request,
+            parameters: parameters,
+            cancellationToken: cancellationToken);
     }
 }
