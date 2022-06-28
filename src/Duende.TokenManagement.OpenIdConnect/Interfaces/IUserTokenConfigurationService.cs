@@ -26,5 +26,5 @@ public interface IUserTokenConfigurationService
     /// </summary>
     /// <param name="parameters"></param>
     /// <returns></returns>
-    Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync();
+    Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(AccessTokenRequestParameters parameters);
 }

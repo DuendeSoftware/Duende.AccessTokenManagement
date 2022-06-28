@@ -206,7 +206,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     {
         parameters ??= new AccessTokenRequestParameters();
 
-        var request = await _userTokenConfigurationService.GetClientCredentialsRequestAsync();
+        var request = await _userTokenConfigurationService.GetClientCredentialsRequestAsync(parameters);
         
         return await _clientCredentialsTokenManagementService.GetAccessTokenAsync(
             "oidc", 

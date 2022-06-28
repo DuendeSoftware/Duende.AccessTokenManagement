@@ -48,7 +48,7 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
             await GetOpenIdConnectSettingsAsync(parameters.ChallengeScheme ??
                                                 _userAccessTokenManagementOptions.SchemeName);
 
-        var requestDetails = new RefreshTokenRequest
+        var request = new RefreshTokenRequest
         {
             Address = configuration.TokenEndpoint,
             ClientCredentialStyle = _userAccessTokenManagementOptions.ClientCredentialStyle,
@@ -59,25 +59,11 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
 
         if (!string.IsNullOrEmpty(parameters.Resource))
         {
-            requestDetails.Resource.Add(parameters.Resource);
+            request.Resource.Add(parameters.Resource);
         }
 
-        if (parameters.Assertion != null)
-        {
-            requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
-            requestDetails.ClientAssertion = parameters.Assertion;
-        }
-        else
-        {
-            var assertion = await CreateAssertionAsync();
-            if (assertion != null)
-            {
-                requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
-                requestDetails.ClientAssertion = assertion;
-            }
-        }
-
-        return requestDetails;
+        await ApplyAssertionAsync(request, parameters);
+        return request;
     }
 
     /// <inheritdoc />
@@ -88,7 +74,7 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
             await GetOpenIdConnectSettingsAsync(parameters.ChallengeScheme ??
                                                 _userAccessTokenManagementOptions.SchemeName);
 
-        var requestDetails = new TokenRevocationRequest
+        var request = new TokenRevocationRequest
         {
             Address = configuration.AdditionalData[OidcConstants.Discovery.RevocationEndpoint].ToString(),
             ClientCredentialStyle = _userAccessTokenManagementOptions.ClientCredentialStyle,
@@ -97,31 +83,17 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
             ClientSecret = options.ClientSecret,
         };
 
-        if (parameters.Assertion != null)
-        {
-            requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
-            requestDetails.ClientAssertion = parameters.Assertion;
-        }
-        else
-        {
-            var assertion = await CreateAssertionAsync();
-            if (assertion != null)
-            {
-                requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
-                requestDetails.ClientAssertion = assertion;
-            }
-        }
-
-        return requestDetails;
+        await ApplyAssertionAsync(request, parameters);
+        return request;
     }
 
     // todo: need to apply per request parameters here!
-    public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync()
+    public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(AccessTokenRequestParameters parameters)
     {
         var (options, configuration) =
             await GetOpenIdConnectSettingsAsync(_userAccessTokenManagementOptions.SchemeName);
 
-        var requestDetails = new ClientCredentialsTokenRequest
+        var request = new ClientCredentialsTokenRequest
         {
             Address = configuration.TokenEndpoint,
             ClientCredentialStyle = _userAccessTokenManagementOptions.ClientCredentialStyle,
@@ -130,24 +102,26 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
             ClientSecret = options.ClientSecret,
         };
 
-        if (_userAccessTokenManagementOptions.ClientCredentialsScope.IsPresent())
+        if (parameters.Scope.IsPresent())
         {
-            requestDetails.Scope = _userAccessTokenManagementOptions.ClientCredentialsScope;
+            request.Scope = parameters.Scope;
         }
-
-        if (_userAccessTokenManagementOptions.ClientCredentialsResource.IsPresent())
+        else if (_userAccessTokenManagementOptions.ClientCredentialsScope.IsPresent())
         {
-            requestDetails.Resource.Add(_userAccessTokenManagementOptions.ClientCredentialsResource);
-        }
-
-        var assertion = await CreateAssertionAsync();
-        if (assertion != null)
-        {
-            requestDetails.ClientCredentialStyle = ClientCredentialStyle.PostBody;
-            requestDetails.ClientAssertion = assertion;
+            request.Scope = _userAccessTokenManagementOptions.ClientCredentialsScope;
         }
         
-        return requestDetails;
+        if (parameters.Resource.IsPresent())
+        {
+            request.Resource.Add(parameters.Resource);
+        }
+        else if (_userAccessTokenManagementOptions.ClientCredentialsResource.IsPresent())
+        {
+            request.Resource.Add(_userAccessTokenManagementOptions.ClientCredentialsResource);
+        }
+
+        await ApplyAssertionAsync(request, parameters);
+        return request;
     }
 
     /// <summary>
@@ -190,6 +164,23 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
         }
 
         return (options, configuration);
+    }
+
+    async Task ApplyAssertionAsync(ProtocolRequest request, AccessTokenRequestParameters parameters)
+    {
+        if (parameters.Assertion != null)
+        {
+            request.ClientAssertion = parameters.Assertion;
+        }
+        else
+        {
+            var assertion = await CreateAssertionAsync();
+            if (assertion != null)
+            {
+                request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+                request.ClientAssertion = assertion;
+            }    
+        }
     }
 
     /// <summary>
