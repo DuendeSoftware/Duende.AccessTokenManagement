@@ -88,7 +88,7 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
     }
 
     // todo: need to apply per request parameters here!
-    public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(AccessTokenRequestParameters parameters)
+    public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(ClientCredentialsTokenRequestParameters parameters)
     {
         var (options, configuration) =
             await GetOpenIdConnectSettingsAsync(_userAccessTokenManagementOptions.SchemeName);
@@ -166,7 +166,7 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
         return (options, configuration);
     }
 
-    async Task ApplyAssertionAsync(ProtocolRequest request, AccessTokenRequestParameters parameters)
+    async Task ApplyAssertionAsync(ProtocolRequest request, ClientCredentialsTokenRequestParameters parameters)
     {
         if (parameters.Assertion != null)
         {

@@ -41,7 +41,7 @@ public static class TokenManagementHttpContextExtensions
     /// <returns></returns>
     public static async Task<ClientCredentialsAccessToken> GetClientAccessTokenAsync(
         this HttpContext httpContext,
-        AccessTokenRequestParameters? parameters = null,
+        ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         var service = httpContext.RequestServices.GetRequiredService<IUserTokenManagementService>();

@@ -149,8 +149,7 @@ public class AuthenticationSessionUserAccessTokenStore : IUserTokenStore
             tokenName += $"||{parameters.ChallengeScheme}";
             expiresName += $"||{parameters.ChallengeScheme}";
         }
-
-
+        
         // todo: deal with missing expires_in
         result.Properties!.Items[$"{TokenPrefix}{tokenName}"] = token.Value;
         result.Properties!.Items[$"{TokenPrefix}{expiresName}"] = token.Expiration.Value.ToString("o", CultureInfo.InvariantCulture);

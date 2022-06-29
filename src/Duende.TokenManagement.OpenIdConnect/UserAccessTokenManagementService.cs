@@ -201,10 +201,10 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     }
 
     public async Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(
-        AccessTokenRequestParameters? parameters = null,
+        ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        parameters ??= new AccessTokenRequestParameters();
+        parameters ??= new ClientCredentialsTokenRequestParameters();
 
         var request = await _userTokenConfigurationService.GetClientCredentialsRequestAsync(parameters);
         

@@ -92,7 +92,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddClientAccessTokenHttpClient(this IServiceCollection services,
         string name,
-        AccessTokenRequestParameters? parameters = null,
+        ClientCredentialsTokenRequestParameters? parameters = null,
         Action<HttpClient>? configureClient = null)
     {
         if (configureClient != null)
@@ -132,7 +132,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddClientAccessTokenHandler(
         this IHttpClientBuilder httpClientBuilder,
-        AccessTokenRequestParameters? parameters = null)
+        ClientCredentialsTokenRequestParameters? parameters = null)
     {
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {

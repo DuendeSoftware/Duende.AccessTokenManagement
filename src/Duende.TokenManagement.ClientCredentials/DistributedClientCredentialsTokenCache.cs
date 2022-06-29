@@ -37,12 +37,12 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     public async Task SetAsync(
         string clientName,
         ClientCredentialsAccessToken clientCredentialsAccessToken,
-        AccessTokenRequestParameters requestParameters,
+        ClientCredentialsTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
         if (clientName is null) throw new ArgumentNullException(nameof(clientName));
             
-        // if the token service does not return expiresIn, cache forever and wait for 401
+        // if there is no expiresIn, cache forever and wait for 401
         var expiration = DateTimeOffset.MaxValue;
         if (clientCredentialsAccessToken.Expiration.HasValue)
         {
@@ -66,7 +66,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     /// <inheritdoc/>
     public async Task<ClientCredentialsAccessToken?> GetAsync(
         string clientName, 
-        AccessTokenRequestParameters requestParameters,
+        ClientCredentialsTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(clientName);
@@ -95,7 +95,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     /// <inheritdoc/>
     public Task DeleteAsync(
         string clientName,
-        AccessTokenRequestParameters requestParameters,
+        ClientCredentialsTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
         if (clientName is null) throw new ArgumentNullException(nameof(clientName));
@@ -114,7 +114,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     protected virtual string GenerateCacheKey(
         ClientCredentialsTokenManagementOptions options, 
         string clientName,
-        AccessTokenRequestParameters? parameters = null)
+        ClientCredentialsTokenRequestParameters? parameters = null)
     {
         return options.CacheKeyPrefix + "::" + clientName + "::" + parameters?.Resource ?? "";
     }

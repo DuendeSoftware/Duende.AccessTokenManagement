@@ -38,14 +38,12 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     /// <inheritdoc/>
     public async Task<TokenResponse> RequestToken(
         ClientCredentialsTokenRequest request,
-        AccessTokenRequestParameters? parameters = null,
+        ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        parameters ??= new AccessTokenRequestParameters();
+        parameters ??= new ClientCredentialsTokenRequestParameters();
         request.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
         
-        
-
         var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);
         
         _logger.LogDebug("Requesting client credentials access token at endpoint: {endpoint}", request.Address);

@@ -33,8 +33,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
 
         return services.AddClientCredentialsTokenManagement();
     }
-
-        
+    
     /// <summary>
     /// Adds a named HTTP client for the factory that automatically sends the a client access token
     /// </summary>

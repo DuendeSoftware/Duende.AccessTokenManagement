@@ -32,6 +32,6 @@ public interface IUserTokenManagementService
         CancellationToken cancellationToken = default);
 
     Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(
-        AccessTokenRequestParameters? parameters = null,
+        ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default);
 }
