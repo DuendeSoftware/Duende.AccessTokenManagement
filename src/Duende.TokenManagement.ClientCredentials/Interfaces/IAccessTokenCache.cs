@@ -15,13 +15,13 @@ public interface IAccessTokenCache
     /// Caches a client access token
     /// </summary>
     /// <param name="clientName"></param>
-    /// <param name="accessToken"></param>
+    /// <param name="clientCredentialsAccessToken"></param>
     /// <param name="requestParameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task SetAsync(
         string clientName,
-        AccessToken accessToken,
+        ClientCredentialsAccessToken clientCredentialsAccessToken,
         AccessTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default);
 
@@ -32,7 +32,7 @@ public interface IAccessTokenCache
     /// <param name="requestParameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<AccessToken?> GetAsync(
+    Task<ClientCredentialsAccessToken?> GetAsync(
         string clientName,
         AccessTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default);

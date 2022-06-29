@@ -23,7 +23,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         services.TryAddTransient<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
         services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
         services.TryAddTransient<IUserTokenConfigurationService, DefaultUserTokenConfigurationService>();
-        services.TryAddTransient<IUserTokenEndpointService, UserTokenEndpointService>();
+        services.TryAddTransient<IUserTokenEndpointService, UserAccessTokenEndpointService>();
 
         return services;
     }

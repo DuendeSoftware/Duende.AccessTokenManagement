@@ -200,7 +200,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         return response;
     }
 
-    public async Task<AccessToken> GetClientCredentialAccessTokenAsync(
+    public async Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(
         AccessTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {

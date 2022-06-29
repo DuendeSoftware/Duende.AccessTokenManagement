@@ -36,7 +36,7 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     /// <inheritdoc/>
     public async Task SetAsync(
         string clientName,
-        AccessToken accessToken,
+        ClientCredentialsAccessToken clientCredentialsAccessToken,
         AccessTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
@@ -44,13 +44,13 @@ public class DistributedAccessTokenCache : IAccessTokenCache
             
         // if the token service does not return expiresIn, cache forever and wait for 401
         var expiration = DateTimeOffset.MaxValue;
-        if (accessToken.Expiration.HasValue)
+        if (clientCredentialsAccessToken.Expiration.HasValue)
         {
-            expiration = accessToken.Expiration.Value;
+            expiration = clientCredentialsAccessToken.Expiration.Value;
         }
         
         var cacheExpiration = expiration.AddSeconds(-_options.CacheLifetimeBuffer);
-        var data = JsonSerializer.Serialize(accessToken);
+        var data = JsonSerializer.Serialize(clientCredentialsAccessToken);
 
         var entryOptions = new DistributedCacheEntryOptions
         {
@@ -64,7 +64,7 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     }
 
     /// <inheritdoc/>
-    public async Task<AccessToken?> GetAsync(
+    public async Task<ClientCredentialsAccessToken?> GetAsync(
         string clientName, 
         AccessTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
@@ -79,7 +79,7 @@ public class DistributedAccessTokenCache : IAccessTokenCache
             try
             {
                 _logger.LogDebug("Cache hit for access token for client: {clientName}", clientName);
-                return JsonSerializer.Deserialize<AccessToken>(entry);
+                return JsonSerializer.Deserialize<ClientCredentialsAccessToken>(entry);
             }
             catch (Exception ex)
             {

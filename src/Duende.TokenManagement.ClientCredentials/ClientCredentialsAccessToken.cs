@@ -8,7 +8,7 @@ namespace Duende.TokenManagement.ClientCredentials;
 /// <summary>
 /// Represents a client access token
 /// </summary>
-public class AccessToken
+public class ClientCredentialsAccessToken
 {
     /// <summary>
     /// The access token

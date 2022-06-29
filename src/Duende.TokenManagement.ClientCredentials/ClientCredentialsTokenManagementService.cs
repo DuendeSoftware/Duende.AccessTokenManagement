@@ -42,7 +42,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     }
 
     /// <inheritdoc/>
-    public async Task<AccessToken> GetAccessTokenAsync(
+    public async Task<ClientCredentialsAccessToken> GetAccessTokenAsync(
         string clientName = TokenManagementDefaults.DefaultTokenClientName,
         ClientCredentialsTokenRequest? request = null,
         AccessTokenRequestParameters? parameters = null,
@@ -63,7 +63,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
         {
             return await _sync.Dictionary.GetOrAdd(clientName, _ =>
             {
-                return new Lazy<Task<AccessToken>>(async () =>
+                return new Lazy<Task<ClientCredentialsAccessToken>>(async () =>
                 {
                     request ??= await _configurationService.GetClientCredentialsRequestAsync(clientName, parameters);
                     
@@ -74,10 +74,10 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
                             "Error requesting access token for client {clientName}. Error = {error}. Error description = {errorDescription}",
                             request.ClientId, response.Error, response.ErrorDescription);
                         
-                        return new AccessToken();
+                        return new ClientCredentialsAccessToken();
                     }
 
-                    var token = new AccessToken
+                    var token = new ClientCredentialsAccessToken
                     {
                         Value = response.AccessToken,
                         Expiration = response.ExpiresIn == 0

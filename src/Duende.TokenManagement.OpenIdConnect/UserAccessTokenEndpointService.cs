@@ -13,19 +13,19 @@ namespace Duende.TokenManagement.OpenIdConnect;
 /// <summary>
 /// Implements token endpoint operations using IdentityModel
 /// </summary>
-public class UserTokenEndpointService : IUserTokenEndpointService
+public class UserAccessTokenEndpointService : IUserTokenEndpointService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<UserTokenEndpointService> _logger;
+    private readonly ILogger<UserAccessTokenEndpointService> _logger;
         
     /// <summary>
     /// ctor
     /// </summary>
     /// <param name="httpClientFactory"></param>
     /// <param name="logger"></param>
-    public UserTokenEndpointService(
+    public UserAccessTokenEndpointService(
         IHttpClientFactory httpClientFactory,
-        ILogger<UserTokenEndpointService> logger)
+        ILogger<UserAccessTokenEndpointService> logger)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
@@ -47,7 +47,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         TokenRevocationRequest request, 
         CancellationToken cancellationToken = default)
     {
-        _logger.LogDebug("Revoking refresh token: {token}", request.Token);
+        _logger.LogTrace("Revoking refresh token: {token}", request.Token);
             
         var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);
         return await httpClient.RevokeTokenAsync(request, cancellationToken);

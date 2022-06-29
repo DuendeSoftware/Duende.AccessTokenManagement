@@ -20,7 +20,7 @@ public interface IClientCredentialsTokenManagementService
     /// <param name="parameters">Optional parameters.</param>
     /// <param name="cancellationToken">A cancellation token to cancel the operation</param>
     /// <returns>The access token or null if the no token can be requested.</returns>
-    Task<AccessToken> GetAccessTokenAsync(
+    Task<ClientCredentialsAccessToken> GetAccessTokenAsync(
         string clientName = TokenManagementDefaults.DefaultTokenClientName, 
         ClientCredentialsTokenRequest? request = null,
         AccessTokenRequestParameters? parameters = null, 

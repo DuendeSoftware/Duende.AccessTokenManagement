@@ -39,7 +39,7 @@ public static class TokenManagementHttpContextExtensions
     /// <param name="parameters">Extra optional parameters</param>
     /// <param name="cancellationToken">A cancellation token to cancel operation.</param>
     /// <returns></returns>
-    public static async Task<AccessToken> GetClientAccessTokenAsync(
+    public static async Task<ClientCredentialsAccessToken> GetClientAccessTokenAsync(
         this HttpContext httpContext,
         AccessTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
