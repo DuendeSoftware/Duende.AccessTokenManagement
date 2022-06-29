@@ -16,10 +16,10 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     public static IServiceCollection AddClientCredentialsTokenManagement(this IServiceCollection services)
     {
         services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
-        services.TryAddTransient<IAccessTokenCache, DistributedAccessTokenCache>();
-        services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
+        services.TryAddTransient<IClientCredentialsTokenCache, DistributedClientCredentialsTokenCache>();
         services.TryAddTransient<IClientCredentialsConfigurationService, DefaultClientCredentialsConfigurationService>();
-        services.TryAddTransient<ITokenEndpointService, TokenEndpointService>();
+        services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
+        services.TryAddTransient<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
 
         services.AddHttpClient(TokenManagementDefaults.BackChannelHttpClientName);
 

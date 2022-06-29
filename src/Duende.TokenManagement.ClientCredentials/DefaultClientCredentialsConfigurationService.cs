@@ -34,9 +34,9 @@ public class DefaultClientCredentialsConfigurationService : IClientCredentialsCo
     /// <inheritdoc />
     public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(
         string clientName,
-        AccessTokenRequestParameters? parameters)
+        AccessTokenRequestParameters parameters)
     {
-        ClientCredentialsTokenRequest? requestDetails = null;
+        ClientCredentialsTokenRequest? request;
 
         // if a named client configuration was passed in, try to load it
         if (string.Equals(clientName, TokenManagementDefaults.DefaultTokenClientName))
@@ -45,7 +45,7 @@ public class DefaultClientCredentialsConfigurationService : IClientCredentialsCo
             if (_clientAccessTokenManagementOptions.Clients.Count == 1)
             {
                 _logger.LogDebug("Reading token client configuration from single configuration entry.");
-                requestDetails = _clientAccessTokenManagementOptions.Clients.First().Value;
+                request = _clientAccessTokenManagementOptions.Clients.First().Value;
             }
             else
             {
@@ -54,7 +54,7 @@ public class DefaultClientCredentialsConfigurationService : IClientCredentialsCo
         }
         else
         {
-            if (!_clientAccessTokenManagementOptions.Clients.TryGetValue(clientName, out requestDetails!))
+            if (!_clientAccessTokenManagementOptions.Clients.TryGetValue(clientName, out request!))
             {
                 throw new InvalidOperationException(
                     $"No access token client configuration found for client: {clientName}");
@@ -62,14 +62,34 @@ public class DefaultClientCredentialsConfigurationService : IClientCredentialsCo
 
             _logger.LogDebug("Returning token client configuration for client: {client}", clientName);
         }
-
-        var assertion = await CreateAssertionAsync(clientName, parameters);
-        if (assertion != null)
+        
+        if (!string.IsNullOrWhiteSpace(parameters.Scope))
         {
-            requestDetails.ClientAssertion = assertion;
+            request.Scope = parameters.Scope;
         }
-            
-        return requestDetails;
+        
+        if (!string.IsNullOrWhiteSpace(parameters.Resource))
+        {
+            request.Resource.Clear();
+            request.Resource.Add(parameters.Resource);
+        }
+
+        if (parameters.Assertion != null)
+        {
+            request.ClientAssertion = parameters.Assertion;
+            request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+        }
+        else
+        {
+            var assertion = await CreateAssertionAsync(clientName, parameters);
+            if (assertion != null)
+            {
+                request.ClientAssertion = assertion;
+                request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+            }
+        }
+
+        return request;
     }
 
     /// <summary>

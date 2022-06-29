@@ -15,8 +15,8 @@ namespace Duende.TokenManagement.ClientCredentials;
 public class ClientCredentialsTokenManagementService : IClientCredentialsTokenManagementService
 {
     private readonly ITokenRequestSynchronization _sync;
-    private readonly ITokenEndpointService _tokenEndpointService;
-    private readonly IAccessTokenCache _distributedAccessTokenCache;
+    private readonly IClientCredentialsTokenEndpointService _clientCredentialsTokenEndpointService;
+    private readonly IClientCredentialsTokenCache _distributedClientCredentialsTokenCache;
     private readonly IClientCredentialsConfigurationService _configurationService;
     private readonly ILogger<ClientCredentialsTokenManagementService> _logger;
 
@@ -24,19 +24,19 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     /// ctor
     /// </summary>
     /// <param name="sync"></param>
-    /// <param name="tokenEndpointService"></param>
-    /// <param name="distributedAccessTokenCache"></param>
+    /// <param name="clientCredentialsTokenEndpointService"></param>
+    /// <param name="distributedClientCredentialsTokenCache"></param>
     /// <param name="logger"></param>
     public ClientCredentialsTokenManagementService(
         ITokenRequestSynchronization sync,
-        ITokenEndpointService tokenEndpointService,
-        IAccessTokenCache distributedAccessTokenCache,
+        IClientCredentialsTokenEndpointService clientCredentialsTokenEndpointService,
+        IClientCredentialsTokenCache distributedClientCredentialsTokenCache,
         IClientCredentialsConfigurationService configurationService,
         ILogger<ClientCredentialsTokenManagementService> logger)
     {
         _sync = sync;
-        _tokenEndpointService = tokenEndpointService;
-        _distributedAccessTokenCache = distributedAccessTokenCache;
+        _clientCredentialsTokenEndpointService = clientCredentialsTokenEndpointService;
+        _distributedClientCredentialsTokenCache = distributedClientCredentialsTokenCache;
         _configurationService = configurationService;
         _logger = logger;
     }
@@ -52,7 +52,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
 
         if (parameters.ForceRenewal == false)
         {
-            var item = await _distributedAccessTokenCache.GetAsync(clientName, parameters, cancellationToken);
+            var item = await _distributedClientCredentialsTokenCache.GetAsync(clientName, parameters, cancellationToken);
             if (item != null)
             {
                 return item;
@@ -67,7 +67,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
                 {
                     request ??= await _configurationService.GetClientCredentialsRequestAsync(clientName, parameters);
                     
-                    var response = await _tokenEndpointService.RequestToken(request, parameters, cancellationToken);
+                    var response = await _clientCredentialsTokenEndpointService.RequestToken(request, parameters, cancellationToken);
                     if (response.IsError)
                     {
                         _logger.LogError(
@@ -87,7 +87,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
                         Resource = response.TryGet("resource")
                     };
 
-                    await _distributedAccessTokenCache.SetAsync(clientName, token, parameters, cancellationToken);
+                    await _distributedClientCredentialsTokenCache.SetAsync(clientName, token, parameters, cancellationToken);
                     return token;
                 });
             }).Value;
@@ -107,6 +107,6 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     {
         parameters ??= new AccessTokenRequestParameters();
 
-        return _distributedAccessTokenCache.DeleteAsync(clientName, parameters, cancellationToken);
+        return _distributedClientCredentialsTokenCache.DeleteAsync(clientName, parameters, cancellationToken);
     }
 }

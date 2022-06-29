@@ -10,7 +10,7 @@ namespace Duende.TokenManagement.ClientCredentials;
 /// <summary>
 /// Abstraction for token endpoint operations
 /// </summary>
-public interface ITokenEndpointService
+public interface IClientCredentialsTokenEndpointService
 {
     /// <summary>
     /// Requests a client credentials access token.

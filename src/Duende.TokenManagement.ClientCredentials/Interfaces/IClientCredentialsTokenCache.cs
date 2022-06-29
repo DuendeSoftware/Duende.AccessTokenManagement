@@ -9,7 +9,7 @@ namespace Duende.TokenManagement.ClientCredentials;
 /// <summary>
 /// Abstraction for caching client credentials access tokens
 /// </summary>
-public interface IAccessTokenCache
+public interface IClientCredentialsTokenCache
 {
     /// <summary>
     /// Caches a client access token

@@ -13,11 +13,11 @@ namespace Duende.TokenManagement.ClientCredentials;
 /// <summary>
 /// Implements token endpoint operations using IdentityModel
 /// </summary>
-public class TokenEndpointService : ITokenEndpointService
+public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndpointService
 {
     private readonly IClientCredentialsConfigurationService _configService;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<TokenEndpointService> _logger;
+    private readonly ILogger<ClientCredentialsTokenEndpointService> _logger;
 
     /// <summary>
     /// ctor
@@ -25,10 +25,10 @@ public class TokenEndpointService : ITokenEndpointService
     /// <param name="configService"></param>
     /// <param name="httpClientFactory"></param>
     /// <param name="logger"></param>
-    public TokenEndpointService(
+    public ClientCredentialsTokenEndpointService(
         IClientCredentialsConfigurationService configService,
         IHttpClientFactory httpClientFactory,
-        ILogger<TokenEndpointService> logger)
+        ILogger<ClientCredentialsTokenEndpointService> logger)
     {
         _configService = configService;
         _httpClientFactory = httpClientFactory;
@@ -44,21 +44,7 @@ public class TokenEndpointService : ITokenEndpointService
         parameters ??= new AccessTokenRequestParameters();
         request.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
         
-        if (!string.IsNullOrWhiteSpace(parameters.Scope))
-        {
-            request.Scope = parameters.Scope;
-        }
         
-        if (!string.IsNullOrWhiteSpace(parameters.Resource))
-        {
-            request.Resource.Clear();
-            request.Resource.Add(parameters.Resource);
-        }
-
-        if (parameters.Assertion != null)
-        {
-            request.ClientAssertion = parameters.Assertion;
-        }
 
         var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);
         

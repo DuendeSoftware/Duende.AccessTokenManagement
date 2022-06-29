@@ -14,10 +14,10 @@ namespace Duende.TokenManagement.ClientCredentials;
 /// <summary>
 /// Client access token cache using IDistributedCache
 /// </summary>
-public class DistributedAccessTokenCache : IAccessTokenCache
+public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCache
 {
     private readonly IDistributedCache _cache;
-    private readonly ILogger<DistributedAccessTokenCache> _logger;
+    private readonly ILogger<DistributedClientCredentialsTokenCache> _logger;
     private readonly ClientCredentialsTokenManagementOptions _options;
 
     /// <summary>
@@ -26,7 +26,7 @@ public class DistributedAccessTokenCache : IAccessTokenCache
     /// <param name="cache"></param>
     /// <param name="options"></param>
     /// <param name="logger"></param>
-    public DistributedAccessTokenCache(IDistributedCache cache, IOptions<ClientCredentialsTokenManagementOptions> options, ILogger<DistributedAccessTokenCache> logger)
+    public DistributedClientCredentialsTokenCache(IDistributedCache cache, IOptions<ClientCredentialsTokenManagementOptions> options, ILogger<DistributedClientCredentialsTokenCache> logger)
     {
         _cache = cache;
         _logger = logger;
