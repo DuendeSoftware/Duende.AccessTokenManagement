@@ -99,10 +99,14 @@ public class AuthenticationSessionUserAccessTokenStore : IUserTokenStore
         accessToken ??= tokens.SingleOrDefault(t => t.Key == $"{tokenName}").Value;
         expiresAt ??= tokens.SingleOrDefault(t => t.Key == $"{expiresName}").Value;
 
-        DateTimeOffset? dtExpires = null;
+        DateTimeOffset dtExpires;
         if (expiresAt != null)
         {
             dtExpires = DateTimeOffset.Parse(expiresAt, CultureInfo.InvariantCulture);
+        }
+        else
+        {
+            dtExpires = DateTimeOffset.MaxValue;
         }
 
         return new UserAccessToken
@@ -152,7 +156,7 @@ public class AuthenticationSessionUserAccessTokenStore : IUserTokenStore
         
         // todo: deal with missing expires_in
         result.Properties!.Items[$"{TokenPrefix}{tokenName}"] = token.Value;
-        result.Properties!.Items[$"{TokenPrefix}{expiresName}"] = token.Expiration.Value.ToString("o", CultureInfo.InvariantCulture);
+        result.Properties!.Items[$"{TokenPrefix}{expiresName}"] = token.Expiration.ToString("o", CultureInfo.InvariantCulture);
 
         if (token.RefreshToken != null)
         {

@@ -96,6 +96,7 @@ public class DefaultClientCredentialsConfigurationService : IClientCredentialsCo
     /// Allows injecting a client assertion into outgoing requests
     /// </summary>
     /// <param name="clientName">Name of client (if present)</param>
+    /// <param name="parameters">Per request parameters (if present)</param>
     /// <returns></returns>
     protected virtual Task<ClientAssertion?> CreateAssertionAsync(string? clientName = null, ClientCredentialsTokenRequestParameters? parameters = null)
     {

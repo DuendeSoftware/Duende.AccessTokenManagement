@@ -18,15 +18,10 @@ public class ClientCredentialsAccessToken
     /// <summary>
     /// The access token expiration
     /// </summary>
-    public DateTimeOffset? Expiration { get; set; }
+    public DateTimeOffset Expiration { get; set; }
 
     /// <summary>
     /// The scope of the access tokens
     /// </summary>
     public string? Scope { get; set; }
-
-    /// <summary>
-    /// The resource of the access token
-    /// </summary>
-    public string? Resource { get; set; }
 }

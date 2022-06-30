@@ -15,22 +15,18 @@ namespace Duende.TokenManagement.ClientCredentials;
 /// </summary>
 public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndpointService
 {
-    private readonly IClientCredentialsConfigurationService _configService;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ClientCredentialsTokenEndpointService> _logger;
 
     /// <summary>
     /// ctor
     /// </summary>
-    /// <param name="configService"></param>
     /// <param name="httpClientFactory"></param>
     /// <param name="logger"></param>
     public ClientCredentialsTokenEndpointService(
-        IClientCredentialsConfigurationService configService,
         IHttpClientFactory httpClientFactory,
         ILogger<ClientCredentialsTokenEndpointService> logger)
     {
-        _configService = configService;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
     }

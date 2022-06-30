@@ -18,8 +18,8 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
         services.TryAddTransient<IClientCredentialsTokenCache, DistributedClientCredentialsTokenCache>();
         services.TryAddTransient<IClientCredentialsConfigurationService, DefaultClientCredentialsConfigurationService>();
-        services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
         services.TryAddTransient<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
+        services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
 
         services.AddHttpClient(TokenManagementDefaults.BackChannelHttpClientName);
 

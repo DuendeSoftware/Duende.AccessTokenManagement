@@ -95,12 +95,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
                 userName, parameters.Resource ?? "default");
         }
 
-        var dtRefresh = DateTimeOffset.MinValue;
-        if (userToken.Expiration.HasValue)
-        {
-            dtRefresh = userToken.Expiration.Value.Subtract(_options.RefreshBeforeExpiration);
-        }
-            
+        var dtRefresh = userToken.Expiration.Subtract(_options.RefreshBeforeExpiration);
         if (dtRefresh < _clock.UtcNow || parameters.ForceRenewal)
         {
             _logger.LogDebug("Token for user {user} needs refreshing.", userName);
@@ -111,16 +106,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
                 {
                     return new Lazy<Task<UserAccessToken>>(async () =>
                     {
-                        var refreshed = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
-
-                        var token = new UserAccessToken
-                        {
-                            Value = refreshed.AccessToken,
-                            Expiration = DateTimeOffset.UtcNow.AddSeconds(refreshed.ExpiresIn),
-                            RefreshToken = refreshed.RefreshToken,
-                            Scope = refreshed.Scope,
-                            Resource = refreshed.TryGet("resource")
-                        };
+                        var token = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
 
                         _logger.LogTrace("Returning refreshed token for user: {user}", userName);
                         return token;
@@ -163,7 +149,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         }
     }
 
-    private async Task<TokenResponse> RefreshUserAccessTokenAsync(
+    private async Task<UserAccessToken> RefreshUserAccessTokenAsync(
         ClaimsPrincipal user,
         UserAccessTokenRequestParameters parameters,
         CancellationToken cancellationToken = default)
@@ -178,26 +164,22 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
 
         if (!response.IsError)
         {
-            // todo: what to do if expires_in is missing?
-            var expiration = DateTime.UtcNow + TimeSpan.FromSeconds(response.ExpiresIn);
-
             var token = new UserAccessToken
             {
                 Value = response.AccessToken,
-                Expiration = expiration,
+                Expiration = response.ExpiresIn == 0
+                    ? DateTimeOffset.MaxValue
+                    : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
                 RefreshToken = response.RefreshToken,
-                Scope = response.Scope,
-                Resource = response.TryGet("resource")
+                Scope = response.Scope
             };
 
             await _userAccessTokenStore.StoreTokenAsync(user, token, parameters);
-        }
-        else
-        {
-            _logger.LogError("Error refreshing access token. Error = {error}", response.Error);
+            return token;
         }
 
-        return response;
+        _logger.LogError("Error refreshing access token. Error = {error}", response.Error);
+        return new UserAccessToken();
     }
 
     public async Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(

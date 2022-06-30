@@ -42,14 +42,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     {
         if (clientName is null) throw new ArgumentNullException(nameof(clientName));
             
-        // if there is no expiresIn, cache forever and wait for 401
-        var expiration = DateTimeOffset.MaxValue;
-        if (clientCredentialsAccessToken.Expiration.HasValue)
-        {
-            expiration = clientCredentialsAccessToken.Expiration.Value;
-        }
-        
-        var cacheExpiration = expiration.AddSeconds(-_options.CacheLifetimeBuffer);
+        var cacheExpiration = clientCredentialsAccessToken.Expiration.AddSeconds(-_options.CacheLifetimeBuffer);
         var data = JsonSerializer.Serialize(clientCredentialsAccessToken);
 
         var entryOptions = new DistributedCacheEntryOptions

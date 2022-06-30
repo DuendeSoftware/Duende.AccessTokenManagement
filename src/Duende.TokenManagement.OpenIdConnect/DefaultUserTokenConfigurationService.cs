@@ -86,8 +86,7 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
         await ApplyAssertionAsync(request, parameters);
         return request;
     }
-
-    // todo: need to apply per request parameters here!
+    
     public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(ClientCredentialsTokenRequestParameters parameters)
     {
         var (options, configuration) =

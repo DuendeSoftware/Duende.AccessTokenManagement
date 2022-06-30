@@ -26,6 +26,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     /// <param name="sync"></param>
     /// <param name="clientCredentialsTokenEndpointService"></param>
     /// <param name="distributedClientCredentialsTokenCache"></param>
+    /// <param name="configurationService"></param>
     /// <param name="logger"></param>
     public ClientCredentialsTokenManagementService(
         ITokenRequestSynchronization sync,
@@ -81,10 +82,9 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
                     {
                         Value = response.AccessToken,
                         Expiration = response.ExpiresIn == 0
-                            ? null
+                            ? DateTimeOffset.MaxValue
                             : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
                         Scope = response.Scope,
-                        Resource = response.TryGet("resource")
                     };
 
                     await _distributedClientCredentialsTokenCache.SetAsync(clientName, token, parameters, cancellationToken);
