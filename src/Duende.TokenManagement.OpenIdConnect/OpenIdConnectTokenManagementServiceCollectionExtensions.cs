@@ -2,7 +2,6 @@ using System;
 using System.Net.Http;
 using Duende.TokenManagement.ClientCredentials;
 using Duende.TokenManagement.OpenIdConnect;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ITokenRequestSynchronization = Duende.TokenManagement.OpenIdConnect.ITokenRequestSynchronization;
@@ -21,11 +20,9 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AddOpenIdConnectTokenManagement(this IServiceCollection services)
     {
-        services.AddClientCredentialsTokenManagement();
-        
-        services.TryAddSingleton<ISystemClock, SystemClock>();
-        services.TryAddSingleton<IAuthenticationSchemeProvider, AuthenticationSchemeProvider>();
         services.AddHttpContextAccessor();
+
+        services.AddClientCredentialsTokenManagement();
         
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
         services.TryAddTransient<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();

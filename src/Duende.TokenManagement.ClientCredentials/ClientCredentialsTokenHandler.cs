@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Duende.TokenManagement.ClientCredentials;
 
 /// <summary>
-/// Delegating handler that injects a client access token into an outgoing request
+/// Delegating handler that injects a client credentials access token into an outgoing request
 /// </summary>
 public class ClientCredentialsTokenHandler : DelegatingHandler
 {
