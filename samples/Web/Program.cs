@@ -1,33 +1,45 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+using System;
+using Microsoft.AspNetCore.Builder;
+using MvcCode;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 
-namespace MvcCode;
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-public class Program
+Log.Information("Host.Main Starting up");
+
+try
 {
-    public static void Main(string[] args)
-    {
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .MinimumLevel.Override("Duende", LogEventLevel.Verbose)
-            .MinimumLevel.Override("System", LogEventLevel.Error)
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-            .MinimumLevel.Override("System.Net.Http", LogEventLevel.Information)
-            .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
-            .WriteTo.Console(theme: AnsiConsoleTheme.Code)
-            .CreateLogger();
-            
-        CreateHostBuilder(args).Build().Run();
-    }
+    var builder = WebApplication.CreateBuilder(args);
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .UseSerilog()
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            });
+    builder.Host.UseSerilog((ctx, lc) => lc
+        .WriteTo.Console(
+            outputTemplate:
+            "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
+            theme: AnsiConsoleTheme.Code)
+        .MinimumLevel.Debug()
+        .MinimumLevel.Override("Duende", LogEventLevel.Verbose)
+        .MinimumLevel.Override("System", LogEventLevel.Error)
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
+        .MinimumLevel.Override("System.Net.Http", LogEventLevel.Information)
+        .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
+        .Enrich.FromLogContext());
+
+    var app = builder
+        .ConfigureServices()
+        .ConfigurePipeline();
+    
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Unhandled exception");
+}
+finally
+{
+    Log.Information("Shut down complete");
+    Log.CloseAndFlush();
 }

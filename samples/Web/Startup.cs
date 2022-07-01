@@ -4,16 +4,17 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using Serilog.Events;
 
 namespace MvcCode;
 
-public class Startup
+public static class Startup
 {
-    public void ConfigureServices(IServiceCollection services)
+    internal static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews();
 
-        services.AddAuthentication(options =>
+        builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = "cookie";
                 options.DefaultChallengeScheme = "oidc";
@@ -22,10 +23,7 @@ public class Startup
             {
                 options.Cookie.Name = "web";
 
-                options.Events.OnSigningOut = async e =>
-                {
-                    await e.HttpContext.RevokeRefreshTokenAsync();
-                };
+                options.Events.OnSigningOut = async e => { await e.HttpContext.RevokeRefreshTokenAsync(); };
             })
             .AddOpenIdConnect("oidc", options =>
             {
@@ -34,9 +32,8 @@ public class Startup
                 options.ClientId = "interactive.confidential.short";
                 options.ClientSecret = "secret";
 
-                // code flow + PKCE (PKCE is turned on by default)
                 options.ResponseType = "code";
-                options.UsePkce = true;
+                options.ResponseMode = "query";
 
                 options.Scope.Clear();
                 options.Scope.Add("openid");
@@ -45,10 +42,6 @@ public class Startup
                 options.Scope.Add("offline_access");
                 options.Scope.Add("api");
 
-                // not mapped by default
-                options.ClaimActions.MapJsonKey("website", "website");
-
-                // keeps id_token smaller
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.SaveTokens = true;
                 options.MapInboundClaims = false;
@@ -60,54 +53,37 @@ public class Startup
                 };
             });
 
-        services.AddOpenIdConnectTokenManagement();
-        
+        builder.Services.AddOpenIdConnectTokenManagement();
+
         // registers HTTP client that uses the managed user access token
-        services.AddUserAccessTokenHttpClient("user_client", configureClient: client =>
-        {
-            client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
-        });
-        
+        builder.Services.AddUserAccessTokenHttpClient("user_client",
+            configureClient: client => { client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/"); });
+
         // registers HTTP client that uses the managed client access token
-        services.AddClientAccessTokenHttpClient("client", configureClient: client =>
-        {
-            client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
-        });
-        
+        builder.Services.AddClientAccessTokenHttpClient("client",
+            configureClient: client => { client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/"); });
+
         // registers a typed HTTP client with token management support
-        services.AddHttpClient<TypedUserClient>(client =>
+        builder.Services.AddHttpClient<TypedUserClient>(client =>
             {
                 client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
             })
             .AddUserAccessTokenHandler();
 
-        services.AddHttpClient<TypedClientClient>(client =>
+        builder.Services.AddHttpClient<TypedClientClient>(client =>
             {
                 client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
             })
             .AddClientAccessTokenHandler();
 
-        // // adds user and client access token management
-        // services.AddAccessTokenManagement(options =>
-        //     {
-        //         // client config is inferred from OpenID Connect settings
-        //         // if you want to specify scopes explicitly, do it here, otherwise the scope parameter will not be sent
-        //         options.Client.DefaultClient.Scope = "api";
-        //     })
-        //     .ConfigureBackchannelHttpClient()
-        //         .AddTransientHttpErrorPolicy(policy => policy.WaitAndRetryAsync(new[]
-        //         {
-        //             TimeSpan.FromSeconds(1),
-        //             TimeSpan.FromSeconds(2),
-        //             TimeSpan.FromSeconds(3)
-        //         }));
-        //
+        return builder.Build();
     }
 
-    public void Configure(IApplicationBuilder app)
+    internal static WebApplication ConfigurePipeline(this WebApplication app)
     {
-        app.UseSerilogRequestLogging();
-        
+        app.UseSerilogRequestLogging(
+            options => options.GetLevel = (httpContext, elapsed, ex) => LogEventLevel.Debug);
+
         app.UseDeveloperExceptionPage();
         app.UseHttpsRedirection();
         app.UseStaticFiles();
@@ -117,10 +93,9 @@ public class Startup
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapDefaultControllerRoute()
-                .RequireAuthorization();
-        });
+        app.MapDefaultControllerRoute()
+            .RequireAuthorization();
+        
+        return app;
     }
 }
