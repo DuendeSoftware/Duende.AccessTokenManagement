@@ -73,6 +73,19 @@ public class Startup
         {
             client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
         });
+        
+        // registers a typed HTTP client with token management support
+        services.AddHttpClient<TypedUserClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
+            })
+            .AddUserAccessTokenHandler();
+
+        services.AddHttpClient<TypedClientClient>(client =>
+            {
+                client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
+            })
+            .AddClientAccessTokenHandler();
 
         // // adds user and client access token management
         // services.AddAccessTokenManagement(options =>
@@ -89,26 +102,6 @@ public class Startup
         //             TimeSpan.FromSeconds(3)
         //         }));
         //
-        
-
-        // registers HTTP client that uses the managed client access token
-        // services.AddClientAccessTokenHttpClient("client", configureClient: client =>
-        // {
-        //     client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
-        // });
-        //
-        // // registers a typed HTTP client with token management support
-        // services.AddHttpClient<TypedUserClient>(client =>
-        // {
-        //     client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
-        // })
-        //     .AddUserAccessTokenHandler();
-        //
-        // services.AddHttpClient<TypedClientClient>(client =>
-        // {
-        //     client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
-        // })
-        //     .AddClientAccessTokenHandler();
     }
 
     public void Configure(IApplicationBuilder app)

@@ -45,9 +45,16 @@ public class Program
                     client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
                 });
                 
+                services.AddHttpClient<TypedClient>(client =>
+                    {
+                        client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
+                    })
+                    .AddClientCredentialsTokenHandler("demo");
+                
                 services.AddHostedService<Worker1>();
-                services.AddHostedService<Worker2>();
-                services.AddHostedService<Worker3>();
+                //services.AddHostedService<Worker2>();
+                //services.AddHostedService<Worker3>();
+                //services.AddHostedService<Worker4>();
             });
 
         return host;

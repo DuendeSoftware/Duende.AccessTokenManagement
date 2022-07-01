@@ -61,10 +61,10 @@ public class HomeController : Controller
         return View("CallApi");
     }
 
-    public async Task<IActionResult> CallApiAsUserTyped([FromServices] TypedUserClient client)
+    public async Task<IActionResult> CallApiAsUserFactoryTyped([FromServices] TypedUserClient client)
     {
         var response = await client.CallApi();
-        //ViewBag.Json = JArray.Parse(response).ToString();
+        ViewBag.Json = PrettyPrint(response);
 
         return View("CallApi");
     }
@@ -93,10 +93,10 @@ public class HomeController : Controller
     }
 
     [AllowAnonymous]
-    public async Task<IActionResult> CallApiAsClientTyped([FromServices] TypedClientClient client)
+    public async Task<IActionResult> CallApiAsClientFactoryTyped([FromServices] TypedClientClient client)
     {
         var response = await client.CallApi();
-        //ViewBag.Json = JArray.Parse(response).ToString();
+        ViewBag.Json = PrettyPrint(response);
 
         return View("CallApi");
     }

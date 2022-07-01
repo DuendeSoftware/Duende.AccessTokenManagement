@@ -11,11 +11,11 @@ namespace WorkerService;
 
 public class Worker3 : BackgroundService
 {
-    private readonly ILogger<Worker2> _logger;
+    private readonly ILogger<Worker3> _logger;
     private readonly IHttpClientFactory _clientFactory;
     private readonly IClientCredentialsTokenManagementService _tokenManagementService;
 
-    public Worker3(ILogger<Worker2> logger, IHttpClientFactory factory, IClientCredentialsTokenManagementService tokenManagementService)
+    public Worker3(ILogger<Worker3> logger, IHttpClientFactory factory, IClientCredentialsTokenManagementService tokenManagementService)
     {
         _logger = logger;
         _clientFactory = factory;
@@ -29,7 +29,7 @@ public class Worker3 : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             Console.WriteLine("\n\n");
-            _logger.LogInformation("Worker2 running at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("Worker3 running at: {time}", DateTimeOffset.Now);
 
             var client = _clientFactory.CreateClient();
             client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
