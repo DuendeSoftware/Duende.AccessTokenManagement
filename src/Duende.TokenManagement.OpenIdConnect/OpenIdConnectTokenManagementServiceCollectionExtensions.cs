@@ -4,7 +4,6 @@ using Duende.TokenManagement.ClientCredentials;
 using Duende.TokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using ITokenRequestSynchronization = Duende.TokenManagement.OpenIdConnect.ITokenRequestSynchronization;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -26,7 +25,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
         services.TryAddTransient<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
-        services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
+        services.TryAddSingleton<IUserAccessTokenRequestSynchronization, UserAccessTokenRequestSynchronization>();
         services.TryAddTransient<IUserTokenConfigurationService, DefaultUserTokenConfigurationService>();
         services.TryAddTransient<IUserTokenEndpointService, UserAccessTokenEndpointService>();
 

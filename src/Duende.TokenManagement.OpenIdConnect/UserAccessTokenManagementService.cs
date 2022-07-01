@@ -17,7 +17,7 @@ namespace Duende.TokenManagement.OpenIdConnect;
 /// </summary>
 public class UserAccessAccessTokenManagementService : IUserTokenManagementService
 {
-    private readonly ITokenRequestSynchronization _sync;
+    private readonly IUserAccessTokenRequestSynchronization _sync;
     private readonly IUserTokenStore _userAccessTokenStore;
     private readonly ISystemClock _clock;
     private readonly UserAccessTokenManagementOptions _options;
@@ -38,7 +38,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     /// <param name="clientCredentialsTokenManagementService"></param>
     /// <param name="logger"></param>
     public UserAccessAccessTokenManagementService(
-        ITokenRequestSynchronization sync,
+        IUserAccessTokenRequestSynchronization sync,
         IUserTokenStore userAccessTokenStore,
         ISystemClock clock,
         IOptions<UserAccessTokenManagementOptions> options,

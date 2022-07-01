@@ -10,7 +10,7 @@ namespace Duende.TokenManagement.OpenIdConnect;
 /// <summary>
 /// Default implementation for token request synchronization primitive
 /// </summary>
-internal class TokenRequestSynchronization : ITokenRequestSynchronization
+internal class UserAccessTokenRequestSynchronization : IUserAccessTokenRequestSynchronization
 {
     /// <inheritdoc />
     public ConcurrentDictionary<string, Lazy<Task<UserAccessToken>>> Dictionary { get; } = new();

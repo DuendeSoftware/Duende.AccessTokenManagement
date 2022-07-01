@@ -10,7 +10,7 @@ namespace Duende.TokenManagement.OpenIdConnect;
 /// <summary>
 /// Service to provide a concurrent dictionary for synchronizing token endpoint requests
 /// </summary>
-public interface ITokenRequestSynchronization
+public interface IUserAccessTokenRequestSynchronization
 {
     /// <summary>
     /// Concurrent dictionary as synchronization primitive
