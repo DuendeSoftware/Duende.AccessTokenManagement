@@ -13,6 +13,11 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class ClientCredentialsTokenManagementServiceCollectionExtensions
 {
+    /// <summary>
+    /// Adds all necessary services for client credentials token management
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddClientCredentialsTokenManagement(this IServiceCollection services)
     {
         services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
@@ -26,6 +31,12 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         return services;
     }
         
+    /// <summary>
+    /// Adds all necessary services for client credentials token management. Also allows configuring clients.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configureAction"></param>
+    /// <returns></returns>
     public static IServiceCollection AddClientCredentialsTokenManagement(this IServiceCollection services,
         Action<ClientCredentialsTokenManagementOptions> configureAction)
     {

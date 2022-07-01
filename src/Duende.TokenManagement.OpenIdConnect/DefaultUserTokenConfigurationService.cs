@@ -87,6 +87,7 @@ public class DefaultUserTokenConfigurationService : IUserTokenConfigurationServi
         return request;
     }
     
+    /// <inheritdoc />
     public virtual async Task<ClientCredentialsTokenRequest> GetClientCredentialsRequestAsync(ClientCredentialsTokenRequestParameters parameters)
     {
         var (options, configuration) =

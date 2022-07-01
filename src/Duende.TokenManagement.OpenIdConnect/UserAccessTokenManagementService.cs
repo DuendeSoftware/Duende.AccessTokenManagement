@@ -148,6 +148,22 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
             }
         }
     }
+    
+    /// <inheritdoc/>
+    public async Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(
+        ClientCredentialsTokenRequestParameters? parameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        parameters ??= new ClientCredentialsTokenRequestParameters();
+
+        var request = await _userTokenConfigurationService.GetClientCredentialsRequestAsync(parameters);
+        
+        return await _clientCredentialsTokenManagementService.GetAccessTokenAsync(
+            "oidc", 
+            request: request,
+            parameters: parameters,
+            cancellationToken: cancellationToken);
+    }
 
     private async Task<UserAccessToken> RefreshUserAccessTokenAsync(
         ClaimsPrincipal user,
@@ -180,20 +196,5 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
 
         _logger.LogError("Error refreshing access token. Error = {error}", response.Error);
         return new UserAccessToken();
-    }
-
-    public async Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(
-        ClientCredentialsTokenRequestParameters? parameters = null,
-        CancellationToken cancellationToken = default)
-    {
-        parameters ??= new ClientCredentialsTokenRequestParameters();
-
-        var request = await _userTokenConfigurationService.GetClientCredentialsRequestAsync(parameters);
-        
-        return await _clientCredentialsTokenManagementService.GetAccessTokenAsync(
-            "oidc", 
-            request: request,
-            parameters: parameters,
-            cancellationToken: cancellationToken);
     }
 }

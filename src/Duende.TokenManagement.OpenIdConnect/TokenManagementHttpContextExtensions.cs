@@ -31,9 +31,31 @@ public static class TokenManagementHttpContextExtensions
 
         return await service.GetAccessTokenAsync(httpContext.User, parameters, cancellationToken);
     }
-    
+
     /// <summary>
-    /// Returns (and refreshes if needed) the current access token for the logged on user
+    /// Revokes the current user refresh token
+    /// </summary>
+    /// <param name="httpContext">The HTTP context</param>
+    /// <param name="parameters">Extra optional parameters</param>
+    /// <param name="cancellationToken">A cancellation token to cancel operation.</param>
+    /// <returns></returns>
+    public static async Task RevokeRefreshTokenAsync(
+        this HttpContext httpContext,
+        UserAccessTokenRequestParameters? parameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        var service = httpContext.RequestServices.GetRequiredService<IUserTokenManagementService>();
+        var store = httpContext.RequestServices.GetRequiredService<IUserTokenStore>();
+
+        await service.RevokeRefreshTokenAsync(httpContext.User, parameters, cancellationToken);
+        
+        // todo: is this the right place to call that - or should revoke do that?
+        await store.ClearTokenAsync(httpContext.User, parameters);
+    }
+
+
+    /// <summary>
+    /// Returns an access token for the OpenID Connect client using client credentials flow
     /// </summary>
     /// <param name="httpContext">The HTTP context</param>
     /// <param name="parameters">Extra optional parameters</param>
@@ -49,42 +71,23 @@ public static class TokenManagementHttpContextExtensions
         return await service.GetClientCredentialAccessTokenAsync(parameters, cancellationToken);
     }
 
-    //     /// <summary>
-    //     /// Returns an access token for the standard client or a named client
-    //     /// </summary>
-    //     /// <param name="httpContext">The HTTP context</param>
-    //     /// <param name="clientName">Name of the client configuration (or null to use the standard client).</param>
-    //     /// <param name="parameters"></param>
-    //     /// <param name="cancellationToken">A cancellation token to cancel operation.</param>
-    //     /// <returns></returns>
-    //     public static async Task<string?> GetClientAccessTokenAsync(
-    //         this HttpContext httpContext, 
-    //         string clientName = AccessTokenManagementDefaults.DefaultTokenClientName, 
-    //         ClientAccessTokenParameters? parameters = null,
-    //         CancellationToken cancellationToken = default)
-    //     {
-    //         var service = httpContext.RequestServices.GetRequiredService<IClientAccessTokenManagementService>();
-    //
-    //         return await service.GetClientAccessTokenAsync(clientName, parameters, cancellationToken);
-    //     }
-    //
-    //     /// <summary>
-    //     /// Revokes the current user refresh token
-    //     /// </summary>
-    //     /// <param name="httpContext">The HTTP context</param>
-    //     /// <param name="parameters">Extra optional parameters</param>
-    //     /// <param name="cancellationToken">A cancellation token to cancel operation.</param>
-    //     /// <returns></returns>
-    //     public static async Task RevokeUserRefreshTokenAsync(
-    //         this HttpContext httpContext, 
-    //         UserAccessTokenParameters? parameters = null, 
-    //         CancellationToken cancellationToken = default)
-    //     {
-    //         var service = httpContext.RequestServices.GetRequiredService<IUserAccessTokenManagementService>();
-    //         var store = httpContext.RequestServices.GetRequiredService<IUserAccessTokenStore>();
-    //
-    //         await service.RevokeRefreshTokenAsync(httpContext.User, parameters, cancellationToken);
-    //         await store.ClearTokenAsync(httpContext.User, parameters);
-    //     }
-    // }
+    /// <summary>
+    /// Returns an access token for a named client using client credentials flow
+    /// </summary>
+    /// <param name="httpContext">The HTTP context</param>
+    /// <param name="clientName">The name of the client</param>
+    /// <param name="parameters">Extra optional parameters</param>
+    /// <param name="cancellationToken">A cancellation token to cancel operation.</param>
+    /// <returns></returns>
+    public static async Task<ClientCredentialsAccessToken> GetClientAccessTokenAsync(
+        this HttpContext httpContext,
+        string clientName,
+        ClientCredentialsTokenRequestParameters? parameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        var service = httpContext.RequestServices.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        return await service.GetAccessTokenAsync(clientName, parameters: parameters,
+            cancellationToken: cancellationToken);
+    }
 }

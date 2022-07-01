@@ -21,16 +21,25 @@ public interface IUserTokenManagementService
         ClaimsPrincipal user, 
         UserAccessTokenRequestParameters? parameters = null, 
         CancellationToken cancellationToken = default);
-        
+    
     /// <summary>
     /// Revokes the current refresh token
     /// </summary>
+    /// <param name="user"></param>
+    /// <param name="parameters"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task RevokeRefreshTokenAsync(
         ClaimsPrincipal user, 
         UserAccessTokenRequestParameters? parameters = null, 
         CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Requests a token using client credentials
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(
         ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default);

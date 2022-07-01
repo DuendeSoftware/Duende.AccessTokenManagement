@@ -24,7 +24,7 @@ public class Startup
 
                 options.Events.OnSigningOut = async e =>
                 {
-                    // await e.HttpContext.RevokeUserRefreshTokenAsync();
+                    await e.HttpContext.RevokeRefreshTokenAsync();
                 };
             })
             .AddOpenIdConnect("oidc", options =>

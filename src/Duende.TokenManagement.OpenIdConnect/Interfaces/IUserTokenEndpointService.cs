@@ -15,8 +15,7 @@ public interface IUserTokenEndpointService
     /// <summary>
     /// Refreshes a user access token.
     /// </summary>
-    /// <param name="refreshToken"></param>
-    /// <param name="parameters"></param>
+    /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<TokenResponse> RefreshAccessTokenAsync(
@@ -26,8 +25,7 @@ public interface IUserTokenEndpointService
     /// <summary>
     /// Revokes a refresh token.
     /// </summary>
-    /// <param name="refreshToken"></param>
-    /// <param name="parameters"></param>
+    /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<TokenRevocationResponse> RevokeRefreshTokenAsync(

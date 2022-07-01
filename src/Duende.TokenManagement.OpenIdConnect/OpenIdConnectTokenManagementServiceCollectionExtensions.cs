@@ -9,8 +9,16 @@ using ITokenRequestSynchronization = Duende.TokenManagement.OpenIdConnect.IToken
 
 namespace Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// Extension methods for IServiceCollection to register the user token management services
+/// </summary>
 public static class OpenIdConnectTokenManagementServiceCollectionExtensions
 {
+    /// <summary>
+    /// Adds the necessary services to manage user tokens based on OpenID Connect configuration
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddOpenIdConnectTokenManagement(this IServiceCollection services)
     {
         services.AddClientCredentialsTokenManagement();
@@ -28,6 +36,12 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    /// Adds the necessary services to manage user tokens based on OpenID Connect configuration
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configureAction"></param>
+    /// <returns></returns>
     public static IServiceCollection AddOpenIdConnectTokenManagement(this IServiceCollection services,
         Action<UserAccessTokenManagementOptions> configureAction)
     {
