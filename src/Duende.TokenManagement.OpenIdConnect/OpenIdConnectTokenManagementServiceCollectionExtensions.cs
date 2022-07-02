@@ -17,7 +17,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <returns></returns>
-    public static IServiceCollection AddOpenIdConnectTokenManagement(this IServiceCollection services)
+    public static IServiceCollection AddOpenIdConnectAccessTokenManagement(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
 
@@ -38,12 +38,12 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <param name="services"></param>
     /// <param name="configureAction"></param>
     /// <returns></returns>
-    public static IServiceCollection AddOpenIdConnectTokenManagement(this IServiceCollection services,
+    public static IServiceCollection AddOpenIdConnectAccessTokenManagement(this IServiceCollection services,
         Action<UserAccessTokenManagementOptions> configureAction)
     {
         services.Configure(configureAction);
 
-        return services.AddOpenIdConnectTokenManagement();
+        return services.AddOpenIdConnectAccessTokenManagement();
     }
     
     /// <summary>

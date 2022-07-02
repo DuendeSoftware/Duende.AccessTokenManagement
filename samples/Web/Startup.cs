@@ -53,7 +53,7 @@ public static class Startup
                 };
             });
 
-        builder.Services.AddOpenIdConnectTokenManagement();
+        builder.Services.AddOpenIdConnectAccessTokenManagement();
 
         // registers HTTP client that uses the managed user access token
         builder.Services.AddUserAccessTokenHttpClient("user_client",
