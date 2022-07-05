@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Duende.TokenManagement.ClientCredentials;
 using IdentityModel;
-using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

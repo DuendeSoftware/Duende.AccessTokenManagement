@@ -52,8 +52,7 @@ public static class TokenManagementHttpContextExtensions
         // todo: is this the right place to call that - or should revoke do that?
         await store.ClearTokenAsync(httpContext.User, parameters);
     }
-
-
+    
     /// <summary>
     /// Returns an access token for the OpenID Connect client using client credentials flow
     /// </summary>
