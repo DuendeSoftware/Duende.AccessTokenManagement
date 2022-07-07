@@ -15,17 +15,23 @@ namespace Duende.TokenManagement.OpenIdConnect;
 /// </summary>
 public class OpenIdConnectUserAccessTokenHandler : DelegatingHandler
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IUserTokenManagementService _userTokenManagementService;
+    private readonly IUserService _userService;
     private readonly UserAccessTokenRequestParameters _parameters;
 
     /// <summary>
     /// ctor
     /// </summary>
-    /// <param name="httpContextAccessor"></param>
+    /// <param name="userService"></param>
     /// <param name="parameters"></param>
-    public OpenIdConnectUserAccessTokenHandler(IHttpContextAccessor httpContextAccessor, UserAccessTokenRequestParameters? parameters = null)
+    /// <param name="userTokenManagementService"></param>
+    public OpenIdConnectUserAccessTokenHandler(
+        IUserTokenManagementService userTokenManagementService, 
+        IUserService userService, 
+        UserAccessTokenRequestParameters? parameters = null)
     {
-        _httpContextAccessor = httpContextAccessor;
+        _userTokenManagementService = userTokenManagementService;
+        _userService = userService;
         _parameters = parameters ?? new UserAccessTokenRequestParameters();
     }
 
@@ -63,9 +69,10 @@ public class OpenIdConnectUserAccessTokenHandler : DelegatingHandler
             ForceRenewal = forceRenewal,
             Context =  _parameters.Context
         };
-              
-        var token = await _httpContextAccessor!.HttpContext!.GetUserAccessTokenAsync(parameters);
 
+        var user = _userService.Principal;
+        var token = await _userTokenManagementService.GetAccessTokenAsync(user, parameters);
+        
         if (!string.IsNullOrWhiteSpace(token.Value))
         {
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);

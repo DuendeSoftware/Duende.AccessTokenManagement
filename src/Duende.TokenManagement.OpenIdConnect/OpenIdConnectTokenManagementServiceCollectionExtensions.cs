@@ -23,6 +23,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
 
         services.AddClientCredentialsTokenManagement();
         
+        services.TryAddTransient<IUserService, DefaultUserService>();
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
         services.TryAddTransient<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
         services.TryAddSingleton<IUserAccessTokenRequestSynchronization, UserAccessTokenRequestSynchronization>();
@@ -126,11 +127,13 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         this IHttpClientBuilder httpClientBuilder,
         UserAccessTokenRequestParameters? parameters = null)
     {
+        return httpClientBuilder.AddHttpMessageHandler<OpenIdConnectUserAccessTokenHandler>();
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {
-            var contextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+            var userService = provider.GetRequiredService<IUserService>();
+            var managementService = provider.GetRequiredService<IUserTokenManagementService>();
 
-            return new OpenIdConnectUserAccessTokenHandler(contextAccessor, parameters);
+            return new OpenIdConnectUserAccessTokenHandler(managementService, userService, parameters);
         });
     }
     

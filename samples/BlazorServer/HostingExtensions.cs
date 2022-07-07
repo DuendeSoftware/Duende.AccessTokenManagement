@@ -65,6 +65,9 @@ public static class HostingExtensions
 
         // adds access token management
         builder.Services.AddOpenIdConnectAccessTokenManagement();
+        builder.Services.AddScoped<IUserService, ManualUserService>();
+        builder.Services.AddTransient<OpenIdConnectUserAccessTokenHandler>();
+        
 
         // not allowed to programmatically use HttpContext in Blazor Server.
         // that's why tokens cannot be managed in the login session

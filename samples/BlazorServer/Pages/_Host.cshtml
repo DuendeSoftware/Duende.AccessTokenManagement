@@ -3,6 +3,8 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     Layout = "_Layout";
+
+    var sub = HttpContext.User.FindFirst("sub")?.Value;
 }
 
-<component type="typeof(App)" render-mode="ServerPrerendered"/>
+<component type="typeof(App)" param-UserSub="sub" render-mode="ServerPrerendered"/>

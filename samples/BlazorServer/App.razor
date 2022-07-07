@@ -1,4 +1,33 @@
-﻿<CascadingAuthenticationState>
+﻿@using Duende.TokenManagement.OpenIdConnect
+@using System.Security.Claims
+@inject IUserService UserService
+
+@code {
+    [Parameter]
+    public string UserSub { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        ClaimsPrincipal principal;
+        
+        if (!string.IsNullOrEmpty(UserSub))
+        {
+            var id = new ClaimsIdentity(new[] { new Claim("sub", UserSub) }, "internal", "name", "role");
+            principal = new ClaimsPrincipal(id);
+        }
+        else
+        {
+            var id = new ClaimsIdentity();
+            principal = new ClaimsPrincipal(id);
+        }
+        
+        UserService.Principal = principal;
+
+        return base.OnInitializedAsync();
+    }
+}
+
+<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
