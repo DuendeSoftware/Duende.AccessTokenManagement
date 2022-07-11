@@ -66,7 +66,7 @@ public static class HostingExtensions
         // adds access token management
         builder.Services.AddOpenIdConnectAccessTokenManagement();
         builder.Services.AddScoped<IUserService, ManualUserService>();
-        builder.Services.AddTransient<OpenIdConnectUserAccessTokenHandler>();
+        builder.Services.AddScoped<OpenIdConnectUserAccessTokenHandler>();
         
 
         // not allowed to programmatically use HttpContext in Blazor Server.
@@ -74,8 +74,11 @@ public static class HostingExtensions
         builder.Services.AddSingleton<IUserTokenStore, ServerSideTokenStore>();
 
         // registers HTTP client that uses the managed user access token
-        builder.Services.AddUserAccessTokenHttpClient("client",
-            configureClient: client => { client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/"); });
+        // builder.Services.AddUserAccessTokenHttpClient("client",
+        //     configureClient: client => { client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/"); });
+
+        builder.Services.AddScoped<ApiClient>();
+        builder.Services.AddHttpClient<ApiClient>();
 
         builder.Services.AddAuthorization(options =>
         {
@@ -88,7 +91,7 @@ public static class HostingExtensions
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();
 
-        builder.Services.AddSingleton<RemoteApiService>();
+        builder.Services.AddScoped<RemoteApiService>();
         builder.Services.AddSingleton<WeatherForecastService>();
 
 
