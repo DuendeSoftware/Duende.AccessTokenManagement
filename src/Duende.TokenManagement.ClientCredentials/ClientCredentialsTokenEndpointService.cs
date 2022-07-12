@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -17,7 +18,7 @@ namespace Duende.TokenManagement.ClientCredentials;
 public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndpointService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IOptionsSnapshot<ClientCredentialsClientOptions> _options;
+    private readonly IOptionsSnapshot<ClientCredentialsClient> _options;
     private readonly ILogger<ClientCredentialsTokenEndpointService> _logger;
 
     /// <summary>
@@ -28,7 +29,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     /// <param name="options"></param>
     public ClientCredentialsTokenEndpointService(
         IHttpClientFactory httpClientFactory,
-        IOptionsSnapshot<ClientCredentialsClientOptions> options,
+        IOptionsSnapshot<ClientCredentialsClient> options,
         ILogger<ClientCredentialsTokenEndpointService> logger)
     {
         _httpClientFactory = httpClientFactory;
@@ -37,7 +38,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     }
 
     /// <inheritdoc/>
-    public async Task<TokenResponse> RequestToken(
+    public async Task<ClientCredentialsAccessToken> RequestToken(
         string clientName,
         ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
@@ -93,7 +94,24 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         }
         
         _logger.LogDebug("Requesting client credentials access token at endpoint: {endpoint}", request.Address);
-        return await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken);
+        var response = await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken);
+
+        if (response.IsError)
+        {
+            return new ClientCredentialsAccessToken
+            {
+                Error = response.Error
+            };
+        }
+        
+        return new ClientCredentialsAccessToken
+        {
+            Value = response.AccessToken,
+            Expiration = response.ExpiresIn == 0
+                ? DateTimeOffset.MaxValue
+                : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
+            Scope = response.Scope,
+        };
     }
     
     /// <summary>

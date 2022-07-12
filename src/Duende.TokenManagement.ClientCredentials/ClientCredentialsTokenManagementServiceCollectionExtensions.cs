@@ -17,7 +17,7 @@ public class ClientCredentialsTokenManagementBuilder
         _services = services;
     }
 
-    public ClientCredentialsTokenManagementBuilder AddClient(string name, Action<ClientCredentialsClientOptions> configureOptions)
+    public ClientCredentialsTokenManagementBuilder AddClient(string name, Action<ClientCredentialsClient> configureOptions)
     {
         _services.Configure(name, configureOptions);
         return this;
@@ -38,7 +38,6 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     {
         services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
         services.TryAddTransient<IClientCredentialsTokenCache, DistributedClientCredentialsTokenCache>();
-        services.TryAddTransient<IClientCredentialsConfigurationService, DefaultClientCredentialsConfigurationService>();
         services.TryAddTransient<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
         services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
 
@@ -47,19 +46,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         return new ClientCredentialsTokenManagementBuilder(services);
     }
         
-    /// <summary>
-    /// Adds all necessary services for client credentials token management. Also allows configuring clients.
-    /// </summary>
-    /// <param name="services"></param>
-    /// <param name="configureAction"></param>
-    /// <returns></returns>
-    // public static IServiceCollection AddClientCredentialsTokenManagement(this IServiceCollection services,
-    //     Action<ClientCredentialsTokenManagementOptions> configureAction)
-    // {
-    //     services.Configure(configureAction);
-    //
-    //     return services.AddClientCredentialsTokenManagement();
-    // }
+   
     
     /// <summary>
     /// Adds a named HTTP client for the factory that automatically sends the a client access token

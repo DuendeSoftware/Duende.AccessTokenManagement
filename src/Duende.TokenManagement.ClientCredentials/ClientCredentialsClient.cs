@@ -2,7 +2,7 @@ using IdentityModel.Client;
 
 namespace Duende.TokenManagement.ClientCredentials;
 
-public class ClientCredentialsClientOptions
+public class ClientCredentialsClient
 {
     public string Address { get; set; }
     public string ClientId { get; set; }

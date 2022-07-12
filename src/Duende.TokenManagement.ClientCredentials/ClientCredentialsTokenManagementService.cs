@@ -18,7 +18,6 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     private readonly ITokenRequestSynchronization _sync;
     private readonly IClientCredentialsTokenEndpointService _clientCredentialsTokenEndpointService;
     private readonly IClientCredentialsTokenCache _tokenCache;
-    private readonly IClientCredentialsConfigurationService _configurationService;
     private readonly ILogger<ClientCredentialsTokenManagementService> _logger;
 
     /// <summary>
@@ -64,26 +63,13 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
             {
                 return new Lazy<Task<ClientCredentialsAccessToken>>(async () =>
                 {
-                    //request ??= await _configurationService.GetClientCredentialsRequestAsync(clientName, parameters);
-                    
-                    var response = await _clientCredentialsTokenEndpointService.RequestToken(clientName, parameters, cancellationToken);
-                    if (response.IsError)
+                    var token = await _clientCredentialsTokenEndpointService.RequestToken(clientName, parameters, cancellationToken);
+                    if (!string.IsNullOrEmpty(token.Error))
                     {
                         _logger.LogError(
-                            "Error requesting access token for client {clientName}. Error = {error}. Error description = {errorDescription}",
-                            clientName, response.Error, response.ErrorDescription);
-                        
-                        return new ClientCredentialsAccessToken();
+                            "Error requesting access token for client {clientName}. Error = {error}.",
+                            clientName, token.Error);
                     }
-
-                    var token = new ClientCredentialsAccessToken
-                    {
-                        Value = response.AccessToken,
-                        Expiration = response.ExpiresIn == 0
-                            ? DateTimeOffset.MaxValue
-                            : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
-                        Scope = response.Scope,
-                    };
 
                     await _tokenCache.SetAsync(clientName, token, parameters, cancellationToken);
                     return token;

@@ -20,9 +20,4 @@ public class ClientCredentialsTokenManagementOptions
     /// Value to subtract from token lifetime for the cache entry lifetime (defaults to 60 seconds)
     /// </summary>
     public int CacheLifetimeBuffer { get; set; } = 60;
-        
-    /// <summary>
-    /// Configures named client configurations for requesting client tokens.
-    /// </summary>
-    public IDictionary<string, ClientCredentialsTokenRequest> Clients { get; set; } = new Dictionary<string, ClientCredentialsTokenRequest>();
 }
