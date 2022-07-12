@@ -15,12 +15,12 @@ public interface IClientCredentialsTokenEndpointService
     /// <summary>
     /// Requests a client credentials access token.
     /// </summary>
-    /// <param name="request"></param>
+    /// <param name="clientName"></param>
     /// <param name="parameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<TokenResponse> RequestToken(
-        ClientCredentialsTokenRequest request,
+        string clientName,
         ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default);
 }

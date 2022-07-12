@@ -8,6 +8,22 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
+public class ClientCredentialsTokenManagementBuilder
+{
+    private readonly IServiceCollection _services;
+
+    public ClientCredentialsTokenManagementBuilder(IServiceCollection services)
+    {
+        _services = services;
+    }
+
+    public ClientCredentialsTokenManagementBuilder AddClient(string name, Action<ClientCredentialsClientOptions> configureOptions)
+    {
+        _services.Configure(name, configureOptions);
+        return this;
+    }
+}
+
 /// <summary>
 /// Extension methods for IServiceCollection to register the client credentials token management services
 /// </summary>
@@ -18,7 +34,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <returns></returns>
-    public static IServiceCollection AddClientCredentialsTokenManagement(this IServiceCollection services)
+    public static ClientCredentialsTokenManagementBuilder AddClientCredentialsTokenManagement(this IServiceCollection services)
     {
         services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
         services.TryAddTransient<IClientCredentialsTokenCache, DistributedClientCredentialsTokenCache>();
@@ -28,7 +44,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
 
         services.AddHttpClient(TokenManagementDefaults.BackChannelHttpClientName);
 
-        return services;
+        return new ClientCredentialsTokenManagementBuilder(services);
     }
         
     /// <summary>
@@ -37,13 +53,13 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     /// <param name="services"></param>
     /// <param name="configureAction"></param>
     /// <returns></returns>
-    public static IServiceCollection AddClientCredentialsTokenManagement(this IServiceCollection services,
-        Action<ClientCredentialsTokenManagementOptions> configureAction)
-    {
-        services.Configure(configureAction);
-
-        return services.AddClientCredentialsTokenManagement();
-    }
+    // public static IServiceCollection AddClientCredentialsTokenManagement(this IServiceCollection services,
+    //     Action<ClientCredentialsTokenManagementOptions> configureAction)
+    // {
+    //     services.Configure(configureAction);
+    //
+    //     return services.AddClientCredentialsTokenManagement();
+    // }
     
     /// <summary>
     /// Adds a named HTTP client for the factory that automatically sends the a client access token

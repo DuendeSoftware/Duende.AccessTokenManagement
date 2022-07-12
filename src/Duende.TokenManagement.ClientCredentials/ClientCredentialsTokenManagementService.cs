@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Duende.TokenManagement.ClientCredentials;
 
@@ -16,7 +17,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
 {
     private readonly ITokenRequestSynchronization _sync;
     private readonly IClientCredentialsTokenEndpointService _clientCredentialsTokenEndpointService;
-    private readonly IClientCredentialsTokenCache _distributedClientCredentialsTokenCache;
+    private readonly IClientCredentialsTokenCache _tokenCache;
     private readonly IClientCredentialsConfigurationService _configurationService;
     private readonly ILogger<ClientCredentialsTokenManagementService> _logger;
 
@@ -25,27 +26,24 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     /// </summary>
     /// <param name="sync"></param>
     /// <param name="clientCredentialsTokenEndpointService"></param>
-    /// <param name="distributedClientCredentialsTokenCache"></param>
-    /// <param name="configurationService"></param>
+    /// <param name="tokenCache"></param>
+    /// <param name="options"></param>
     /// <param name="logger"></param>
     public ClientCredentialsTokenManagementService(
         ITokenRequestSynchronization sync,
         IClientCredentialsTokenEndpointService clientCredentialsTokenEndpointService,
-        IClientCredentialsTokenCache distributedClientCredentialsTokenCache,
-        IClientCredentialsConfigurationService configurationService,
+        IClientCredentialsTokenCache tokenCache,
         ILogger<ClientCredentialsTokenManagementService> logger)
     {
         _sync = sync;
         _clientCredentialsTokenEndpointService = clientCredentialsTokenEndpointService;
-        _distributedClientCredentialsTokenCache = distributedClientCredentialsTokenCache;
-        _configurationService = configurationService;
+        _tokenCache = tokenCache;
         _logger = logger;
     }
 
     /// <inheritdoc/>
     public async Task<ClientCredentialsAccessToken> GetAccessTokenAsync(
-        string clientName = TokenManagementDefaults.DefaultTokenClientName,
-        ClientCredentialsTokenRequest? request = null,
+        string clientName,
         ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
@@ -53,7 +51,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
 
         if (parameters.ForceRenewal == false)
         {
-            var item = await _distributedClientCredentialsTokenCache.GetAsync(clientName, parameters, cancellationToken);
+            var item = await _tokenCache.GetAsync(clientName, parameters, cancellationToken);
             if (item != null)
             {
                 return item;
@@ -66,14 +64,14 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
             {
                 return new Lazy<Task<ClientCredentialsAccessToken>>(async () =>
                 {
-                    request ??= await _configurationService.GetClientCredentialsRequestAsync(clientName, parameters);
+                    //request ??= await _configurationService.GetClientCredentialsRequestAsync(clientName, parameters);
                     
-                    var response = await _clientCredentialsTokenEndpointService.RequestToken(request, parameters, cancellationToken);
+                    var response = await _clientCredentialsTokenEndpointService.RequestToken(clientName, parameters, cancellationToken);
                     if (response.IsError)
                     {
                         _logger.LogError(
                             "Error requesting access token for client {clientName}. Error = {error}. Error description = {errorDescription}",
-                            request.ClientId, response.Error, response.ErrorDescription);
+                            clientName, response.Error, response.ErrorDescription);
                         
                         return new ClientCredentialsAccessToken();
                     }
@@ -87,7 +85,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
                         Scope = response.Scope,
                     };
 
-                    await _distributedClientCredentialsTokenCache.SetAsync(clientName, token, parameters, cancellationToken);
+                    await _tokenCache.SetAsync(clientName, token, parameters, cancellationToken);
                     return token;
                 });
             }).Value;
@@ -107,6 +105,6 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     {
         parameters ??= new ClientCredentialsTokenRequestParameters();
 
-        return _distributedClientCredentialsTokenCache.DeleteAsync(clientName, parameters, cancellationToken);
+        return _tokenCache.DeleteAsync(clientName, parameters, cancellationToken);
     }
 }
