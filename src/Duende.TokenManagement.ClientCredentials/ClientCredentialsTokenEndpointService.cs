@@ -110,7 +110,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
             Expiration = response.ExpiresIn == 0
                 ? DateTimeOffset.MaxValue
                 : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
-            Scope = response.Scope,
+            Scope = response.Scope
         };
     }
     

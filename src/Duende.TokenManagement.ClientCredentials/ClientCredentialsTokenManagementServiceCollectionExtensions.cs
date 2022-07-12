@@ -8,22 +8,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-public class ClientCredentialsTokenManagementBuilder
-{
-    private readonly IServiceCollection _services;
-
-    public ClientCredentialsTokenManagementBuilder(IServiceCollection services)
-    {
-        _services = services;
-    }
-
-    public ClientCredentialsTokenManagementBuilder AddClient(string name, Action<ClientCredentialsClient> configureOptions)
-    {
-        _services.Configure(name, configureOptions);
-        return this;
-    }
-}
-
 /// <summary>
 /// Extension methods for IServiceCollection to register the client credentials token management services
 /// </summary>
@@ -52,23 +36,23 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     /// Adds a named HTTP client for the factory that automatically sends the a client access token
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/>.</param>
-    /// <param name="clientName">The name of the client.</param>
+    /// <param name="httpClientName">The name of the client.</param>
     /// <param name="tokenClientName">The name of the token client.</param>
     /// <param name="configureClient">A delegate that is used to configure a <see cref="HttpClient"/>.</param>
     /// <returns></returns>
     public static IHttpClientBuilder AddClientCredentialsHttpClient(
         this IServiceCollection services, 
-        string clientName,
-        string tokenClientName = TokenManagementDefaults.DefaultTokenClientName,
+        string httpClientName,
+        string tokenClientName,
         Action<HttpClient>? configureClient = null)
     {
         if (configureClient != null)
         {
-            return services.AddHttpClient(clientName, configureClient)
+            return services.AddHttpClient(httpClientName, configureClient)
                 .AddClientCredentialsTokenHandler(tokenClientName);
         }
 
-        return services.AddHttpClient(clientName)
+        return services.AddHttpClient(httpClientName)
             .AddClientCredentialsTokenHandler(tokenClientName);
     }
         
@@ -76,23 +60,23 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     /// Adds a named HTTP client for the factory that automatically sends the a client access token
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/>.</param>
-    /// <param name="clientName">The name of the client.</param>
+    /// <param name="httpClientName">The name of the client.</param>
     /// <param name="tokenClientName">The name of the token client.</param>
     /// <param name="configureClient">Additional configuration with service provider instance.</param>
     /// <returns></returns>
     public static IHttpClientBuilder AddClientCredentialsHttpClient(
         this IServiceCollection services,
-        string clientName,
-        string tokenClientName = TokenManagementDefaults.DefaultTokenClientName,
+        string httpClientName,
+        string tokenClientName,
         Action<IServiceProvider, HttpClient>? configureClient = null)
     {
         if (configureClient != null)
         {
-            return services.AddHttpClient(clientName, configureClient)
+            return services.AddHttpClient(httpClientName, configureClient)
                 .AddClientCredentialsTokenHandler(tokenClientName);
         }
 
-        return services.AddHttpClient(clientName)
+        return services.AddHttpClient(httpClientName)
             .AddClientCredentialsTokenHandler(tokenClientName);
     }
 

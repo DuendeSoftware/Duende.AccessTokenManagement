@@ -4,30 +4,39 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Duende.TokenManagement.ClientCredentials;
+using IdentityModel.Client;
 
 namespace WorkerService;
 
-public class Worker1 : BackgroundService
+public class WorkerManual : BackgroundService
 {
-    private readonly ILogger<Worker1> _logger;
+    private readonly ILogger<WorkerManual> _logger;
     private readonly IHttpClientFactory _clientFactory;
+    private readonly IClientCredentialsTokenManagementService _tokenManagementService;
 
-    public Worker1(ILogger<Worker1> logger, IHttpClientFactory factory)
+    public WorkerManual(ILogger<WorkerManual> logger, IHttpClientFactory factory, IClientCredentialsTokenManagementService tokenManagementService)
     {
         _logger = logger;
         _clientFactory = factory;
+        _tokenManagementService = tokenManagementService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await Task.Delay(2000, stoppingToken);
+        await Task.Delay(3000, stoppingToken);
             
         while (!stoppingToken.IsCancellationRequested)
         {
             Console.WriteLine("\n\n");
-            _logger.LogInformation("Worker1 running at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("WorkerManual running at: {time}", DateTimeOffset.Now);
 
-            var client = _clientFactory.CreateClient("client");
+            var client = _clientFactory.CreateClient();
+            client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
+            
+            var token = await _tokenManagementService.GetAccessTokenAsync("demo");
+            client.SetBearerToken(token.Value);
+            
             var response = await client.GetAsync("test", stoppingToken);
                 
             if (response.IsSuccessStatusCode)
@@ -40,7 +49,7 @@ public class Worker1 : BackgroundService
                 _logger.LogError("API returned: {statusCode}", response.StatusCode);
             }
 
-            await Task.Delay(5000, stoppingToken);
+            await Task.Delay(6000, stoppingToken);
         }
     }
 }

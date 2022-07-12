@@ -38,20 +38,6 @@ public class Program
                         client.Scope = "api";
                     });
                 
-                
-                // services.AddClientCredentialsTokenManagement(options =>
-                // {
-                //     options.Clients.Add("demo", new()
-                //     {
-                //         Address = "https://demo.duendesoftware.com/connect/token",
-                //             
-                //         ClientId = "m2m.short",
-                //         ClientSecret = "secret",
-                //             
-                //         Scope = "api"
-                //     });
-                // });
-                    
                 services.AddClientCredentialsHttpClient("client", "demo", client =>
                 {
                     client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
@@ -63,10 +49,9 @@ public class Program
                     })
                     .AddClientCredentialsTokenHandler("demo");
                 
-                //services.AddHostedService<Worker1>();
-                services.AddHostedService<Worker2>();
-                //services.AddHostedService<Worker3>();
-                //services.AddHostedService<Worker4>();
+                services.AddHostedService<WorkerManual>();
+                services.AddHostedService<WorkerHttpClient>();
+                services.AddHostedService<WorkerTypedHttpClient>();
             });
 
         return host;

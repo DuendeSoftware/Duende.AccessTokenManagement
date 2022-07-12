@@ -4,9 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Duende.TokenManagement.ClientCredentials;
 
@@ -26,7 +24,6 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     /// <param name="sync"></param>
     /// <param name="clientCredentialsTokenEndpointService"></param>
     /// <param name="tokenCache"></param>
-    /// <param name="options"></param>
     /// <param name="logger"></param>
     public ClientCredentialsTokenManagementService(
         ITokenRequestSynchronization sync,
