@@ -45,7 +45,7 @@ public class AuthenticationSessionUserAccessTokenStore : IUserTokenStore
         UserAccessTokenRequestParameters? parameters = null)
     {
         parameters ??= new UserAccessTokenRequestParameters();
-        var result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme);
+        var result = await _contextAccessor.HttpContext!.AuthenticateAsync(parameters.SignInScheme);
 
         if (!result.Succeeded)
         {
@@ -124,7 +124,7 @@ public class AuthenticationSessionUserAccessTokenStore : IUserTokenStore
         UserAccessTokenRequestParameters? parameters = null)
     {
         parameters ??= new UserAccessTokenRequestParameters();
-        var result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme)!;
+        var result = await _contextAccessor.HttpContext!.AuthenticateAsync(parameters.SignInScheme);
 
         if (result is not { Succeeded: true })
         {
@@ -165,7 +165,7 @@ public class AuthenticationSessionUserAccessTokenStore : IUserTokenStore
             }
         }
 
-        var options = _contextAccessor!.HttpContext!.RequestServices.GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>();
+        var options = _contextAccessor.HttpContext!.RequestServices.GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>();
         var schemeProvider = _contextAccessor.HttpContext.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
         var scheme = parameters.SignInScheme ?? (await schemeProvider.GetDefaultSignInSchemeAsync())?.Name;
         var cookieOptions = options.Get(scheme);

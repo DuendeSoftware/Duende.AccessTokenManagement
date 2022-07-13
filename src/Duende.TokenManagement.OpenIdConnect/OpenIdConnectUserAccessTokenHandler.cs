@@ -64,7 +64,7 @@ public class OpenIdConnectUserAccessTokenHandler : DelegatingHandler
             Context =  _parameters.Context
         };
               
-        var token = await _httpContextAccessor!.HttpContext!.GetUserAccessTokenAsync(parameters);
+        var token = await _httpContextAccessor.HttpContext!.GetUserAccessTokenAsync(parameters);
 
         if (!string.IsNullOrWhiteSpace(token.Value))
         {

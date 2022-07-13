@@ -28,16 +28,18 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
     /// ctor
     /// </summary>
     /// <param name="httpClientFactory"></param>
+    /// <param name="options"></param>
     /// <param name="logger"></param>
+    /// <param name="configurationService"></param>
     public UserAccessTokenEndpointService(
         IHttpClientFactory httpClientFactory,
         IOpenIdConnectConfigurationService configurationService,
-        IOptionsSnapshot<UserAccessTokenManagementOptions> optionsSnapshot,
+        IOptions<UserAccessTokenManagementOptions> options,
         ILogger<UserAccessTokenEndpointService> logger)
     {
         _httpClientFactory = httpClientFactory;
         _configurationService = configurationService;
-        _options = optionsSnapshot.Value;
+        _options = options.Value;
         _logger = logger;
     }
 
@@ -71,7 +73,7 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
 
         await ApplyAssertionAsync(request, parameters);
             
-        var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);
+        var httpClient = _httpClientFactory.CreateClient(OpenIdConnectTokenManagementDefaults.BackChannelHttpClientName);
         var response = await httpClient.RequestRefreshTokenAsync(request, cancellationToken);
 
         var token = new UserAccessToken();
@@ -118,13 +120,13 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
        
         await ApplyAssertionAsync(request, parameters);
         
-        var httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);
+        var httpClient = _httpClientFactory.CreateClient(OpenIdConnectTokenManagementDefaults.BackChannelHttpClientName);
         var response = await httpClient.RevokeTokenAsync(request, cancellationToken);
         
         _logger.LogInformation("Error revoking refresh token. Error = {error}", response.Error);
     }
     
-    async Task ApplyAssertionAsync(ProtocolRequest request, ClientCredentialsTokenRequestParameters parameters)
+    private async Task ApplyAssertionAsync(ProtocolRequest request, ClientCredentialsTokenRequestParameters parameters)
     {
         if (parameters.Assertion != null)
         {

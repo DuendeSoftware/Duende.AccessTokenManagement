@@ -1,3 +1,6 @@
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
 using System;
 using System.Threading.Tasks;
 using IdentityModel;
@@ -15,6 +18,12 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
     private readonly IOptionsMonitor<OpenIdConnectOptions> _oidcOptionsMonitor;
     private readonly IAuthenticationSchemeProvider _schemeProvider;
 
+    /// <summary>
+    /// ctor
+    /// </summary>
+    /// <param name="userAccessTokenManagementOptions"></param>
+    /// <param name="oidcOptionsMonitor"></param>
+    /// <param name="schemeProvider"></param>
     public OpenIdConnectConfigurationService(
         IOptions<UserAccessTokenManagementOptions> userAccessTokenManagementOptions,
         IOptionsMonitor<OpenIdConnectOptions> oidcOptionsMonitor,
@@ -24,7 +33,8 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
         _oidcOptionsMonitor = oidcOptionsMonitor;
         _schemeProvider = schemeProvider;
     }
-    
+
+    /// <inheritdoc />
     public async Task<OpenIdConnectClientConfiguration> GetOpenIdConnectConfigurationAsync(string? schemeName = null)
     {
         OpenIdConnectOptions options;
@@ -59,7 +69,7 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
                 $"Unable to load OpenID configuration for configured scheme: {e.Message}");
         }
 
-        return new()
+        return new OpenIdConnectClientConfiguration
         {
             TokenEndpoint = configuration.TokenEndpoint,
             RevocationEndpoint = configuration.AdditionalData[OidcConstants.Discovery.RevocationEndpoint].ToString(),

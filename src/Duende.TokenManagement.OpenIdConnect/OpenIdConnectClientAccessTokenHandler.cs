@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using Duende.TokenManagement.ClientCredentials;
 
 namespace Duende.TokenManagement.OpenIdConnect;
 
@@ -67,7 +66,7 @@ public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
             Context =  _parameters.Context
         };
               
-        var token = await _httpContextAccessor!.HttpContext!.GetClientAccessTokenAsync(parameters);
+        var token = await _httpContextAccessor.HttpContext!.GetClientAccessTokenAsync(parameters);
 
         if (!string.IsNullOrWhiteSpace(token.Value))
         {
