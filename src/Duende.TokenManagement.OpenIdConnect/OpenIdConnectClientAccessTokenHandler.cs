@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using Duende.TokenManagement.ClientCredentials;
 
 namespace Duende.TokenManagement.OpenIdConnect;
 
@@ -17,17 +16,17 @@ namespace Duende.TokenManagement.OpenIdConnect;
 public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ClientCredentialsTokenRequestParameters _parameters;
+    private readonly UserAccessTokenRequestParameters _parameters;
 
     /// <summary>
     /// ctor
     /// </summary>
     /// <param name="httpContextAccessor"></param>
     /// <param name="parameters"></param>
-    public OpenIdConnectClientAccessTokenHandler(IHttpContextAccessor httpContextAccessor, ClientCredentialsTokenRequestParameters? parameters = null)
+    public OpenIdConnectClientAccessTokenHandler(IHttpContextAccessor httpContextAccessor, UserAccessTokenRequestParameters? parameters = null)
     {
         _httpContextAccessor = httpContextAccessor;
-        _parameters = parameters ?? new ClientCredentialsTokenRequestParameters();
+        _parameters = parameters ?? new UserAccessTokenRequestParameters();
     }
 
     /// <inheritdoc/>
@@ -56,8 +55,10 @@ public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
     /// <returns></returns>
     protected virtual async Task SetTokenAsync(HttpRequestMessage request, bool forceRenewal)
     {
-        var parameters = new ClientCredentialsTokenRequestParameters
+        var parameters = new UserAccessTokenRequestParameters
         {
+            ChallengeScheme = _parameters.ChallengeScheme,
+            
             ForceRenewal = forceRenewal,
             Scope = _parameters.Scope,
             Resource = _parameters.Resource,
@@ -65,7 +66,7 @@ public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
             Context =  _parameters.Context
         };
               
-        var token = await _httpContextAccessor!.HttpContext!.GetClientAccessTokenAsync(parameters);
+        var token = await _httpContextAccessor.HttpContext!.GetClientAccessTokenAsync(parameters);
 
         if (!string.IsNullOrWhiteSpace(token.Value))
         {

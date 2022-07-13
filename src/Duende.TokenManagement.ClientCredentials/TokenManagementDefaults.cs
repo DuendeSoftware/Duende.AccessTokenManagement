@@ -16,7 +16,7 @@ public static class TokenManagementDefaults
     /// <summary>
     /// Name of the back-channel HTTP client
     /// </summary>
-    public const string BackChannelHttpClientName = "Duende.TokenManagement.TokenEndpointService";
+    public const string BackChannelHttpClientName = "Duende.TokenManagement.ClientCredentials.HttpClient";
         
     /// <summary>
     /// Name used to propagate access token parameters to HttpRequestMessage

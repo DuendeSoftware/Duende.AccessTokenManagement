@@ -4,6 +4,7 @@ using Duende.TokenManagement.ClientCredentials;
 using Duende.TokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -22,12 +23,15 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         services.AddHttpContextAccessor();
 
         services.AddClientCredentialsTokenManagement();
+        services.AddSingleton<IConfigureOptions<ClientCredentialsClient>, ConfigureOpenIdConnectClientCredentialsOptions>();
         
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
+        services.TryAddTransient<IOpenIdConnectConfigurationService, OpenIdConnectConfigurationService>();
         services.TryAddTransient<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
         services.TryAddSingleton<IUserAccessTokenRequestSynchronization, UserAccessTokenRequestSynchronization>();
-        services.TryAddTransient<IUserTokenConfigurationService, DefaultUserTokenConfigurationService>();
         services.TryAddTransient<IUserTokenEndpointService, UserAccessTokenEndpointService>();
+        
+        services.AddHttpClient(OpenIdConnectTokenManagementDefaults.BackChannelHttpClientName);
 
         return services;
     }
@@ -102,7 +106,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddClientAccessTokenHttpClient(this IServiceCollection services,
         string name,
-        ClientCredentialsTokenRequestParameters? parameters = null,
+        UserAccessTokenRequestParameters? parameters = null,
         Action<HttpClient>? configureClient = null)
     {
         if (configureClient != null)
@@ -142,7 +146,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddClientAccessTokenHandler(
         this IHttpClientBuilder httpClientBuilder,
-        ClientCredentialsTokenRequestParameters? parameters = null)
+        UserAccessTokenRequestParameters? parameters = null)
     {
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {

@@ -1,7 +1,9 @@
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Duende.TokenManagement.ClientCredentials;
 
 namespace Duende.TokenManagement.OpenIdConnect;
 
@@ -32,15 +34,5 @@ public interface IUserTokenManagementService
     Task RevokeRefreshTokenAsync(
         ClaimsPrincipal user, 
         UserAccessTokenRequestParameters? parameters = null, 
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Requests a token using client credentials
-    /// </summary>
-    /// <param name="parameters"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(
-        ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default);
 }

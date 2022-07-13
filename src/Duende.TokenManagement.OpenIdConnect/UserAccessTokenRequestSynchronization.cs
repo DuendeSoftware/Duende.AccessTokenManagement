@@ -12,6 +12,22 @@ namespace Duende.TokenManagement.OpenIdConnect;
 /// </summary>
 internal class UserAccessTokenRequestSynchronization : IUserAccessTokenRequestSynchronization
 {
-    /// <inheritdoc />
-    public ConcurrentDictionary<string, Lazy<Task<UserAccessToken>>> Dictionary { get; } = new();
+    // this is what provides the synchronization; assumes this service is a singleton in DI.
+    ConcurrentDictionary<string, Lazy<Task<UserAccessToken>>> _dictionary { get; } = new();
+
+    /// <inheritdoc/>
+    public async Task<UserAccessToken> SynchronizeAsync(string name, Func<Task<UserAccessToken>> func)
+    {
+        try
+        {
+            return await _dictionary.GetOrAdd(name, _ =>
+            {
+                return new Lazy<Task<UserAccessToken>>(func);
+            }).Value;
+        }
+        finally
+        {
+            _dictionary.TryRemove(name, out _);
+        }
+    }
 }

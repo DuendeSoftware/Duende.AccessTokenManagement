@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,9 +19,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     private readonly IUserTokenStore _userAccessTokenStore;
     private readonly ISystemClock _clock;
     private readonly UserAccessTokenManagementOptions _options;
-    private readonly IUserTokenConfigurationService _userTokenConfigurationService;
     private readonly IUserTokenEndpointService _tokenEndpointService;
-    private readonly IClientCredentialsTokenManagementService _clientCredentialsTokenManagementService;
     private readonly ILogger<UserAccessAccessTokenManagementService> _logger;
 
     /// <summary>
@@ -32,7 +29,6 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     /// <param name="userAccessTokenStore"></param>
     /// <param name="clock"></param>
     /// <param name="options"></param>
-    /// <param name="userTokenConfigurationService"></param>
     /// <param name="tokenEndpointService"></param>
     /// <param name="clientCredentialsTokenManagementService"></param>
     /// <param name="logger"></param>
@@ -41,7 +37,6 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         IUserTokenStore userAccessTokenStore,
         ISystemClock clock,
         IOptions<UserAccessTokenManagementOptions> options,
-        IUserTokenConfigurationService userTokenConfigurationService,
         IUserTokenEndpointService tokenEndpointService,
         IClientCredentialsTokenManagementService clientCredentialsTokenManagementService,
         ILogger<UserAccessAccessTokenManagementService> logger)
@@ -50,9 +45,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         _userAccessTokenStore = userAccessTokenStore;
         _clock = clock;
         _options = options.Value;
-        _userTokenConfigurationService = userTokenConfigurationService;
         _tokenEndpointService = tokenEndpointService;
-        _clientCredentialsTokenManagementService = clientCredentialsTokenManagementService;
         _logger = logger;
     }
         
@@ -99,23 +92,13 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         {
             _logger.LogDebug("Token for user {user} needs refreshing.", userName);
 
-            try
+            return await _sync.SynchronizeAsync(userToken.RefreshToken!, async () =>
             {
-                return await _sync.Dictionary.GetOrAdd(userToken.RefreshToken!, _ =>
-                {
-                    return new Lazy<Task<UserAccessToken>>(async () =>
-                    {
-                        var token = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
+                var token = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
 
-                        _logger.LogTrace("Returning refreshed token for user: {user}", userName);
-                        return token;
-                    });
-                }).Value;
-            }
-            finally
-            {
-                _sync.Dictionary.TryRemove(userToken.RefreshToken!, out _);
-            }
+                _logger.LogTrace("Returning refreshed token for user: {user}", userName);
+                return token;
+            });
         }
 
         _logger.LogTrace("Returning current token for user: {user}", userName);
@@ -129,71 +112,34 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         CancellationToken cancellationToken = default)
     {
         parameters ??= new UserAccessTokenRequestParameters();
-            
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-        var requestDetails = await _userTokenConfigurationService.GetTokenRevocationRequestAsync(parameters);
-            
-        requestDetails.Token = userToken.RefreshToken;
-        requestDetails.TokenTypeHint = OidcConstants.TokenTypes.RefreshToken;
-        requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
-            
-        if (!string.IsNullOrEmpty(userToken?.RefreshToken))
-        {
-            var response = await _tokenEndpointService.RevokeRefreshTokenAsync(requestDetails, cancellationToken);
 
-            if (response.IsError)
-            {
-                _logger.LogError("Error revoking refresh token. Error = {error}", response.Error);
-            }
+        if (!string.IsNullOrWhiteSpace(userToken.RefreshToken))
+        {
+            await _tokenEndpointService.RevokeRefreshTokenAsync(userToken.RefreshToken, parameters, cancellationToken);    
         }
     }
     
-    /// <inheritdoc/>
-    public async Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(
-        ClientCredentialsTokenRequestParameters? parameters = null,
-        CancellationToken cancellationToken = default)
-    {
-        parameters ??= new ClientCredentialsTokenRequestParameters();
-
-        var request = await _userTokenConfigurationService.GetClientCredentialsRequestAsync(parameters);
-        
-        return await _clientCredentialsTokenManagementService.GetAccessTokenAsync(
-            "oidc", 
-            request: request,
-            parameters: parameters,
-            cancellationToken: cancellationToken);
-    }
-
     private async Task<UserAccessToken> RefreshUserAccessTokenAsync(
         ClaimsPrincipal user,
         UserAccessTokenRequestParameters parameters,
         CancellationToken cancellationToken = default)
     {
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-        var requestDetails = await _userTokenConfigurationService.GetRefreshTokenRequestAsync(parameters);
-            
-        requestDetails.RefreshToken = userToken.RefreshToken;
-        requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
-
-        var response = await _tokenEndpointService.RefreshAccessTokenAsync(requestDetails, cancellationToken);
-
-        if (!response.IsError)
+        
+        // todo: should not happen - should we use better exception?
+        ArgumentNullException.ThrowIfNull(userToken.RefreshToken);
+        
+        var refreshedToken = await _tokenEndpointService.RefreshAccessTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
+        if (refreshedToken.IsError)
         {
-            var token = new UserAccessToken
-            {
-                Value = response.AccessToken,
-                Expiration = response.ExpiresIn == 0
-                    ? DateTimeOffset.MaxValue
-                    : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
-                RefreshToken = response.RefreshToken,
-                Scope = response.Scope
-            };
-
-            await _userAccessTokenStore.StoreTokenAsync(user, token, parameters);
-            return token;
+            _logger.LogError("Error refreshing access token. Error = {error}", refreshedToken.Error);
+        }
+        else
+        {
+            await _userAccessTokenStore.StoreTokenAsync(user, refreshedToken, parameters);
         }
 
-        _logger.LogError("Error refreshing access token. Error = {error}", response.Error);
-        return new UserAccessToken();
+        return refreshedToken;
     }
 }

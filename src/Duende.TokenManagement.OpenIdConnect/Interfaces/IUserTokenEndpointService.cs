@@ -3,7 +3,6 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using IdentityModel.Client;
 
 namespace Duende.TokenManagement.OpenIdConnect;
 
@@ -15,20 +14,24 @@ public interface IUserTokenEndpointService
     /// <summary>
     /// Refreshes a user access token.
     /// </summary>
-    /// <param name="request"></param>
+    /// <param name="refreshToken"></param>
+    /// <param name="parameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<TokenResponse> RefreshAccessTokenAsync(
-        RefreshTokenRequest request,
+    Task<UserAccessToken> RefreshAccessTokenAsync(
+        string refreshToken,
+        UserAccessTokenRequestParameters parameters,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Revokes a refresh token.
     /// </summary>
-    /// <param name="request"></param>
+    /// <param name="parameters"></param>
     /// <param name="cancellationToken"></param>
+    /// <param name="refreshToken"></param>
     /// <returns></returns>
-    Task<TokenRevocationResponse> RevokeRefreshTokenAsync(
-        TokenRevocationRequest request,
+    Task RevokeRefreshTokenAsync(
+        string refreshToken,
+        UserAccessTokenRequestParameters parameters,
         CancellationToken cancellationToken = default);
 }

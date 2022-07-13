@@ -109,6 +109,9 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
         string clientName,
         ClientCredentialsTokenRequestParameters? parameters = null)
     {
-        return options.CacheKeyPrefix + "::" + clientName + "::" + parameters?.Resource ?? "";
+        var s = "s" + parameters?.Scope ?? "";
+        var r = "r" + parameters?.Resource ?? "";
+
+        return options.CacheKeyPrefix + "::" + clientName + "::" + s + "::" + r;
     }
 }
