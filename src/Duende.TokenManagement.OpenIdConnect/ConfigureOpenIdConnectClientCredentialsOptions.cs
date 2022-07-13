@@ -45,11 +45,14 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
         // todo: how to async?
         var oidc = _configurationService.GetOpenIdConnectConfigurationAsync(scheme).GetAwaiter().GetResult();
             
-        // todo: client credentials style
         options.Address = oidc.TokenEndpoint;
         options.ClientId = oidc.ClientId;
         options.ClientSecret = oidc.ClientSecret;
+        options.ClientCredentialStyle = _options.ClientCredentialStyle;
         options.Scope = _options.ClientCredentialsScope;
         options.Resource = _options.ClientCredentialsResource;
+        
+        // todo: do we need scheme specific back-channel clients?
+        options.HttpClientName = OpenIdConnectTokenManagementDefaults.BackChannelHttpClientName;
     }
 }
