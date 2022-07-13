@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
@@ -24,7 +25,7 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
         _schemeProvider = schemeProvider;
     }
     
-    public async Task<(OpenIdConnectOptions options, OpenIdConnectConfiguration configuration)> GetOpenIdConnectConfigurationAsync(string? schemeName = null)
+    public async Task<OpenIdConnectClientConfiguration> GetOpenIdConnectConfigurationAsync(string? schemeName = null)
     {
         OpenIdConnectOptions options;
 
@@ -58,6 +59,13 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
                 $"Unable to load OpenID configuration for configured scheme: {e.Message}");
         }
 
-        return (options, configuration);
+        return new()
+        {
+            TokenEndpoint = configuration.TokenEndpoint,
+            RevocationEndpoint = configuration.AdditionalData[OidcConstants.Discovery.RevocationEndpoint].ToString(),
+            
+            ClientId = options.ClientId,
+            ClientSecret = options.ClientSecret
+        };
     }
 }

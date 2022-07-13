@@ -62,31 +62,14 @@ public static class TokenManagementHttpContextExtensions
     /// <returns></returns>
     public static async Task<ClientCredentialsAccessToken> GetClientAccessTokenAsync(
         this HttpContext httpContext,
-        ClientCredentialsTokenRequestParameters? parameters = null,
-        CancellationToken cancellationToken = default)
-    {
-        var service = httpContext.RequestServices.GetRequiredService<IUserTokenManagementService>();
-
-        return await service.GetClientCredentialAccessTokenAsync(parameters, cancellationToken);
-    }
-
-    /// <summary>
-    /// Returns an access token for a named client using client credentials flow
-    /// </summary>
-    /// <param name="httpContext">The HTTP context</param>
-    /// <param name="clientName">The name of the client</param>
-    /// <param name="parameters">Extra optional parameters</param>
-    /// <param name="cancellationToken">A cancellation token to cancel operation.</param>
-    /// <returns></returns>
-    public static async Task<ClientCredentialsAccessToken> GetClientAccessTokenAsync(
-        this HttpContext httpContext,
-        string clientName,
-        ClientCredentialsTokenRequestParameters? parameters = null,
+        UserAccessTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         var service = httpContext.RequestServices.GetRequiredService<IClientCredentialsTokenManagementService>();
 
-        return await service.GetAccessTokenAsync(clientName, parameters: parameters,
-            cancellationToken: cancellationToken);
+        return await service.GetAccessTokenAsync(
+            OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + parameters?.ChallengeScheme ?? "",
+            parameters, 
+            cancellationToken);
     }
 }

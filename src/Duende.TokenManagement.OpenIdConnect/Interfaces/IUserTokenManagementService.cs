@@ -33,14 +33,4 @@ public interface IUserTokenManagementService
         ClaimsPrincipal user, 
         UserAccessTokenRequestParameters? parameters = null, 
         CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Requests a token using client credentials
-    /// </summary>
-    /// <param name="parameters"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(
-        ClientCredentialsTokenRequestParameters? parameters = null,
-        CancellationToken cancellationToken = default);
 }

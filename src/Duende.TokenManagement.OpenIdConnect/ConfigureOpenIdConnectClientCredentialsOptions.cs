@@ -26,9 +26,12 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
             // todo: how to async?
             var oidc = _configurationService.GetOpenIdConnectConfigurationAsync().GetAwaiter().GetResult();
 
-            options.Address = oidc.configuration.TokenEndpoint;
-            options.ClientId = oidc.options.ClientId;
-            options.ClientSecret = oidc.options.ClientSecret;
+            options.Address = oidc.TokenEndpoint;
+            
+            options.ClientId = oidc.ClientId;
+            options.ClientSecret = oidc.ClientSecret;
+            // todo: client credentials style
+            
             options.Scope = _options.ClientCredentialsScope;
             options.Resource = _options.ClientCredentialsResource;
         }

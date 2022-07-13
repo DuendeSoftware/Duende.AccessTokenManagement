@@ -26,9 +26,9 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         services.AddSingleton<IConfigureOptions<ClientCredentialsClient>, ConfigureOpenIdConnectClientCredentialsOptions>();
         
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
+        services.TryAddTransient<IOpenIdConnectConfigurationService, OpenIdConnectConfigurationService>();
         services.TryAddTransient<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
         services.TryAddSingleton<IUserAccessTokenRequestSynchronization, UserAccessTokenRequestSynchronization>();
-        services.TryAddTransient<IUserTokenConfigurationService, DefaultUserTokenConfigurationService>();
         services.TryAddTransient<IUserTokenEndpointService, UserAccessTokenEndpointService>();
 
         return services;
@@ -104,7 +104,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddClientAccessTokenHttpClient(this IServiceCollection services,
         string name,
-        ClientCredentialsTokenRequestParameters? parameters = null,
+        UserAccessTokenRequestParameters? parameters = null,
         Action<HttpClient>? configureClient = null)
     {
         if (configureClient != null)
@@ -144,7 +144,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddClientAccessTokenHandler(
         this IHttpClientBuilder httpClientBuilder,
-        ClientCredentialsTokenRequestParameters? parameters = null)
+        UserAccessTokenRequestParameters? parameters = null)
     {
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {

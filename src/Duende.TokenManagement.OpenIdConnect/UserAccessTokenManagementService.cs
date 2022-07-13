@@ -20,7 +20,6 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     private readonly IUserTokenStore _userAccessTokenStore;
     private readonly ISystemClock _clock;
     private readonly UserAccessTokenManagementOptions _options;
-    private readonly IUserTokenConfigurationService _userTokenConfigurationService;
     private readonly IUserTokenEndpointService _tokenEndpointService;
     private readonly IClientCredentialsTokenManagementService _clientCredentialsTokenManagementService;
     private readonly ILogger<UserAccessAccessTokenManagementService> _logger;
@@ -41,7 +40,6 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         IUserTokenStore userAccessTokenStore,
         ISystemClock clock,
         IOptions<UserAccessTokenManagementOptions> options,
-        IUserTokenConfigurationService userTokenConfigurationService,
         IUserTokenEndpointService tokenEndpointService,
         IClientCredentialsTokenManagementService clientCredentialsTokenManagementService,
         ILogger<UserAccessAccessTokenManagementService> logger)
@@ -50,7 +48,6 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         _userAccessTokenStore = userAccessTokenStore;
         _clock = clock;
         _options = options.Value;
-        _userTokenConfigurationService = userTokenConfigurationService;
         _tokenEndpointService = tokenEndpointService;
         _clientCredentialsTokenManagementService = clientCredentialsTokenManagementService;
         _logger = logger;
@@ -129,33 +126,11 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         CancellationToken cancellationToken = default)
     {
         parameters ??= new UserAccessTokenRequestParameters();
-            
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
         
         await _tokenEndpointService.RevokeRefreshTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
-
-          
-        
     }
     
-    /// <inheritdoc/>
-    public async Task<ClientCredentialsAccessToken> GetClientCredentialAccessTokenAsync(
-        ClientCredentialsTokenRequestParameters? parameters = null,
-        CancellationToken cancellationToken = default)
-    {
-        // parameters ??= new ClientCredentialsTokenRequestParameters();
-        //
-        // var request = await _userTokenConfigurationService.GetClientCredentialsRequestAsync(parameters);
-        //
-        // return await _clientCredentialsTokenManagementService.GetAccessTokenAsync(
-        //     "oidc", 
-        //     request: request,
-        //     parameters: parameters,
-        //     cancellationToken: cancellationToken);
-
-        throw new NotImplementedException();
-    }
-
     private async Task<UserAccessToken> RefreshUserAccessTokenAsync(
         ClaimsPrincipal user,
         UserAccessTokenRequestParameters parameters,

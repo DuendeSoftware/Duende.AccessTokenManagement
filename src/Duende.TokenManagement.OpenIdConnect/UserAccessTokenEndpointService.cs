@@ -53,9 +53,10 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
 
         var request = new RefreshTokenRequest
         {
-            Address = oidc.configuration.TokenEndpoint,
-            ClientId = oidc.options.ClientId,
-            ClientSecret = oidc.options.ClientSecret,
+            Address = oidc.TokenEndpoint,
+            
+            ClientId = oidc.ClientId,
+            ClientSecret = oidc.ClientSecret,
             ClientCredentialStyle = _options.ClientCredentialStyle,
             
             RefreshToken = refreshToken
@@ -103,9 +104,10 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
 
         var request = new TokenRevocationRequest
         {
-            Address = oidc.configuration.TokenEndpoint,
-            ClientId = oidc.options.ClientId,
-            ClientSecret = oidc.options.ClientSecret,
+            Address = oidc.RevocationEndpoint,
+            
+            ClientId = oidc.ClientId,
+            ClientSecret = oidc.ClientSecret,
             ClientCredentialStyle = _options.ClientCredentialStyle,
             
             Token = refreshToken,
