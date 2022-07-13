@@ -18,8 +18,9 @@ public interface IUserTokenEndpointService
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<TokenResponse> RefreshAccessTokenAsync(
-        RefreshTokenRequest request,
+    Task<UserAccessToken> RefreshAccessTokenAsync(
+        string refreshToken,
+        UserAccessTokenRequestParameters parameters,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -28,7 +29,8 @@ public interface IUserTokenEndpointService
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<TokenRevocationResponse> RevokeRefreshTokenAsync(
-        TokenRevocationRequest request,
+    Task RevokeRefreshTokenAsync(
+        string refreshToken,
+        UserAccessTokenRequestParameters parameters,
         CancellationToken cancellationToken = default);
 }

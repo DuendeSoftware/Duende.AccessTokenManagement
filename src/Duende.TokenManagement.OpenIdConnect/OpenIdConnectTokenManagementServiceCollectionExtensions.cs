@@ -4,6 +4,7 @@ using Duende.TokenManagement.ClientCredentials;
 using Duende.TokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         services.AddHttpContextAccessor();
 
         services.AddClientCredentialsTokenManagement();
+        services.AddSingleton<IConfigureOptions<ClientCredentialsClient>, ConfigureOpenIdConnectClientCredentialsOptions>();
         
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
         services.TryAddTransient<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();

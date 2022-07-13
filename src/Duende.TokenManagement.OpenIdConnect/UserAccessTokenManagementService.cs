@@ -131,21 +131,11 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         parameters ??= new UserAccessTokenRequestParameters();
             
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-        var requestDetails = await _userTokenConfigurationService.GetTokenRevocationRequestAsync(parameters);
-            
-        requestDetails.Token = userToken.RefreshToken;
-        requestDetails.TokenTypeHint = OidcConstants.TokenTypes.RefreshToken;
-        requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
-            
-        if (!string.IsNullOrEmpty(userToken?.RefreshToken))
-        {
-            var response = await _tokenEndpointService.RevokeRefreshTokenAsync(requestDetails, cancellationToken);
+        
+        await _tokenEndpointService.RevokeRefreshTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
 
-            if (response.IsError)
-            {
-                _logger.LogError("Error revoking refresh token. Error = {error}", response.Error);
-            }
-        }
+          
+        
     }
     
     /// <inheritdoc/>
@@ -153,15 +143,17 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        parameters ??= new ClientCredentialsTokenRequestParameters();
+        // parameters ??= new ClientCredentialsTokenRequestParameters();
+        //
+        // var request = await _userTokenConfigurationService.GetClientCredentialsRequestAsync(parameters);
+        //
+        // return await _clientCredentialsTokenManagementService.GetAccessTokenAsync(
+        //     "oidc", 
+        //     request: request,
+        //     parameters: parameters,
+        //     cancellationToken: cancellationToken);
 
-        var request = await _userTokenConfigurationService.GetClientCredentialsRequestAsync(parameters);
-        
-        return await _clientCredentialsTokenManagementService.GetAccessTokenAsync(
-            "oidc", 
-            request: request,
-            parameters: parameters,
-            cancellationToken: cancellationToken);
+        throw new NotImplementedException();
     }
 
     private async Task<UserAccessToken> RefreshUserAccessTokenAsync(
@@ -170,30 +162,17 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         CancellationToken cancellationToken = default)
     {
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-        var requestDetails = await _userTokenConfigurationService.GetRefreshTokenRequestAsync(parameters);
-            
-        requestDetails.RefreshToken = userToken.RefreshToken;
-        requestDetails.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
-
-        var response = await _tokenEndpointService.RefreshAccessTokenAsync(requestDetails, cancellationToken);
-
-        if (!response.IsError)
+        
+        var refreshedToken = await _tokenEndpointService.RefreshAccessTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
+        if (refreshedToken.IsError)
         {
-            var token = new UserAccessToken
-            {
-                Value = response.AccessToken,
-                Expiration = response.ExpiresIn == 0
-                    ? DateTimeOffset.MaxValue
-                    : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
-                RefreshToken = response.RefreshToken,
-                Scope = response.Scope
-            };
-
-            await _userAccessTokenStore.StoreTokenAsync(user, token, parameters);
-            return token;
+            _logger.LogError("Error refreshing access token. Error = {error}", refreshedToken.Error);
+        }
+        else
+        {
+            await _userAccessTokenStore.StoreTokenAsync(user, refreshedToken, parameters);
         }
 
-        _logger.LogError("Error refreshing access token. Error = {error}", response.Error);
-        return new UserAccessToken();
+        return refreshedToken;
     }
 }
