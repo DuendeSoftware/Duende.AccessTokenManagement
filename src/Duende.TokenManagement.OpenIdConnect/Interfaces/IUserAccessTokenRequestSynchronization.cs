@@ -2,18 +2,17 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 namespace Duende.TokenManagement.OpenIdConnect;
 
 /// <summary>
-/// Service to provide a concurrent dictionary for synchronizing token endpoint requests
+/// Service to provide synchronization to token endpoint requests
 /// </summary>
 public interface IUserAccessTokenRequestSynchronization
 {
     /// <summary>
-    /// Concurrent dictionary as synchronization primitive
+    /// Method to perform synchronization of work.
     /// </summary>
-    public ConcurrentDictionary<string, Lazy<Task<UserAccessToken>>> Dictionary { get; }
+    public Task<UserAccessToken> SynchronizeAsync(string name, Func<Task<UserAccessToken>> func);
 }

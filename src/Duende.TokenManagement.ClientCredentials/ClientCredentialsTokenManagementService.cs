@@ -54,29 +54,19 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
             }
         }
 
-        try
+        return await _sync.SynchronizeAsync(clientName, async () =>
         {
-            return await _sync.Dictionary.GetOrAdd(clientName, _ =>
+            var token = await _clientCredentialsTokenEndpointService.RequestToken(clientName, parameters, cancellationToken);
+            if (!string.IsNullOrEmpty(token.Error))
             {
-                return new Lazy<Task<ClientCredentialsAccessToken>>(async () =>
-                {
-                    var token = await _clientCredentialsTokenEndpointService.RequestToken(clientName, parameters, cancellationToken);
-                    if (!string.IsNullOrEmpty(token.Error))
-                    {
-                        _logger.LogError(
-                            "Error requesting access token for client {clientName}. Error = {error}.",
-                            clientName, token.Error);
-                    }
+                _logger.LogError(
+                    "Error requesting access token for client {clientName}. Error = {error}.",
+                    clientName, token.Error);
+            }
 
-                    await _tokenCache.SetAsync(clientName, token, parameters, cancellationToken);
-                    return token;
-                });
-            }).Value;
-        }
-        finally
-        {
-            _sync.Dictionary.TryRemove(clientName, out _);
-        }
+            await _tokenCache.SetAsync(clientName, token, parameters, cancellationToken);
+            return token;
+        });
     }
 
 
