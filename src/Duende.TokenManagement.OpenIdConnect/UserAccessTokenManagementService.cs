@@ -92,23 +92,13 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         {
             _logger.LogDebug("Token for user {user} needs refreshing.", userName);
 
-            try
+            return await _sync.SynchronizeAsync(userToken.RefreshToken!, async () =>
             {
-                return await _sync.Dictionary.GetOrAdd(userToken.RefreshToken!, _ =>
-                {
-                    return new Lazy<Task<UserAccessToken>>(async () =>
-                    {
-                        var token = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
+                var token = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
 
-                        _logger.LogTrace("Returning refreshed token for user: {user}", userName);
-                        return token;
-                    });
-                }).Value;
-            }
-            finally
-            {
-                _sync.Dictionary.TryRemove(userToken.RefreshToken!, out _);
-            }
+                _logger.LogTrace("Returning refreshed token for user: {user}", userName);
+                return token;
+            });
         }
 
         _logger.LogTrace("Returning current token for user: {user}", userName);
