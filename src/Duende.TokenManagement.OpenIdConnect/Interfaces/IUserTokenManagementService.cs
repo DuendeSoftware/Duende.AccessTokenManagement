@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Duende.TokenManagement.ClientCredentials;
 
 namespace Duende.TokenManagement.OpenIdConnect;
 

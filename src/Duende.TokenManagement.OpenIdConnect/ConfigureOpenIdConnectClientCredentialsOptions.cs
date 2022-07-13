@@ -1,5 +1,7 @@
+using System;
 using Duende.TokenManagement.ClientCredentials;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Duende.TokenManagement.OpenIdConnect;
 
@@ -21,11 +23,18 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
 
     public void Configure(string name, ClientCredentialsClient options)
     {
-        if (name.Equals(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix))
-        {
-            // todo: how to async?
-            var oidc = _configurationService.GetOpenIdConnectConfigurationAsync().GetAwaiter().GetResult();
+        string scheme = null;
 
+        if (name.StartsWith(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix))
+        {
+            if (name.Length > OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix.Length)
+            {
+                scheme = name[OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix.Length..];
+            }
+            
+            // todo: how to async?
+            var oidc = _configurationService.GetOpenIdConnectConfigurationAsync(scheme).GetAwaiter().GetResult();
+            
             options.Address = oidc.TokenEndpoint;
             
             options.ClientId = oidc.ClientId;
@@ -35,7 +44,5 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
             options.Scope = _options.ClientCredentialsScope;
             options.Resource = _options.ClientCredentialsResource;
         }
-        
-        // todo: add support for explicit schemes
     }
 }
