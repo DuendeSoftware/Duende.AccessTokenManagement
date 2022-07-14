@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorServer.Plumbing;
@@ -7,11 +8,21 @@ namespace BlazorServer.Plumbing;
 [AllowAnonymous]
 public class AccountController : ControllerBase
 {
-    public IActionResult LogIn()
+    public IActionResult LogIn(string? returnUrl)
     {
+        string redirectUri = "/";
+
+        if (!string.IsNullOrWhiteSpace(returnUrl))
+        {
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                redirectUri = returnUrl;
+            }
+        }
+        
         var props = new AuthenticationProperties
         {
-            RedirectUri = "/"
+            RedirectUri = redirectUri
         };
         
         return Challenge(props);
