@@ -13,8 +13,8 @@ public class RemoteApiService
     private readonly IUserTokenManagementService _tokenManagementService;
 
     public RemoteApiService(
-        HttpClient client, 
-        AuthenticationStateProvider authenticationStateProvider, 
+        HttpClient client,
+        AuthenticationStateProvider authenticationStateProvider,
         IUserTokenManagementService tokenManagementService)
     {
         _client = client;
@@ -23,7 +23,7 @@ public class RemoteApiService
     }
 
     private record Claim(string type, object value);
-    
+
     public async Task<string> GetData()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "test");
@@ -39,19 +39,6 @@ public class RemoteApiService
         var token = await _tokenManagementService.GetAccessTokenAsync(state.User);
 
         request.SetBearerToken(token.Value);
-        var response = await _client.SendAsync(request);
-
-        // if 401 - retry with refreshed token
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            response.Dispose();
-            
-            token = await _tokenManagementService.GetAccessTokenAsync(state.User, new UserAccessTokenRequestParameters { ForceRenewal = true });
-            request.SetBearerToken(token.Value);
-            
-            response = await _client.SendAsync(request);
-        }
-
-        return response;
+        return  await _client.SendAsync(request);
     }
 }
