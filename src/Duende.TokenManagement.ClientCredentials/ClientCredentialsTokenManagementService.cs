@@ -57,7 +57,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
         return await _sync.SynchronizeAsync(clientName, async () =>
         {
             var token = await _clientCredentialsTokenEndpointService.RequestToken(clientName, parameters, cancellationToken);
-            if (!string.IsNullOrEmpty(token.Error))
+            if (token.IsError)
             {
                 _logger.LogError(
                     "Error requesting access token for client {clientName}. Error = {error}.",

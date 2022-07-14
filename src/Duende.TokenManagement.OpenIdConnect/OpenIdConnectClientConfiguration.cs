@@ -1,6 +1,8 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System.Net.Http;
+
 namespace Duende.TokenManagement.OpenIdConnect;
 
 /// <summary>
@@ -27,4 +29,9 @@ public class OpenIdConnectClientConfiguration
     /// The client secret
     /// </summary>
     public string? ClientSecret { get; set; }
+    
+    /// <summary>
+    /// The HTTP client associated with the OIDC handler
+    /// </summary>
+    public HttpClient? HttpClient { get; set; }
 }

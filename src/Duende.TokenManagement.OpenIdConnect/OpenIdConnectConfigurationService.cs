@@ -75,7 +75,9 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
             RevocationEndpoint = configuration.AdditionalData[OidcConstants.Discovery.RevocationEndpoint].ToString(),
             
             ClientId = options.ClientId,
-            ClientSecret = options.ClientSecret
+            ClientSecret = options.ClientSecret,
+            
+            HttpClient = options.Backchannel
         };
     }
 }

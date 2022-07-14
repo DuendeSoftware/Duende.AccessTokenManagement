@@ -31,8 +31,6 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         services.TryAddSingleton<IUserAccessTokenRequestSynchronization, UserAccessTokenRequestSynchronization>();
         services.TryAddTransient<IUserTokenEndpointService, UserAccessTokenEndpointService>();
         
-        services.AddHttpClient(OpenIdConnectTokenManagementDefaults.BackChannelHttpClientName);
-
         return services;
     }
 

@@ -51,8 +51,6 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
         options.ClientCredentialStyle = _options.ClientCredentialStyle;
         options.Scope = _options.ClientCredentialsScope;
         options.Resource = _options.ClientCredentialsResource;
-        
-        // todo: do we need scheme specific back-channel clients?
-        options.HttpClientName = OpenIdConnectTokenManagementDefaults.BackChannelHttpClientName;
+        options.HttpClient = oidc.HttpClient;
     }
 }

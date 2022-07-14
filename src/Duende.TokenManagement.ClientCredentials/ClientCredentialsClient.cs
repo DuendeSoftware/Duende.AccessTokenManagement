@@ -1,3 +1,4 @@
+using System.Net.Http;
 using IdentityModel.Client;
 
 namespace Duende.TokenManagement.ClientCredentials;
@@ -38,7 +39,12 @@ public class ClientCredentialsClient
     public string? Resource { get; set; }
 
     /// <summary>
-    /// The HTTP client name to use for the back-channel operations
+    /// The HTTP client name to use for the back-channel operations, will fall back to the standard client if not set
     /// </summary>
     public string? HttpClientName { get; set; }
+    
+    /// <summary>
+    /// The HTTP client name to use for the back-channel operations, will override the HTTP client name if set
+    /// </summary>
+    public HttpClient? HttpClient { get; set; }
 }

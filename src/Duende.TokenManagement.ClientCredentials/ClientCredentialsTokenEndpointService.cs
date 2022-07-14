@@ -84,7 +84,11 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         request.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
 
         HttpClient httpClient;
-        if (!string.IsNullOrWhiteSpace(client.HttpClientName))
+        if (client.HttpClient != null)
+        {
+            httpClient = client.HttpClient;
+        }
+        else if (!string.IsNullOrWhiteSpace(client.HttpClientName))
         {
             httpClient = _httpClientFactory.CreateClient(client.HttpClientName);    
         }

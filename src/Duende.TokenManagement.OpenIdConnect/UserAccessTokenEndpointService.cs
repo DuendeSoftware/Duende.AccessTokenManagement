@@ -72,9 +72,8 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
         }
 
         await ApplyAssertionAsync(request, parameters);
-            
-        var httpClient = _httpClientFactory.CreateClient(OpenIdConnectTokenManagementDefaults.BackChannelHttpClientName);
-        var response = await httpClient.RequestRefreshTokenAsync(request, cancellationToken);
+        
+        var response = await oidc.HttpClient.RequestRefreshTokenAsync(request, cancellationToken);
 
         var token = new UserAccessToken();
         if (response.IsError)
@@ -120,10 +119,12 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
        
         await ApplyAssertionAsync(request, parameters);
         
-        var httpClient = _httpClientFactory.CreateClient(OpenIdConnectTokenManagementDefaults.BackChannelHttpClientName);
-        var response = await httpClient.RevokeTokenAsync(request, cancellationToken);
-        
-        _logger.LogInformation("Error revoking refresh token. Error = {error}", response.Error);
+        var response = await oidc.HttpClient.RevokeTokenAsync(request, cancellationToken);
+
+        if (response.IsError)
+        {
+            _logger.LogInformation("Error revoking refresh token. Error = {error}", response.Error);
+        }
     }
     
     private async Task ApplyAssertionAsync(ProtocolRequest request, ClientCredentialsTokenRequestParameters parameters)
