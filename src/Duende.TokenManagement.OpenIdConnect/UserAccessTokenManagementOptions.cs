@@ -13,6 +13,12 @@ public class UserAccessTokenManagementOptions
     /// (will fall back to configured default challenge scheme if not set)
     /// </summary>
     public string? SchemeName { get; set; }
+    
+    /// <summary>
+    /// Boolean to set whether tokens added to a session should be challenge-scheme-specific.
+    /// The default is 'false'.
+    /// </summary>
+    public bool UseChallengeSchemeScopedTokens { get; set; }
 
     /// <summary>
     /// Timespan that specifies how long before expiration, the token should be refreshed (defaults to 1 minute)

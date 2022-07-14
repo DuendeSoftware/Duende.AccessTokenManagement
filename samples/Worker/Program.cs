@@ -50,8 +50,8 @@ public class Program
                     .AddClientCredentialsTokenHandler("demo");
                 
                 services.AddHostedService<WorkerManual>();
-                services.AddHostedService<WorkerHttpClient>();
-                services.AddHostedService<WorkerTypedHttpClient>();
+                //services.AddHostedService<WorkerHttpClient>();
+                //services.AddHostedService<WorkerTypedHttpClient>();
             });
 
         return host;
