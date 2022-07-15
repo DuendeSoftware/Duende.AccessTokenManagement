@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
+using Duende.TokenManagement.ClientCredentials;
 using Serilog.Sinks.SystemConsole.Themes;
 
 namespace WorkerService;
@@ -36,6 +37,14 @@ public class Program
                         client.ClientSecret = "secret";
 
                         client.Scope = "api";
+                    })
+                    .AddClient("demo.jwt", client =>
+                    {
+                        client.Address = "https://demo.duendesoftware.com/connect/token";
+
+                        client.ClientId = "m2m.short.jwt";
+
+                        client.Scope = "api";
                     });
                 
                 services.AddClientCredentialsHttpClient("client", "demo", client =>
@@ -48,8 +57,11 @@ public class Program
                         client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
                     })
                     .AddClientCredentialsTokenHandler("demo");
+
+                services.AddTransient<IClientAssertionService, ClientAssertionService>();
                 
-                services.AddHostedService<WorkerManual>();
+                //services.AddHostedService<WorkerManual>();
+                services.AddHostedService<WorkerManualJwt>();
                 //services.AddHostedService<WorkerHttpClient>();
                 //services.AddHostedService<WorkerTypedHttpClient>();
             });
