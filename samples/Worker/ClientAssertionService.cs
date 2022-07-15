@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Duende.TokenManagement.ClientCredentials;
 using IdentityModel;
@@ -46,25 +45,6 @@ public class ClientAssertionService : IClientAssertionService
                 Type = OidcConstants.ClientAssertionTypes.JwtBearer,
                 Value = jwt
             });
-
-            //h.CreateToken()
-
-            // var token = new JwtSecurityToken(
-            //     clientName,
-            //     "https://demo.duendesoftware.com/connect/token",
-            //     new List<Claim>()
-            //     {
-            //         new Claim(JwtClaimTypes.JwtId, Guid.NewGuid().ToString()),
-            //         new Claim(JwtClaimTypes.Subject, clientId),
-            //         new Claim(JwtClaimTypes.IssuedAt, now.ToEpochTime().ToString(), ClaimValueTypes.Integer64)
-            //     },
-            //     now,
-            //     now.AddMinutes(1),
-            //     credential
-            // );
-            //
-            // var tokenHandler = new JwtSecurityTokenHandler();
-            // return tokenHandler.WriteToken(token);
         }
 
         return Task.FromResult<ClientAssertion?>(null);

@@ -78,7 +78,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         else
         {
             // todo: add parameter here?
-            var assertion = await _clientAssertionService.GetClientAssertionAsync(clientName, client.ClientId, client.Address);
+            var assertion = await _clientAssertionService.GetClientAssertionAsync(clientName, client.ClientId!, client.Address!);
                 
             if (assertion != null)
             {

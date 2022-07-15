@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json;
 using Duende.TokenManagement.OpenIdConnect;
 using IdentityModel.Client;

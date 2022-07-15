@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -62,6 +61,8 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
                 _logger.LogError(
                     "Error requesting access token for client {clientName}. Error = {error}.",
                     clientName, token.Error);
+
+                return token;
             }
 
             await _tokenCache.SetAsync(clientName, token, parameters, cancellationToken);
