@@ -41,7 +41,6 @@ public class Program
                     .AddClient("demo.jwt", client =>
                     {
                         client.Address = "https://demo.duendesoftware.com/connect/token";
-
                         client.ClientId = "m2m.short.jwt";
 
                         client.Scope = "api";

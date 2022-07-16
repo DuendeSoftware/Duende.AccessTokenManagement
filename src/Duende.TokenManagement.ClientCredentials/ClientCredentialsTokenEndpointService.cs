@@ -70,6 +70,8 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
             request.Resource.Add(parameters.Resource);
         }
 
+        // if assertion gets passed in explicitly, use it.
+        // otherwise call assertion service
         if (parameters.Assertion != null)
         {
             request.ClientAssertion = parameters.Assertion;
@@ -77,8 +79,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         }
         else
         {
-            // todo: add parameter here?
-            var assertion = await _clientAssertionService.GetClientAssertionAsync(clientName, client.ClientId!, client.Address!);
+            var assertion = await _clientAssertionService.GetClientAssertionAsync(clientName);
                 
             if (assertion != null)
             {

@@ -29,7 +29,7 @@ public class WorkerManualJwt : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             Console.WriteLine("\n\n");
-            _logger.LogInformation("WorkerManual running at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("WorkerManualJwt running at: {time}", DateTimeOffset.Now);
 
             var client = _clientFactory.CreateClient();
             client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
