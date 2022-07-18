@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Duende.TokenManagement.ClientCredentials;
+using Duende.AccessTokenManagement.ClientCredentials;
 using IdentityModel;
 using IdentityModel.Client;
 using Microsoft.Extensions.Options;

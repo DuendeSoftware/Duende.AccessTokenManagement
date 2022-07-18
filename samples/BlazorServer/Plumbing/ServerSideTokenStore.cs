@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using System.Security.Claims;
-using Duende.TokenManagement.OpenIdConnect;
+using Duende.AccessTokenManagement.OpenIdConnect;
 
 namespace BlazorServer.Plumbing;
 

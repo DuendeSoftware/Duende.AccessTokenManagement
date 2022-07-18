@@ -11,16 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Duende.TokenManagement.OpenIdConnect\Duende.TokenManagement.OpenIdConnect.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="Views\Home\CallApi.cshtml" />
-    <AdditionalFiles Include="Views\Home\Index.cshtml" />
-    <AdditionalFiles Include="Views\Home\Secure.cshtml" />
-    <AdditionalFiles Include="Views\Shared\_Layout.cshtml" />
-    <AdditionalFiles Include="Views\Shared\_ValidationScriptsPartial.cshtml" />
-    <AdditionalFiles Include="Views\_ViewImports.cshtml" />
-    <AdditionalFiles Include="Views\_ViewStart.cshtml" />
+    <ProjectReference Include="..\..\src\Duende.AccessTokenManagement.OpenIdConnect\Duende.AccessTokenManagement.OpenIdConnect.csproj" />
   </ItemGroup>
 </Project>

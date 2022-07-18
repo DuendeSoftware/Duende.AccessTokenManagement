@@ -1,4 +1,4 @@
-// using Duende.TokenManagement.ClientCredentials;
+// using Duende.AccessTokenManagement.ClientCredentials;
 // using IdentityModel.Client;
 // using Microsoft.Extensions.DependencyInjection;
 //

@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Duende.TokenManagement.OpenIdConnect;
+using Duende.AccessTokenManagement.OpenIdConnect;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Components.Authorization;
 

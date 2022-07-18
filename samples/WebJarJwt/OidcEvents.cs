@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Duende.TokenManagement.ClientCredentials;
+using Duende.AccessTokenManagement.ClientCredentials;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace WebJarJwt
@@ -25,7 +25,7 @@ namespace WebJarJwt
         {
             var service = _assertionService as ClientAssertionService;
             
-            var request = await service.SignAuthorizeRequest(context.ProtocolMessage);
+            var request = await service!.SignAuthorizeRequest(context.ProtocolMessage);
             var clientId = context.ProtocolMessage.ClientId;
             var redirectUri = context.ProtocolMessage.RedirectUri;
             

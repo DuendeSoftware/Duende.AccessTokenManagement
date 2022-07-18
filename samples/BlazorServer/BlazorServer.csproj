@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Duende.TokenManagement.OpenIdConnect\Duende.TokenManagement.OpenIdConnect.csproj" />
+      <ProjectReference Include="..\..\src\Duende.AccessTokenManagement.OpenIdConnect\Duende.AccessTokenManagement.OpenIdConnect.csproj" />
     </ItemGroup>
     
 </Project>

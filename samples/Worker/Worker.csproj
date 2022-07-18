@@ -7,11 +7,10 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog.AspNetCore" Version="6.0.0" />
-    
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.21.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Duende.TokenManagement.ClientCredentials\Duende.TokenManagement.ClientCredentials.csproj" />
+    <ProjectReference Include="..\..\src\Duende.AccessTokenManagement.ClientCredentials\Duende.AccessTokenManagement.ClientCredentials.csproj" />
   </ItemGroup>
 </Project>

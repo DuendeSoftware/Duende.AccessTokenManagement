@@ -4,7 +4,7 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Duende.TokenManagement.ClientCredentials;
+using Duende.AccessTokenManagement.ClientCredentials;
 using IdentityModel.Client;
 
 namespace WorkerService;

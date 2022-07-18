@@ -1,4 +1,4 @@
-using Duende.TokenManagement.OpenIdConnect;
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace BlazorServer.Plumbing;

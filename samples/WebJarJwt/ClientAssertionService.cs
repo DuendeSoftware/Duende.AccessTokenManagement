@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Duende.TokenManagement.ClientCredentials;
-using Duende.TokenManagement.OpenIdConnect;
+using Duende.AccessTokenManagement.ClientCredentials;
+
+using Duende.AccessTokenManagement.OpenIdConnect;
 using IdentityModel;
 using IdentityModel.Client;
 using Microsoft.Extensions.Options;

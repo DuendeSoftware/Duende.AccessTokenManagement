@@ -1,5 +1,5 @@
 using System;
-using Duende.TokenManagement.ClientCredentials;
+using Duende.AccessTokenManagement.ClientCredentials;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;

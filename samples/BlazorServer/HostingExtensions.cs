@@ -1,6 +1,6 @@
 using BlazorServer.Plumbing;
 using BlazorServer.Services;
-using Duende.TokenManagement.OpenIdConnect;
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Serilog;
 
 namespace BlazorServer;
@@ -65,13 +65,6 @@ public static class HostingExtensions
         {
             client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
         });
-
-        // builder.Services.AddAuthorization(options =>
-        // {
-        //     // By default, all incoming requests will be authorized according to the default policy
-        //     // comment out if you want to drive the login/logout workflow from the UI
-        //     options.FallbackPolicy = options.DefaultPolicy;
-        // });
 
         builder.Services.AddControllersWithViews();
         builder.Services.AddRazorPages();
