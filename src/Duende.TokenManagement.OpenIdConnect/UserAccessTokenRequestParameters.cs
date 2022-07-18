@@ -6,7 +6,7 @@ using Duende.TokenManagement.ClientCredentials;
 namespace Duende.TokenManagement.OpenIdConnect;
 
 /// <summary>
-/// Additional optional parameters for a user access token request
+/// Additional optional per request parameters for a user access token request
 /// </summary>
 public class UserAccessTokenRequestParameters : ClientCredentialsTokenRequestParameters
 {

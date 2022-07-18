@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace MvcCode;
+namespace Web;
 
 public abstract class TypedClient
 {

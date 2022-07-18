@@ -19,8 +19,8 @@ namespace Duende.TokenManagement.OpenIdConnect;
 /// </summary>
 public class UserAccessTokenEndpointService : IUserTokenEndpointService
 {
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOpenIdConnectConfigurationService _configurationService;
+    private readonly IClientAssertionService _clientAssertionService;
     private readonly ILogger<UserAccessTokenEndpointService> _logger;
     private readonly UserAccessTokenManagementOptions _options;
 
@@ -32,13 +32,13 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
     /// <param name="logger"></param>
     /// <param name="configurationService"></param>
     public UserAccessTokenEndpointService(
-        IHttpClientFactory httpClientFactory,
         IOpenIdConnectConfigurationService configurationService,
         IOptions<UserAccessTokenManagementOptions> options,
+        IClientAssertionService clientAssertionService,
         ILogger<UserAccessTokenEndpointService> logger)
     {
-        _httpClientFactory = httpClientFactory;
         _configurationService = configurationService;
+        _clientAssertionService = clientAssertionService;
         _options = options.Value;
         _logger = logger;
     }
@@ -70,9 +70,22 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
         {
             request.Resource.Add(parameters.Resource);
         }
-
-        await ApplyAssertionAsync(request, parameters);
         
+        if (parameters.Assertion != null)
+        {
+            request.ClientAssertion = parameters.Assertion;
+            request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+        }
+        else
+        {
+            var assertion = await _clientAssertionService.GetClientAssertionAsync(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + oidc.Scheme, parameters);
+            if (assertion != null)
+            {
+                request.ClientAssertion = assertion;
+                request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+            }
+        }
+
         var response = await oidc.HttpClient.RequestRefreshTokenAsync(request, cancellationToken);
 
         var token = new UserAccessToken();
@@ -117,7 +130,20 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
         
         request.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
        
-        await ApplyAssertionAsync(request, parameters);
+        if (parameters.Assertion != null)
+        {
+            request.ClientAssertion = parameters.Assertion;
+            request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+        }
+        else
+        {
+            var assertion = await _clientAssertionService.GetClientAssertionAsync(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + oidc.Scheme, parameters);
+            if (assertion != null)
+            {
+                request.ClientAssertion = parameters.Assertion;
+                request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
+            }
+        }
         
         var response = await oidc.HttpClient.RevokeTokenAsync(request, cancellationToken);
 
@@ -127,30 +153,21 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
         }
     }
     
-    private async Task ApplyAssertionAsync(ProtocolRequest request, ClientCredentialsTokenRequestParameters parameters)
+    private async Task ApplyAssertionAsync(ProtocolRequest request, string schemename, ClientCredentialsTokenRequestParameters parameters)
     {
         if (parameters.Assertion != null)
         {
             request.ClientAssertion = parameters.Assertion;
+            request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
         }
         else
         {
-            var assertion = await CreateAssertionAsync();
+            var assertion = await _clientAssertionService.GetClientAssertionAsync(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + schemename, parameters);
             if (assertion != null)
             {
+                request.ClientAssertion = parameters.Assertion;
                 request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
-                request.ClientAssertion = assertion;
-            }    
+            }
         }
-    }
-
-    /// <summary>
-    /// Allows injecting a client assertion into outgoing requests
-    /// </summary>
-    /// <param name="clientName">Name of client (if present)</param>
-    /// <returns></returns>
-    protected virtual Task<ClientAssertion?> CreateAssertionAsync(string? clientName = null)
-    {
-        return Task.FromResult<ClientAssertion?>(null);
     }
 }

@@ -19,21 +19,25 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsSnapshot<ClientCredentialsClient> _options;
+    private readonly IClientAssertionService _clientAssertionService;
     private readonly ILogger<ClientCredentialsTokenEndpointService> _logger;
 
     /// <summary>
     /// ctor
     /// </summary>
     /// <param name="httpClientFactory"></param>
+    /// <param name="clientAssertionService"></param>
     /// <param name="logger"></param>
     /// <param name="options"></param>
     public ClientCredentialsTokenEndpointService(
         IHttpClientFactory httpClientFactory,
         IOptionsSnapshot<ClientCredentialsClient> options,
+        IClientAssertionService clientAssertionService,
         ILogger<ClientCredentialsTokenEndpointService> logger)
     {
         _httpClientFactory = httpClientFactory;
         _options = options;
+        _clientAssertionService = clientAssertionService;
         _logger = logger;
     }
 
@@ -66,6 +70,8 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
             request.Resource.Add(parameters.Resource);
         }
 
+        // if assertion gets passed in explicitly, use it.
+        // otherwise call assertion service
         if (parameters.Assertion != null)
         {
             request.ClientAssertion = parameters.Assertion;
@@ -73,7 +79,8 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         }
         else
         {
-            var assertion = await CreateAssertionAsync(clientName, parameters);
+            var assertion = await _clientAssertionService.GetClientAssertionAsync(clientName);
+                
             if (assertion != null)
             {
                 request.ClientAssertion = assertion;
@@ -116,16 +123,5 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
                 : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
             Scope = response.Scope
         };
-    }
-    
-    /// <summary>
-    /// Allows injecting a client assertion into outgoing requests
-    /// </summary>
-    /// <param name="clientName">Name of client (if present)</param>
-    /// <param name="parameters">Per request parameters (if present)</param>
-    /// <returns></returns>
-    protected virtual Task<ClientAssertion?> CreateAssertionAsync(string clientName, ClientCredentialsTokenRequestParameters parameters)
-    {
-        return Task.FromResult<ClientAssertion?>(null);
     }
 }

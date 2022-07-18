@@ -1,0 +1,40 @@
+﻿@using Microsoft.AspNetCore.Authentication
+
+<h3>Call API as User</h3>
+
+<a href="./CallApiAsUserManual">Manual</a>
+|
+<a href="./CallApiAsUserExtensionMethod">Extension method</a>
+|
+<a href="./CallApiAsUserFactory">HTTP client factory</a>
+|
+<a href="./CallApiAsUserFactoryTyped">HTTP client factory (typed)</a>
+
+<h3>Call API as Client</h3>
+
+<a href="./CallApiAsClientExtensionMethod">Extension method</a>
+|
+<a href="./CallApiAsClientFactory">HTTP client factory</a>
+|
+<a href="./CallApiAsClientFactoryTypes">HTTP client factory (typed)</a>
+
+
+<h2>Claims</h2>
+
+<dl>
+    @foreach (var claim in User.Claims)
+    {
+        <dt>@claim.Type</dt>
+        <dd>@claim.Value</dd>
+    }
+</dl>
+
+<h2>Properties</h2>
+
+<dl>
+    @foreach (var prop in (await Context!.AuthenticateAsync())!.Properties!.Items)
+    {
+        <dt>@prop.Key</dt>
+        <dd>@prop.Value</dd>
+    }
+</dl>

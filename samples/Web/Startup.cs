@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
 
-namespace MvcCode;
+namespace Web;
 
 public static class Startup
 {

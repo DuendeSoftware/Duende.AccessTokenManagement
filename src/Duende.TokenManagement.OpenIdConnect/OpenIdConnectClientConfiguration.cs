@@ -11,6 +11,11 @@ namespace Duende.TokenManagement.OpenIdConnect;
 public class OpenIdConnectClientConfiguration
 {
     /// <summary>
+    /// The authority
+    /// </summary>
+    public string? Authority { get; set; }
+    
+    /// <summary>
     /// The token endpoint address
     /// </summary>
     public string? TokenEndpoint { get; set; }
@@ -34,4 +39,9 @@ public class OpenIdConnectClientConfiguration
     /// The HTTP client associated with the OIDC handler
     /// </summary>
     public HttpClient? HttpClient { get; set; }
+    
+    /// <summary>
+    /// The scheme name of the OIDC handler
+    /// </summary>
+    public string Scheme { get; set; }
 }

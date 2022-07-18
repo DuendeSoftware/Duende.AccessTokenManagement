@@ -43,20 +43,18 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
 
         if (string.IsNullOrWhiteSpace(configScheme))
         {
-            var scheme = await _schemeProvider.GetDefaultChallengeSchemeAsync();
+            var defaultScheme = await _schemeProvider.GetDefaultChallengeSchemeAsync();
 
-            if (scheme is null)
+            if (defaultScheme is null)
             {
                 throw new InvalidOperationException(
                     "No OpenID Connect authentication scheme configured for getting client configuration. Either set the scheme name explicitly or set the default challenge scheme");
             }
 
-            options = _oidcOptionsMonitor.Get(scheme.Name);
+            configScheme = defaultScheme.Name;
         }
-        else
-        {
-            options = _oidcOptionsMonitor.Get(configScheme);
-        }
+
+        options = _oidcOptionsMonitor.Get(configScheme);
 
         OpenIdConnectConfiguration configuration;
         try
@@ -71,13 +69,15 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
 
         return new OpenIdConnectClientConfiguration
         {
+            Authority = options.Authority,
             TokenEndpoint = configuration.TokenEndpoint,
             RevocationEndpoint = configuration.AdditionalData[OidcConstants.Discovery.RevocationEndpoint].ToString(),
             
             ClientId = options.ClientId,
             ClientSecret = options.ClientSecret,
             
-            HttpClient = options.Backchannel
+            HttpClient = options.Backchannel,
+            Scheme = configScheme
         };
     }
 }

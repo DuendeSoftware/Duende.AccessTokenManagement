@@ -48,35 +48,38 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         _tokenEndpointService = tokenEndpointService;
         _logger = logger;
     }
-        
+
     /// <inheritdoc/>
     public async Task<UserAccessToken> GetAccessTokenAsync(
-        ClaimsPrincipal user, 
-        UserAccessTokenRequestParameters? parameters = null, 
+        ClaimsPrincipal user,
+        UserAccessTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         _logger.LogTrace("Starting user token acquisition");
-            
+
         parameters ??= new UserAccessTokenRequestParameters();
-            
+
         if (!user.Identity!.IsAuthenticated)
         {
             _logger.LogDebug("No active user. Cannot retrieve token");
             return new UserAccessToken();
         }
 
-        var userName = user.FindFirst(JwtClaimTypes.Name)?.Value ?? user.FindFirst(JwtClaimTypes.Subject)?.Value ?? "unknown";
+        var userName = user.FindFirst(JwtClaimTypes.Name)?.Value ??
+                       user.FindFirst(JwtClaimTypes.Subject)?.Value ?? "unknown";
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-            
+
         if (userToken.Value.IsMissing() && userToken.RefreshToken.IsMissing())
         {
             _logger.LogDebug("No token data found in user token store for user {user}.", userName);
             return new UserAccessToken();
         }
-            
+
         if (userToken.Value.IsPresent() && userToken.RefreshToken.IsMissing())
         {
-            _logger.LogDebug("No refresh token found in user token store for user {user} / resource {resource}. Returning current access token.", userName, parameters.Resource ?? "default");
+            _logger.LogDebug(
+                "No refresh token found in user token store for user {user} / resource {resource}. Returning current access token.",
+                userName, parameters.Resource ?? "default");
             return userToken;
         }
 
@@ -96,6 +99,11 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
             {
                 var token = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
 
+                if (token.IsError)
+                {
+                    return new UserAccessToken();
+                }
+
                 _logger.LogTrace("Returning refreshed token for user: {user}", userName);
                 return token;
             });
@@ -107,8 +115,8 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
 
     /// <inheritdoc/>
     public async Task RevokeRefreshTokenAsync(
-        ClaimsPrincipal user, 
-        UserAccessTokenRequestParameters? parameters = null, 
+        ClaimsPrincipal user,
+        UserAccessTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         parameters ??= new UserAccessTokenRequestParameters();
@@ -116,21 +124,22 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
 
         if (!string.IsNullOrWhiteSpace(userToken.RefreshToken))
         {
-            await _tokenEndpointService.RevokeRefreshTokenAsync(userToken.RefreshToken, parameters, cancellationToken);    
+            await _tokenEndpointService.RevokeRefreshTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
         }
     }
-    
+
     private async Task<UserAccessToken> RefreshUserAccessTokenAsync(
         ClaimsPrincipal user,
         UserAccessTokenRequestParameters parameters,
         CancellationToken cancellationToken = default)
     {
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
-        
+
         // todo: should not happen - should we use better exception?
         ArgumentNullException.ThrowIfNull(userToken.RefreshToken);
-        
-        var refreshedToken = await _tokenEndpointService.RefreshAccessTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
+
+        var refreshedToken =
+            await _tokenEndpointService.RefreshAccessTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
         if (refreshedToken.IsError)
         {
             _logger.LogError("Error refreshing access token. Error = {error}", refreshedToken.Error);
