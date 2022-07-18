@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Web;
+namespace WebJarJwt;
 
 public abstract class TypedClient
 {

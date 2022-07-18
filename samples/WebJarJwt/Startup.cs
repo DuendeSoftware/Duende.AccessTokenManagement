@@ -1,4 +1,5 @@
 using System;
+using Duende.TokenManagement.ClientCredentials;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,13 +7,14 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
 
-namespace Web;
+namespace WebJarJwt;
 
 public static class Startup
 {
     internal static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddControllersWithViews();
+        builder.Services.AddTransient<OidcEvents>();
 
         builder.Services.AddAuthentication(options =>
             {
@@ -28,10 +30,8 @@ public static class Startup
             .AddOpenIdConnect("oidc", options =>
             {
                 options.Authority = "https://demo.duendesoftware.com";
-
-                options.ClientId = "interactive.confidential.short";
-                options.ClientSecret = "secret";
-
+                options.ClientId = "interactive.confidential.short.jar.jwt";
+                
                 options.ResponseType = "code";
                 options.ResponseMode = "query";
 
@@ -40,11 +40,13 @@ public static class Startup
                 options.Scope.Add("profile");
                 options.Scope.Add("email");
                 options.Scope.Add("offline_access");
-                options.Scope.Add("api");
+                options.Scope.Add("resource1.scope1");
 
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.SaveTokens = true;
                 options.MapInboundClaims = false;
+
+                options.EventsType = typeof(OidcEvents);
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -54,6 +56,7 @@ public static class Startup
             });
 
         builder.Services.AddOpenIdConnectAccessTokenManagement();
+        builder.Services.AddTransient<IClientAssertionService, ClientAssertionService>();
 
         // registers HTTP client that uses the managed user access token
         builder.Services.AddUserAccessTokenHttpClient("user_client",

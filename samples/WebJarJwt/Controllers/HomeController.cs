@@ -7,7 +7,7 @@ using Duende.TokenManagement.OpenIdConnect;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 
-namespace Web.Controllers;
+namespace WebJarJwt.Controllers;
 
 public class HomeController : Controller
 {

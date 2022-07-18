@@ -1,9 +1,9 @@
 using System;
 using Microsoft.AspNetCore.Builder;
-using Web;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
+using WebJarJwt;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
