@@ -73,12 +73,11 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
 
     /// <inheritdoc/>
     public Task DeleteAccessTokenAsync(
-        string clientName = TokenManagementDefaults.DefaultTokenClientName,
+        string clientName,
         ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         parameters ??= new ClientCredentialsTokenRequestParameters();
-
         return _tokenCache.DeleteAsync(clientName, parameters, cancellationToken);
     }
 }

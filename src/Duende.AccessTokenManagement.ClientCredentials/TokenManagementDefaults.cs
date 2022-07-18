@@ -9,14 +9,9 @@ namespace Duende.AccessTokenManagement.ClientCredentials;
 public static class TokenManagementDefaults
 {
     /// <summary>
-    /// Name of the default client access token configuration
-    /// </summary>
-    public const string DefaultTokenClientName = "default";
-
-    /// <summary>
     /// Name of the back-channel HTTP client
     /// </summary>
-    public const string BackChannelHttpClientName = "Duende.AccessTokenManagement.ClientCredentialslient";
+    public const string BackChannelHttpClientName = "Duende.AccessTokenManagement.BackChannelHttpClient";
         
     /// <summary>
     /// Name used to propagate access token parameters to HttpRequestMessage

@@ -23,7 +23,7 @@ public class ClientCredentialsTokenHandler : DelegatingHandler
     /// <param name="tokenClientName">The name of the token client configuration</param>
     public ClientCredentialsTokenHandler(
         IClientCredentialsTokenManagementService accessTokenManagementService, 
-        string tokenClientName = TokenManagementDefaults.DefaultTokenClientName)
+        string tokenClientName)
     {
         _accessTokenManagementService = accessTokenManagementService;
         _tokenClientName = tokenClientName;

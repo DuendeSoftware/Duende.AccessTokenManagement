@@ -91,7 +91,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddClientCredentialsTokenHandler(
         this IHttpClientBuilder httpClientBuilder,
-        string tokenClientName = TokenManagementDefaults.DefaultTokenClientName)
+        string tokenClientName)
     {
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {
