@@ -40,8 +40,7 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
         {
             scheme = name[OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix.Length..];
         }
-            
-        // todo: how to async?
+        
         var oidc = _configurationService.GetOpenIdConnectConfigurationAsync(scheme).GetAwaiter().GetResult();
             
         options.Address = oidc.TokenEndpoint;

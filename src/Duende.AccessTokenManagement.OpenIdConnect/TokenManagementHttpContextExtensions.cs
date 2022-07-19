@@ -1,12 +1,14 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
 using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Authentication;
 
@@ -66,9 +68,21 @@ public static class TokenManagementHttpContextExtensions
         CancellationToken cancellationToken = default)
     {
         var service = httpContext.RequestServices.GetRequiredService<IClientCredentialsTokenManagementService>();
+        var options = httpContext.RequestServices.GetRequiredService<IOptions<UserAccessTokenManagementOptions>>();
+        var schemes = httpContext.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+
+        var schemeName = parameters?.ChallengeScheme ?? options.Value.SchemeName;
+        
+        if (string.IsNullOrEmpty(schemeName))
+        {
+            var defaultScheme = await schemes.GetDefaultChallengeSchemeAsync();
+            ArgumentNullException.ThrowIfNull(defaultScheme);
+
+            schemeName = defaultScheme.Name;
+        }
 
         return await service.GetAccessTokenAsync(
-            OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + parameters?.ChallengeScheme ?? "",
+            OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + schemeName,
             parameters, 
             cancellationToken);
     }
