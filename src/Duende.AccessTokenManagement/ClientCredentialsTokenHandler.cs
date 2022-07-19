@@ -6,7 +6,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Duende.AccessTokenManagement.ClientCredentials;
+namespace Duende.AccessTokenManagement;
 
 /// <summary>
 /// Delegating handler that injects a client credentials access token into an outgoing request

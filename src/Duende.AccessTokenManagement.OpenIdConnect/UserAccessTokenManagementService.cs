@@ -1,8 +1,10 @@
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
 using System;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Duende.AccessTokenManagement.ClientCredentials;
 using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;

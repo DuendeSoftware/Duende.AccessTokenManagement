@@ -4,10 +4,8 @@
 using System;
 using System.Collections.Generic;
 using IdentityModel.Client;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Duende.AccessTokenManagement.ClientCredentials;
 using IdentityModel;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -64,7 +62,7 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
             RefreshToken = refreshToken
         };
         
-        request.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+        request.Options.TryAdd(AccessTokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
         
         if (!string.IsNullOrEmpty(parameters.Resource))
         {
@@ -128,7 +126,7 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
             TokenTypeHint = OidcConstants.TokenTypes.RefreshToken
         };
         
-        request.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+        request.Options.TryAdd(AccessTokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
        
         if (parameters.Assertion != null)
         {

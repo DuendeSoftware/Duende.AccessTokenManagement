@@ -10,7 +10,7 @@ using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Duende.AccessTokenManagement.ClientCredentials;
+namespace Duende.AccessTokenManagement;
 
 /// <summary>
 /// Implements token endpoint operations using IdentityModel
@@ -88,7 +88,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
             }
         }
         
-        request.Options.TryAdd(TokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+        request.Options.TryAdd(AccessTokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
 
         HttpClient httpClient;
         if (client.HttpClient != null)
@@ -101,7 +101,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         }
         else
         {
-            httpClient = _httpClientFactory.CreateClient(TokenManagementDefaults.BackChannelHttpClientName);    
+            httpClient = _httpClientFactory.CreateClient(AccessTokenManagementDefaults.BackChannelHttpClientName);    
         }
         
         _logger.LogDebug("Requesting client credentials access token at endpoint: {endpoint}", request.Address);

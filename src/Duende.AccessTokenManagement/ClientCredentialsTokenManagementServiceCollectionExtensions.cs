@@ -3,7 +3,7 @@
 
 using System;
 using System.Net.Http;
-using Duende.AccessTokenManagement.ClientCredentials;
+using Duende.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -27,7 +27,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         services.TryAddTransient<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
         services.TryAddTransient<IClientAssertionService, DefaultClientAssertionService>();
         
-        services.AddHttpClient(TokenManagementDefaults.BackChannelHttpClientName);
+        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName);
 
         return new ClientCredentialsTokenManagementBuilder(services);
     }

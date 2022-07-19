@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace Duende.AccessTokenManagement.ClientCredentials;
+namespace Duende.AccessTokenManagement;
 
 /// <summary>
 /// Implements token management logic

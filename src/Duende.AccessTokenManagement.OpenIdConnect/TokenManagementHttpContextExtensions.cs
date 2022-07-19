@@ -5,7 +5,7 @@ using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
-using Duende.AccessTokenManagement.ClientCredentials;
+using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 
 namespace Microsoft.AspNetCore.Authentication;

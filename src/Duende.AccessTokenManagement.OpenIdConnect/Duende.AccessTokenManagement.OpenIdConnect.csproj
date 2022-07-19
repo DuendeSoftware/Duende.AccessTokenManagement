@@ -13,7 +13,7 @@
 
         <PackageReference Include="MinVer" Version="4.0.0" PrivateAssets="All" />
 
-        <ProjectReference Include="..\Duende.AccessTokenManagement.ClientCredentials\Duende.AccessTokenManagement.ClientCredentials.csproj" />
+        <ProjectReference Include="..\Duende.AccessTokenManagement\Duende.AccessTokenManagement.csproj" />
     </ItemGroup>
 
 </Project>

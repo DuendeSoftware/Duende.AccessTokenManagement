@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Duende.AccessTokenManagement.ClientCredentials;
+namespace Duende.AccessTokenManagement;
 
 /// <summary>
 /// Abstraction for managing client access tokens

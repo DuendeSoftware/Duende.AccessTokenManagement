@@ -56,7 +56,7 @@ namespace build
 
             Target(Targets.Pack, DependsOn(Targets.Build, Targets.CleanPackOutput), () =>
             {
-                Run("dotnet", $"pack ./src/Duende.AccessTokenManagement.ClientCredentials/Duende.AccessTokenManagement.ClientCredentials.csproj -c Release -o {Directory.CreateDirectory(packOutput).FullName} --no-build --nologo");
+                Run("dotnet", $"pack ./src/Duende.AccessTokenManagement/Duende.AccessTokenManagement.csproj -c Release -o {Directory.CreateDirectory(packOutput).FullName} --no-build --nologo");
                 Run("dotnet", $"pack ./src/Duende.AccessTokenManagement.OpenIdConnect/Duende.AccessTokenManagement.OpenIdConnect.csproj -c Release -o {Directory.CreateDirectory(packOutput).FullName} --no-build --nologo");
             });
 

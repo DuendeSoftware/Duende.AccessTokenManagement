@@ -1,7 +1,10 @@
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
 using System.Net.Http;
 using IdentityModel.Client;
 
-namespace Duende.AccessTokenManagement.ClientCredentials;
+namespace Duende.AccessTokenManagement;
 
 /// <summary>
 /// Defines a client credentials client
@@ -39,12 +42,12 @@ public class ClientCredentialsClient
     public string? Resource { get; set; }
 
     /// <summary>
-    /// The HTTP client name to use for the back-channel operations, will fall back to the standard client if not set
+    /// The HTTP client name to use for the backchannel operations, will fall back to the standard backchannel client if not set
     /// </summary>
     public string? HttpClientName { get; set; }
     
     /// <summary>
-    /// The HTTP client name to use for the back-channel operations, will override the HTTP client name if set
+    /// The HTTP client instance to use for the back-channel operations, will override the HTTP client name if set
     /// </summary>
     public HttpClient? HttpClient { get; set; }
 }

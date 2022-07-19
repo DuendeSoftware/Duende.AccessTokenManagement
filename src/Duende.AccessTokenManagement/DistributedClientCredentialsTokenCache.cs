@@ -9,7 +9,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Duende.AccessTokenManagement.ClientCredentials;
+namespace Duende.AccessTokenManagement;
 
 /// <summary>
 /// Client access token cache using IDistributedCache
@@ -26,7 +26,10 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     /// <param name="cache"></param>
     /// <param name="options"></param>
     /// <param name="logger"></param>
-    public DistributedClientCredentialsTokenCache(IDistributedCache cache, IOptions<ClientCredentialsTokenManagementOptions> options, ILogger<DistributedClientCredentialsTokenCache> logger)
+    public DistributedClientCredentialsTokenCache(
+        IDistributedCache cache, 
+        IOptions<ClientCredentialsTokenManagementOptions> options, 
+        ILogger<DistributedClientCredentialsTokenCache> logger)
     {
         _cache = cache;
         _logger = logger;
@@ -109,8 +112,8 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
         string clientName,
         ClientCredentialsTokenRequestParameters? parameters = null)
     {
-        var s = "s" + parameters?.Scope ?? "";
-        var r = "r" + parameters?.Resource ?? "";
+        var s = "s_" + parameters?.Scope ?? "";
+        var r = "r_" + parameters?.Resource ?? "";
 
         return options.CacheKeyPrefix + "::" + clientName + "::" + s + "::" + r;
     }

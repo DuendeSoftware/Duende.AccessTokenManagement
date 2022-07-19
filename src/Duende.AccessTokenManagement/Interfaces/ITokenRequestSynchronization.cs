@@ -4,7 +4,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Duende.AccessTokenManagement.ClientCredentials;
+namespace Duende.AccessTokenManagement;
 
 /// <summary>
 /// Service to provide synchronization to token endpoint requests

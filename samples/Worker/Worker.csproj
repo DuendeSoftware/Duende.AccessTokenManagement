@@ -11,6 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Duende.AccessTokenManagement.ClientCredentials\Duende.AccessTokenManagement.ClientCredentials.csproj" />
+    <ProjectReference Include="..\..\src\Duende.AccessTokenManagement\Duende.AccessTokenManagement.csproj" />
   </ItemGroup>
 </Project>

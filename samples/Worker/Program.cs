@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
-using Duende.AccessTokenManagement.ClientCredentials;
+using Duende.AccessTokenManagement;
 using Serilog.Sinks.SystemConsole.Themes;
 
 namespace WorkerService;

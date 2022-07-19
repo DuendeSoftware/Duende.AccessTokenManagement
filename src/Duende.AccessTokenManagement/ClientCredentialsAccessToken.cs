@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Duende.AccessTokenManagement.ClientCredentials;
+namespace Duende.AccessTokenManagement;
 
 /// <summary>
 /// Represents a client access token
