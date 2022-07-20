@@ -1,6 +1,7 @@
-using System.Net;
 using System.Text.Json;
+using ClientCredentialTests.Services;
 using Duende.AccessTokenManagement;
+using IdentityModel;
 using IdentityModel.Client;
 using Microsoft.Extensions.DependencyInjection;
 using RichardSzalay.MockHttp;
@@ -20,15 +21,12 @@ public class ManagementServiceTests
         var provider = services.BuildServiceProvider();
         var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
 
-        Func<Task> action = async () =>
+        async Task action()
         {
             var token = await sut.GetAccessTokenAsync("unknown");
-        };
-        
-        await Should.ThrowAsync<InvalidOperationException>(() => action());
-        
-        
-        
+        }
+
+        await Should.ThrowAsync<InvalidOperationException>(action);
     }
     
     [Theory]
@@ -63,6 +61,228 @@ public class ManagementServiceTests
             expectedRequestFormData.Add("client_secret", "client_secret");
         }
 
+        var response = new
+        {
+            access_token = "access_token",
+            expires_in = 60,
+            scope = "scope"
+        };
+        
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+
+        if (style == ClientCredentialStyle.PostBody)
+        {
+            mockHttp.Expect("/connect/token")
+                .WithFormData(expectedRequestFormData)
+                .Respond("application/json", JsonSerializer.Serialize(response));
+        }
+        else if (style == ClientCredentialStyle.AuthorizationHeader)
+        {
+            mockHttp.Expect("/connect/token")
+                .WithFormData(expectedRequestFormData)
+                .WithHeaders("Authorization", "Basic " + BasicAuthenticationOAuthHeaderValue.EncodeCredential("client_id", "client_secret"))
+                .Respond("application/json", JsonSerializer.Serialize(response));
+        }
+
+        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test");
+        mockHttp.VerifyNoOutstandingExpectation();
+
+        token.Value.ShouldBe("access_token");
+        token.Scope.ShouldBe("scope");
+        token.IsError.ShouldBeFalse();
+        
+        token.Expiration.ShouldBeGreaterThan(DateTimeOffset.Now);
+        token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
+    }
+    
+    
+    [Fact]
+    public async Task Missing_expires_in_response_should_create_long_lived_token()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDistributedMemoryCache();
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.Address = "https://as/connect/token";
+                client.ClientId = "client_id";
+            });
+
+        var expectedResponse = new
+        {
+            access_token = "access_token",
+            scope = "scope"
+        };
+        
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+        
+        mockHttp.Expect("/connect/token")
+            .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
+
+        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test");
+        mockHttp.VerifyNoOutstandingExpectation();
+
+        token.Value.ShouldBe("access_token");
+        token.Scope.ShouldBe("scope");
+        token.IsError.ShouldBeFalse();
+        
+        token.Expiration.ShouldBe(DateTimeOffset.MaxValue);
+    }
+    
+    [Fact]
+    public async Task Request_parameters_should_take_precedence_over_configuration()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDistributedMemoryCache();
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.Address = "https://as/connect/token";
+                client.ClientId = "client_id";
+                client.ClientSecret = "client_secret";
+                
+                client.Scope = "scope";
+                client.Resource = "resource";
+            });
+
+        var request = new ClientCredentialsTokenRequestParameters
+        {
+            Scope = "scope_per_request",
+            Resource = "resource_per_request"
+        };
+        
+        var expectedRequestFormData = new Dictionary<string, string>
+        {
+            { "scope", "scope_per_request" },
+            { "resource", "resource_per_request" },
+        };
+
+        var response = new
+        {
+            access_token = "access_token",
+            expires_in = 60,
+            scope = "scope_per_request"
+        };
+        
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+        
+        mockHttp.Expect("/connect/token")
+            .WithFormData(expectedRequestFormData)
+            .Respond("application/json", JsonSerializer.Serialize(response));
+
+        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test", request);
+        mockHttp.VerifyNoOutstandingExpectation();
+        
+        token.IsError.ShouldBeFalse();
+    }
+    
+    [Fact]
+    public async Task Request_assertions_should_be_sent_correctly()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDistributedMemoryCache();
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.Address = "https://as/connect/token";
+                client.ClientId = "client_id";
+                client.ClientSecret = "client_secret";
+
+                client.Scope = "scope";
+                client.Resource = "resource";
+            });
+
+        var request = new ClientCredentialsTokenRequestParameters
+        {
+            Assertion = new()
+            {
+                Type = "type",
+                Value = "value"
+            }
+        };
+        
+        var expectedRequestFormData = new Dictionary<string, string>
+        {
+            { OidcConstants.TokenRequest.ClientAssertionType, "type" },
+            { OidcConstants.TokenRequest.ClientAssertion, "value" },
+        };
+
+        var expectedResponse = new
+        {
+            access_token = "access_token",
+            expires_in = 60,
+            scope = "scope"
+        };
+        
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+        
+        mockHttp.Expect("/connect/token")
+            .WithFormData(expectedRequestFormData)
+            .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
+
+        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test", request);
+        mockHttp.VerifyNoOutstandingExpectation();
+        
+        token.IsError.ShouldBeFalse();
+    }
+    
+    [Fact]
+    public async Task Service_assertions_should_be_sent_correctly()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDistributedMemoryCache();
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.Address = "https://as/connect/token";
+                client.ClientId = "client_id";
+                client.ClientSecret = "client_secret";
+
+                client.Scope = "scope";
+                client.Resource = "resource";
+            });
+
+        services.AddTransient<IClientAssertionService>(sp =>
+            new TestClientAssertionService("test", "service_type", "service_value"));
+        
+        var expectedRequestFormData = new Dictionary<string, string>
+        {
+            { OidcConstants.TokenRequest.ClientAssertionType, "service_type" },
+            { OidcConstants.TokenRequest.ClientAssertion, "service_value" },
+        };
+
         var expectedResponse = new
         {
             access_token = "access_token",
@@ -85,12 +305,68 @@ public class ManagementServiceTests
 
         var token = await sut.GetAccessTokenAsync("test");
         mockHttp.VerifyNoOutstandingExpectation();
-
-        token.Value.ShouldBe("access_token");
-        token.Scope.ShouldBe("scope");
-        token.IsError.ShouldBeFalse();
         
-        token.Expiration.ShouldBeGreaterThan(DateTimeOffset.Now);
-        token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
+        token.IsError.ShouldBeFalse();
+    }
+    
+    [Fact]
+    public async Task Request_assertion_should_take_precedence_over_service_assertion()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDistributedMemoryCache();
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.Address = "https://as/connect/token";
+                client.ClientId = "client_id";
+                client.ClientSecret = "client_secret";
+
+                client.Scope = "scope";
+                client.Resource = "resource";
+            });
+
+        services.AddTransient<IClientAssertionService>(sp =>
+            new TestClientAssertionService("test", "service_type", "service_value"));
+        
+        var request = new ClientCredentialsTokenRequestParameters
+        {
+            Assertion = new()
+            {
+                Type = "request_type",
+                Value = "request_value"
+            }
+        };
+
+        var expectedRequestFormData = new Dictionary<string, string>
+        {
+            { OidcConstants.TokenRequest.ClientAssertionType, "request_type" },
+            { OidcConstants.TokenRequest.ClientAssertion, "request_value" },
+        };
+
+        var expectedResponse = new
+        {
+            access_token = "access_token",
+            expires_in = 60,
+            scope = "scope"
+        };
+        
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+        
+        mockHttp.Expect("/connect/token")
+            .WithFormData(expectedRequestFormData)
+            .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
+
+        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test", request);
+        mockHttp.VerifyNoOutstandingExpectation();
+        
+        token.IsError.ShouldBeFalse();
     }
 }

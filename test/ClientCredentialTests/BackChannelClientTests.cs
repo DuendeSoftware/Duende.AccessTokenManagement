@@ -5,7 +5,6 @@ using System.Net;
 using Duende.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection;
 using RichardSzalay.MockHttp;
-using Shouldly;
 
 namespace ClientCredentialTests;
 
@@ -32,7 +31,7 @@ public class BackChannelClientTests
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();
-        var sut = provider.GetService<IClientCredentialsTokenManagementService>();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
 
         var token = await sut.GetAccessTokenAsync("test");
         
@@ -64,7 +63,7 @@ public class BackChannelClientTests
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();
-        var sut = provider.GetService<IClientCredentialsTokenManagementService>();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
 
         var token = await sut.GetAccessTokenAsync("test");
         
@@ -94,7 +93,7 @@ public class BackChannelClientTests
             });
      
         var provider = services.BuildServiceProvider();
-        var sut = provider.GetService<IClientCredentialsTokenManagementService>();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
 
         var token = await sut.GetAccessTokenAsync("test");
         
