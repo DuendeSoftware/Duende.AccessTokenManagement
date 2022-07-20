@@ -48,10 +48,16 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         CancellationToken cancellationToken = default)
     {
         var client = _options.Get(clientName);
+
+        if (string.IsNullOrWhiteSpace(client.Address) || string.IsNullOrEmpty(client.ClientId))
+        {
+            throw new InvalidOperationException("unknown client");
+        }
         
         var request = new ClientCredentialsTokenRequest
         {
             Address = client.Address,
+            Scope = client.Scope,
             ClientId = client.ClientId,
             ClientSecret = client.ClientSecret,
             ClientCredentialStyle = client.ClientCredentialStyle
@@ -68,6 +74,11 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         {
             request.Resource.Clear();
             request.Resource.Add(parameters.Resource);
+        }
+        else if (!string.IsNullOrWhiteSpace(client.Resource))
+        {
+            request.Resource.Clear();
+            request.Resource.Add(client.Resource);
         }
 
         // if assertion gets passed in explicitly, use it.
