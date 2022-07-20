@@ -43,7 +43,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
         ClientCredentialsTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
-        if (clientName is null) throw new ArgumentNullException(nameof(clientName));
+        ArgumentNullException.ThrowIfNull(clientName);
             
         var cacheExpiration = clientCredentialsAccessToken.Expiration.AddSeconds(-_options.CacheLifetimeBuffer);
         var data = JsonSerializer.Serialize(clientCredentialsAccessToken);
@@ -115,6 +115,6 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
         var s = "s_" + parameters?.Scope ?? "";
         var r = "r_" + parameters?.Resource ?? "";
 
-        return options.CacheKeyPrefix + "::" + clientName + "::" + s + "::" + r;
+        return options.CacheKeyPrefix + clientName + "::" + s + "::" + r;
     }
 }

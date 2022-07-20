@@ -17,7 +17,7 @@ public class ManagementServiceTests
 
         services.AddDistributedMemoryCache();
         services.AddClientCredentialsTokenManagement();
-          
+
         var provider = services.BuildServiceProvider();
         var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
 
@@ -28,11 +28,11 @@ public class ManagementServiceTests
 
         await Should.ThrowAsync<InvalidOperationException>(action);
     }
-    
+
     [Theory]
     [InlineData(ClientCredentialStyle.AuthorizationHeader)]
     [InlineData(ClientCredentialStyle.PostBody)]
-    public async Task Valid_token_request_should_return_expected_values(ClientCredentialStyle style)
+    public async Task Token_request_and_response_should_have_expected_values(ClientCredentialStyle style)
     {
         var services = new ServiceCollection();
 
@@ -44,11 +44,11 @@ public class ManagementServiceTests
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
                 client.ClientCredentialStyle = style;
-                
+
                 client.Scope = "scope";
                 client.Resource = "resource";
             });
-        
+
         var expectedRequestFormData = new Dictionary<string, string>
         {
             { "scope", "scope" },
@@ -67,7 +67,7 @@ public class ManagementServiceTests
             expires_in = 60,
             scope = "scope"
         };
-        
+
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
 
@@ -81,7 +81,8 @@ public class ManagementServiceTests
         {
             mockHttp.Expect("/connect/token")
                 .WithFormData(expectedRequestFormData)
-                .WithHeaders("Authorization", "Basic " + BasicAuthenticationOAuthHeaderValue.EncodeCredential("client_id", "client_secret"))
+                .WithHeaders("Authorization",
+                    "Basic " + BasicAuthenticationOAuthHeaderValue.EncodeCredential("client_id", "client_secret"))
                 .Respond("application/json", JsonSerializer.Serialize(response));
         }
 
@@ -97,12 +98,12 @@ public class ManagementServiceTests
         token.Value.ShouldBe("access_token");
         token.Scope.ShouldBe("scope");
         token.IsError.ShouldBeFalse();
-        
+
         token.Expiration.ShouldBeGreaterThan(DateTimeOffset.Now);
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
     }
-    
-    
+
+
     [Fact]
     public async Task Missing_expires_in_response_should_create_long_lived_token()
     {
@@ -121,10 +122,10 @@ public class ManagementServiceTests
             access_token = "access_token",
             scope = "scope"
         };
-        
+
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
-        
+
         mockHttp.Expect("/connect/token")
             .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
 
@@ -140,10 +141,10 @@ public class ManagementServiceTests
         token.Value.ShouldBe("access_token");
         token.Scope.ShouldBe("scope");
         token.IsError.ShouldBeFalse();
-        
+
         token.Expiration.ShouldBe(DateTimeOffset.MaxValue);
     }
-    
+
     [Fact]
     public async Task Request_parameters_should_take_precedence_over_configuration()
     {
@@ -156,7 +157,7 @@ public class ManagementServiceTests
                 client.Address = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
-                
+
                 client.Scope = "scope";
                 client.Resource = "resource";
             });
@@ -166,7 +167,7 @@ public class ManagementServiceTests
             Scope = "scope_per_request",
             Resource = "resource_per_request"
         };
-        
+
         var expectedRequestFormData = new Dictionary<string, string>
         {
             { "scope", "scope_per_request" },
@@ -179,10 +180,10 @@ public class ManagementServiceTests
             expires_in = 60,
             scope = "scope_per_request"
         };
-        
+
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
-        
+
         mockHttp.Expect("/connect/token")
             .WithFormData(expectedRequestFormData)
             .Respond("application/json", JsonSerializer.Serialize(response));
@@ -195,10 +196,10 @@ public class ManagementServiceTests
 
         var token = await sut.GetAccessTokenAsync("test", request);
         mockHttp.VerifyNoOutstandingExpectation();
-        
+
         token.IsError.ShouldBeFalse();
     }
-    
+
     [Fact]
     public async Task Request_assertions_should_be_sent_correctly()
     {
@@ -224,7 +225,7 @@ public class ManagementServiceTests
                 Value = "value"
             }
         };
-        
+
         var expectedRequestFormData = new Dictionary<string, string>
         {
             { OidcConstants.TokenRequest.ClientAssertionType, "type" },
@@ -237,10 +238,10 @@ public class ManagementServiceTests
             expires_in = 60,
             scope = "scope"
         };
-        
+
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
-        
+
         mockHttp.Expect("/connect/token")
             .WithFormData(expectedRequestFormData)
             .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
@@ -253,10 +254,10 @@ public class ManagementServiceTests
 
         var token = await sut.GetAccessTokenAsync("test", request);
         mockHttp.VerifyNoOutstandingExpectation();
-        
+
         token.IsError.ShouldBeFalse();
     }
-    
+
     [Fact]
     public async Task Service_assertions_should_be_sent_correctly()
     {
@@ -276,7 +277,7 @@ public class ManagementServiceTests
 
         services.AddTransient<IClientAssertionService>(sp =>
             new TestClientAssertionService("test", "service_type", "service_value"));
-        
+
         var expectedRequestFormData = new Dictionary<string, string>
         {
             { OidcConstants.TokenRequest.ClientAssertionType, "service_type" },
@@ -289,10 +290,10 @@ public class ManagementServiceTests
             expires_in = 60,
             scope = "scope"
         };
-        
+
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
-        
+
         mockHttp.Expect("/connect/token")
             .WithFormData(expectedRequestFormData)
             .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
@@ -305,10 +306,10 @@ public class ManagementServiceTests
 
         var token = await sut.GetAccessTokenAsync("test");
         mockHttp.VerifyNoOutstandingExpectation();
-        
+
         token.IsError.ShouldBeFalse();
     }
-    
+
     [Fact]
     public async Task Request_assertion_should_take_precedence_over_service_assertion()
     {
@@ -328,7 +329,7 @@ public class ManagementServiceTests
 
         services.AddTransient<IClientAssertionService>(sp =>
             new TestClientAssertionService("test", "service_type", "service_value"));
-        
+
         var request = new ClientCredentialsTokenRequestParameters
         {
             Assertion = new()
@@ -350,10 +351,10 @@ public class ManagementServiceTests
             expires_in = 60,
             scope = "scope"
         };
-        
+
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
-        
+
         mockHttp.Expect("/connect/token")
             .WithFormData(expectedRequestFormData)
             .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
@@ -366,7 +367,52 @@ public class ManagementServiceTests
 
         var token = await sut.GetAccessTokenAsync("test", request);
         mockHttp.VerifyNoOutstandingExpectation();
+
+        token.IsError.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Service_should_hit_network_only_once_and_then_use_cache()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDistributedMemoryCache();
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.Address = "https://as/connect/token";
+                client.ClientId = "client_id";
+            });
+
+        var response = new
+        {
+            access_token = "access_token",
+            expires_in = 3600,
+            scope = "scope"
+        };
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+        
+        var mockedRequest = mockHttp.Expect("/connect/token")
+            .Respond("application/json", JsonSerializer.Serialize(response));
+        
+        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test");
+        mockHttp.VerifyNoOutstandingExpectation();
+
+        token.Value.ShouldBe("access_token");
+        
+        // 2nd request
+        token = await sut.GetAccessTokenAsync("test");
         
         token.IsError.ShouldBeFalse();
+        token.Value.ShouldBe("access_token");
+        mockHttp.GetMatchCount(mockedRequest).ShouldBe(1);
     }
 }
