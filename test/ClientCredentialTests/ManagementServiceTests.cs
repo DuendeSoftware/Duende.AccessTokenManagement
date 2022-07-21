@@ -415,4 +415,51 @@ public class ManagementServiceTests
         token.Value.ShouldBe("access_token");
         mockHttp.GetMatchCount(mockedRequest).ShouldBe(1);
     }
+    
+    [Fact]
+    public async Task Service_should_always_hit_network_with_force_renewal()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDistributedMemoryCache();
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.Address = "https://as/connect/token";
+                client.ClientId = "client_id";
+            });
+
+        var response = new
+        {
+            access_token = "access_token",
+            expires_in = 3600,
+            scope = "scope"
+        };
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+        
+        mockHttp.Expect("/connect/token")
+            .Respond("application/json", JsonSerializer.Serialize(response));
+        
+        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test");
+        mockHttp.VerifyNoOutstandingExpectation();
+
+        token.Value.ShouldBe("access_token");
+        
+        // 2nd request
+        mockHttp.Expect("/connect/token")
+            .Respond("application/json", JsonSerializer.Serialize(response));
+        
+        token = await sut.GetAccessTokenAsync("test", new ClientCredentialsTokenRequestParameters { ForceRenewal = true });
+        
+        token.IsError.ShouldBeFalse();
+        token.Value.ShouldBe("access_token");
+    }
 }
