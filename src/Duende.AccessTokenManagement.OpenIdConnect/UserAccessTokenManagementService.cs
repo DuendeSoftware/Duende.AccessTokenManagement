@@ -32,7 +32,6 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     /// <param name="clock"></param>
     /// <param name="options"></param>
     /// <param name="tokenEndpointService"></param>
-    /// <param name="clientCredentialsTokenManagementService"></param>
     /// <param name="logger"></param>
     public UserAccessAccessTokenManagementService(
         IUserAccessTokenRequestSynchronization sync,
