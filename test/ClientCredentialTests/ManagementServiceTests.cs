@@ -451,7 +451,7 @@ public class ManagementServiceTests
         var token = await sut.GetAccessTokenAsync("test");
         mockHttp.VerifyNoOutstandingExpectation();
 
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
         
         // 2nd request
         mockHttp.Expect("/connect/token")
@@ -460,6 +460,6 @@ public class ManagementServiceTests
         token = await sut.GetAccessTokenAsync("test", new ClientCredentialsTokenRequestParameters { ForceRenewal = true });
         
         token.IsError.ShouldBeFalse();
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
     }
 }
