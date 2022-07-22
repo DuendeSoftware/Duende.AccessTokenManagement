@@ -71,7 +71,7 @@ public static class TokenManagementHttpContextExtensions
         var options = httpContext.RequestServices.GetRequiredService<IOptions<UserAccessTokenManagementOptions>>();
         var schemes = httpContext.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
 
-        var schemeName = parameters?.ChallengeScheme ?? options.Value.SchemeName;
+        var schemeName = parameters?.ChallengeScheme ?? options.Value.ChallengeScheme;
         
         if (string.IsNullOrEmpty(schemeName))
         {

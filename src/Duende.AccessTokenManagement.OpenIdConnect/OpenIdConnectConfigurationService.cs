@@ -39,7 +39,7 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
     {
         OpenIdConnectOptions options;
 
-        var configScheme = schemeName ?? _userAccessTokenManagementOptions.Value.SchemeName;
+        var configScheme = schemeName ?? _userAccessTokenManagementOptions.Value.ChallengeScheme;
 
         if (string.IsNullOrWhiteSpace(configScheme))
         {

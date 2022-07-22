@@ -27,7 +27,9 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
 
         services.AddClientCredentialsTokenManagement();
         services.AddSingleton<IConfigureOptions<ClientCredentialsClient>, ConfigureOpenIdConnectClientCredentialsOptions>();
-        
+        // TODO: maybe return a builder with a ConfigureScheme that adds IConfigureNamedOptions/IPostConfigureNamedOptions with the naming convention?
+        // for example, per-scheme client credentials style, scope, etc settings
+
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
         services.TryAddTransient<IOpenIdConnectConfigurationService, OpenIdConnectConfigurationService>();
         services.TryAddTransient<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();

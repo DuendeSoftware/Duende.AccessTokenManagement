@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Microsoft.Extensions.Options;
+using System;
 
 namespace Duende.AccessTokenManagement.OpenIdConnect;
 
@@ -39,6 +40,11 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
         if (name.Length > OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix.Length)
         {
             scheme = name[OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix.Length..];
+        }
+
+        if (String.IsNullOrWhiteSpace(scheme))
+        {
+            throw new ArgumentException("Missing scheme when used with OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix");
         }
         
         var oidc = _configurationService.GetOpenIdConnectConfigurationAsync(scheme).GetAwaiter().GetResult();

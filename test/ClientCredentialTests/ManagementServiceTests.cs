@@ -95,7 +95,7 @@ public class ManagementServiceTests
         var token = await sut.GetAccessTokenAsync("test");
         mockHttp.VerifyNoOutstandingExpectation();
 
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
         token.Scope.ShouldBe("scope");
         token.IsError.ShouldBeFalse();
 
@@ -138,7 +138,7 @@ public class ManagementServiceTests
         var token = await sut.GetAccessTokenAsync("test");
         mockHttp.VerifyNoOutstandingExpectation();
 
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
         token.Scope.ShouldBe("scope");
         token.IsError.ShouldBeFalse();
 
@@ -406,13 +406,13 @@ public class ManagementServiceTests
         var token = await sut.GetAccessTokenAsync("test");
         mockHttp.VerifyNoOutstandingExpectation();
 
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
         
         // 2nd request
         token = await sut.GetAccessTokenAsync("test");
         
         token.IsError.ShouldBeFalse();
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
         mockHttp.GetMatchCount(mockedRequest).ShouldBe(1);
     }
 }
