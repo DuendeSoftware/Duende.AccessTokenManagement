@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F65AC342-86D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{0B14DE7B-43BD-4570-B6AB-37EDA32032FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientCredentialTests", "test\ClientCredentialTests\ClientCredentialTests.csproj", "{11D9707F-E9AB-47BC-82E0-699AA0C49211}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "test\Tests\Tests.csproj", "{11D9707F-E9AB-47BC-82E0-699AA0C49211}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorServer", "samples\BlazorServer\BlazorServer.csproj", "{AB15F574-FDF0-4117-9E4F-9D35EEA65125}"
 EndProject

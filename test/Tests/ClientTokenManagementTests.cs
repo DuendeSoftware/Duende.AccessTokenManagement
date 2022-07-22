@@ -8,7 +8,7 @@ using RichardSzalay.MockHttp;
 
 namespace ClientCredentialTests;
 
-public class ManagementServiceTests
+public class ClientTokenManagementTests
 {
     [Fact]
     public async Task Unknown_client_should_throw_exception()
