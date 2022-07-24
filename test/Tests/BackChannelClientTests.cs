@@ -2,11 +2,10 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Net;
-using Duende.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection;
 using RichardSzalay.MockHttp;
 
-namespace ClientCredentialTests;
+namespace Duende.AccessTokenManagement.Tests;
 
 public class BackChannelClientTests
 {

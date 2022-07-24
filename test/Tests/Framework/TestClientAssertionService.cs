@@ -1,7 +1,6 @@
-using Duende.AccessTokenManagement;
 using IdentityModel.Client;
 
-namespace ClientCredentialTests.Services;
+namespace Duende.AccessTokenManagement.Tests;
 
 public class TestClientAssertionService : IClientAssertionService
 {

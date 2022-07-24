@@ -1,16 +1,12 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ClientCredentialTests;
+namespace Duende.AccessTokenManagement.Tests;
 
-public class UserTokenManagementTests
+public class UserTokenManagementTests : IntegrationTestBase
 {
     [Fact]
     public async Task Foo()
     {
-        var services = new ServiceCollection();
-
-        services.AddDistributedMemoryCache();
-        services.AddAuthentication();
-
+        await AppHost.LoginAsync("alice");
     }
 }
