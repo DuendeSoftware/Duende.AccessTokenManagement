@@ -49,7 +49,7 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
         
         var oidc = _configurationService.GetOpenIdConnectConfigurationAsync(scheme).GetAwaiter().GetResult();
             
-        options.Address = oidc.TokenEndpoint;
+        options.TokenEndpoint = oidc.TokenEndpoint;
         options.ClientId = oidc.ClientId;
         options.ClientSecret = oidc.ClientSecret;
         options.ClientCredentialStyle = _options.ClientCredentialStyle;

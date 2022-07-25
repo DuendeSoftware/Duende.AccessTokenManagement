@@ -14,7 +14,7 @@ public class ClientCredentialsClient
     /// <summary>
     /// The address of the token endpoint
     /// </summary>
-    public string? Address { get; set; }
+    public string? TokenEndpoint { get; set; }
     
     /// <summary>
     /// The client ID 

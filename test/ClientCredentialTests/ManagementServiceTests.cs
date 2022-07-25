@@ -40,7 +40,7 @@ public class ManagementServiceTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
                 client.ClientCredentialStyle = style;
@@ -113,7 +113,7 @@ public class ManagementServiceTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
             });
 
@@ -154,7 +154,7 @@ public class ManagementServiceTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
 
@@ -209,7 +209,7 @@ public class ManagementServiceTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
 
@@ -267,7 +267,7 @@ public class ManagementServiceTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
 
@@ -319,7 +319,7 @@ public class ManagementServiceTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
 
@@ -380,7 +380,7 @@ public class ManagementServiceTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
             });
 
@@ -425,7 +425,7 @@ public class ManagementServiceTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
             });
 

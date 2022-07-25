@@ -19,7 +19,7 @@ public class BackChannelClientTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as";
+                client.TokenEndpoint = "https://as";
                 client.ClientId = "id";
             });
         
@@ -49,7 +49,7 @@ public class BackChannelClientTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as";
+                client.TokenEndpoint = "https://as";
                 client.ClientId = "id";
                 
                 client.HttpClientName = "custom";
@@ -86,7 +86,7 @@ public class BackChannelClientTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as";
+                client.TokenEndpoint = "https://as";
                 client.ClientId = "id";
                 
                 client.HttpClient = mockClient;
