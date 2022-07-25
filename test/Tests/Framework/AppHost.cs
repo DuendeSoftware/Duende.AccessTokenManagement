@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using RichardSzalay.MockHttp;
 
 namespace Duende.AccessTokenManagement.Tests;
 
@@ -14,7 +16,10 @@ public class AppHost : GenericHost
     private readonly ApiHost _apiHost;
     private readonly string _clientId;
         
-    public AppHost(IdentityServerHost identityServerHost, ApiHost apiHost, string clientId,
+    public AppHost(
+        IdentityServerHost identityServerHost, 
+        ApiHost apiHost, 
+        string clientId,
         string baseAddress = "https://app")
         : base(baseAddress)
     {
@@ -26,10 +31,15 @@ public class AppHost : GenericHost
         OnConfigure += Configure;
     }
 
+    public MockHttpMessageHandler? MockHttpHandler { get; set; }
+
     private void ConfigureServices(IServiceCollection services)
     {
         services.AddRouting();
         services.AddAuthorization();
+
+        services.AddDistributedMemoryCache();
+        services.AddOpenIdConnectAccessTokenManagement();
 
         services.AddAuthentication("cookie")
             .AddCookie("cookie", options =>
@@ -67,6 +77,12 @@ public class AppHost : GenericHost
                     options.Scope.Add("offline_access");
                 }
 
+                if (MockHttpHandler != null)
+                {
+                    MockHttpHandler.Fallback.Respond(_identityServerHost.Server.CreateClient());
+                    options.Backchannel = MockHttpHandler.ToHttpClient();
+                }
+                
                 options.BackchannelHttpHandler = _identityServerHost.Server.CreateHandler();
             });
     }
@@ -90,6 +106,18 @@ public class AppHost : GenericHost
             endpoints.MapGet("/logout", async context =>
             {
                 await context.SignOutAsync();
+            });
+            
+            endpoints.MapGet("/user_token", async context =>
+            {
+                var token = await context.GetUserAccessTokenAsync();
+                await context.Response.WriteAsJsonAsync(token);
+            });
+            
+            endpoints.MapGet("/client_token", async context =>
+            {
+                var token = await context.GetClientAccessTokenAsync();
+                await context.Response.WriteAsJsonAsync(token);
             });
         });
     }

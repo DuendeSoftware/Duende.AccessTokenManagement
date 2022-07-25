@@ -21,31 +21,21 @@ public class IntegrationTestBase
             
         IdentityServerHost.Clients.Add(new Client
         {
-            ClientId = "spa",
+            ClientId = "web",
             ClientSecrets = { new Secret("secret".Sha256()) },
             AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
             RedirectUris = { "https://app/signin-oidc" },
             PostLogoutRedirectUris = { "https://app/signout-callback-oidc" },
-            BackChannelLogoutUri = "https://app/bff/backchannel",
             AllowOfflineAccess = true,
             AllowedScopes = { "openid", "profile", "scope1" }
         });
-            
-            
-        IdentityServerHost.OnConfigureServices += services => {
-            services.AddTransient<IBackChannelLogoutHttpClient>(provider => 
-                new DefaultBackChannelLogoutHttpClient(
-                    AppHost.HttpClient, 
-                    provider.GetRequiredService<ILoggerFactory>(), 
-                    provider.GetRequiredService<ICancellationTokenProvider>()));
-        };
             
         IdentityServerHost.InitializeAsync().Wait();
 
         ApiHost = new ApiHost(IdentityServerHost, "scope1");
         ApiHost.InitializeAsync().Wait();
 
-        AppHost = new AppHost(IdentityServerHost, ApiHost, "spa");
+        AppHost = new AppHost(IdentityServerHost, ApiHost, "web");
         AppHost.InitializeAsync().Wait();
     }
 
