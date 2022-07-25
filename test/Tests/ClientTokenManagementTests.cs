@@ -1,14 +1,12 @@
 using System.Text.Json;
-using ClientCredentialTests.Services;
-using Duende.AccessTokenManagement;
 using IdentityModel;
 using IdentityModel.Client;
 using Microsoft.Extensions.DependencyInjection;
 using RichardSzalay.MockHttp;
 
-namespace ClientCredentialTests;
+namespace Duende.AccessTokenManagement.Tests;
 
-public class ManagementServiceTests
+public class ClientTokenManagementTests
 {
     [Fact]
     public async Task Unknown_client_should_throw_exception()
