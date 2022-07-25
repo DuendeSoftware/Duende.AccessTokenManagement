@@ -57,7 +57,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 _logger.LogInformation("Cannot authenticate scheme: {scheme}", parameters.SignInScheme ?? "default signin scheme");
 
-                return new UserAccessToken();
+                return new UserAccessToken() { Error = "Cannot authenticate scheme" };
             }
 
             if (result.Properties == null)
@@ -65,7 +65,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 _logger.LogInformation("Authentication result properties are null for scheme: {scheme}",
                     parameters.SignInScheme ?? "default signin scheme");
 
-                return new UserAccessToken();
+                return new UserAccessToken() { Error = "No properties on authentication result" };
             }
 
             var tokens = result.Properties.Items.Where(i => i.Key.StartsWith(TokenPrefix)).ToList();
@@ -73,7 +73,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 _logger.LogInformation("No tokens found in cookie properties. SaveTokens must be enabled for automatic token refresh.");
 
-                return new UserAccessToken();
+                return new UserAccessToken() { Error = "No tokens in properties" };
             }
 
             var tokenName = $"{TokenPrefix}{OpenIdConnectParameterNames.AccessToken}";
@@ -114,7 +114,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
             return new UserAccessToken
             {
-                Value = accessToken,
+                AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 Expiration = dtExpires
             };
@@ -158,7 +158,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 expiresName += $"||{parameters.ChallengeScheme}";
             }
 
-            result.Properties!.Items[$"{TokenPrefix}{tokenName}"] = token.Value;
+            result.Properties!.Items[$"{TokenPrefix}{tokenName}"] = token.AccessToken;
             result.Properties!.Items[$"{TokenPrefix}{expiresName}"] = token.Expiration.ToString("o", CultureInfo.InvariantCulture);
 
             if (token.RefreshToken != null)

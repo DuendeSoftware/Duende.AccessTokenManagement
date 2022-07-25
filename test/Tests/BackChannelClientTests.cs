@@ -18,7 +18,7 @@ public class BackChannelClientTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as";
+                client.TokenEndpoint = "https://as";
                 client.ClientId = "id";
             });
         
@@ -34,7 +34,7 @@ public class BackChannelClientTests
 
         var token = await sut.GetAccessTokenAsync("test");
         
-        token.Value.ShouldBeNull();
+        token.AccessToken.ShouldBeNull();
         token.Error.ShouldBe("Not Found");
         mockHttp.GetMatchCount(request).ShouldBe(1);
     }
@@ -48,7 +48,7 @@ public class BackChannelClientTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as";
+                client.TokenEndpoint = "https://as";
                 client.ClientId = "id";
                 
                 client.HttpClientName = "custom";
@@ -66,7 +66,7 @@ public class BackChannelClientTests
 
         var token = await sut.GetAccessTokenAsync("test");
         
-        token.Value.ShouldBeNull();
+        token.AccessToken.ShouldBeNull();
         token.Error.ShouldBe("Not Found");
         mockHttp.GetMatchCount(request).ShouldBe(1);
     }
@@ -85,7 +85,7 @@ public class BackChannelClientTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as";
+                client.TokenEndpoint = "https://as";
                 client.ClientId = "id";
                 
                 client.HttpClient = mockClient;
@@ -96,7 +96,7 @@ public class BackChannelClientTests
 
         var token = await sut.GetAccessTokenAsync("test");
         
-        token.Value.ShouldBeNull();
+        token.AccessToken.ShouldBeNull();
         token.Error.ShouldBe("Not Found");
         mockHttp.GetMatchCount(request).ShouldBe(1);
     }

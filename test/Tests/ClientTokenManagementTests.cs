@@ -38,7 +38,7 @@ public class ClientTokenManagementTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
                 client.ClientCredentialStyle = style;
@@ -93,7 +93,7 @@ public class ClientTokenManagementTests
         var token = await sut.GetAccessTokenAsync("test");
         mockHttp.VerifyNoOutstandingExpectation();
 
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
         token.Scope.ShouldBe("scope");
         token.IsError.ShouldBeFalse();
 
@@ -111,7 +111,7 @@ public class ClientTokenManagementTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
             });
 
@@ -136,7 +136,7 @@ public class ClientTokenManagementTests
         var token = await sut.GetAccessTokenAsync("test");
         mockHttp.VerifyNoOutstandingExpectation();
 
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
         token.Scope.ShouldBe("scope");
         token.IsError.ShouldBeFalse();
 
@@ -152,7 +152,7 @@ public class ClientTokenManagementTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
 
@@ -207,7 +207,7 @@ public class ClientTokenManagementTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
 
@@ -265,7 +265,7 @@ public class ClientTokenManagementTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
 
@@ -317,7 +317,7 @@ public class ClientTokenManagementTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
                 client.ClientSecret = "client_secret";
 
@@ -378,7 +378,7 @@ public class ClientTokenManagementTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
             });
 
@@ -404,13 +404,13 @@ public class ClientTokenManagementTests
         var token = await sut.GetAccessTokenAsync("test");
         mockHttp.VerifyNoOutstandingExpectation();
 
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
         
         // 2nd request
         token = await sut.GetAccessTokenAsync("test");
         
         token.IsError.ShouldBeFalse();
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
         mockHttp.GetMatchCount(mockedRequest).ShouldBe(1);
     }
     
@@ -423,7 +423,7 @@ public class ClientTokenManagementTests
         services.AddClientCredentialsTokenManagement()
             .AddClient("test", client =>
             {
-                client.Address = "https://as/connect/token";
+                client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = "client_id";
             });
 
@@ -449,7 +449,7 @@ public class ClientTokenManagementTests
         var token = await sut.GetAccessTokenAsync("test");
         mockHttp.VerifyNoOutstandingExpectation();
 
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
         
         // 2nd request
         mockHttp.Expect("/connect/token")
@@ -458,6 +458,6 @@ public class ClientTokenManagementTests
         token = await sut.GetAccessTokenAsync("test", new ClientCredentialsTokenRequestParameters { ForceRenewal = true });
         
         token.IsError.ShouldBeFalse();
-        token.Value.ShouldBe("access_token");
+        token.AccessToken.ShouldBe("access_token");
     }
 }

@@ -49,14 +49,14 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     {
         var client = _options.Get(clientName);
 
-        if (string.IsNullOrWhiteSpace(client.Address) || string.IsNullOrEmpty(client.ClientId))
+        if (string.IsNullOrWhiteSpace(client.TokenEndpoint) || string.IsNullOrEmpty(client.ClientId))
         {
             throw new InvalidOperationException("unknown client");
         }
         
         var request = new ClientCredentialsTokenRequest
         {
-            Address = client.Address,
+            Address = client.TokenEndpoint,
             Scope = client.Scope,
             ClientId = client.ClientId,
             ClientSecret = client.ClientSecret,
@@ -128,7 +128,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         
         return new ClientCredentialsAccessToken
         {
-            Value = response.AccessToken,
+            AccessToken = response.AccessToken,
             Expiration = response.ExpiresIn == 0
                 ? DateTimeOffset.MaxValue
                 : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),

@@ -31,7 +31,7 @@ public class Program
                 services.AddClientCredentialsTokenManagement()
                     .AddClient("demo", client =>
                     {
-                        client.Address = "https://demo.duendesoftware.com/connect/token";
+                        client.TokenEndpoint = "https://demo.duendesoftware.com/connect/token";
 
                         client.ClientId = "m2m.short";
                         client.ClientSecret = "secret";
@@ -40,7 +40,7 @@ public class Program
                     })
                     .AddClient("demo.jwt", client =>
                     {
-                        client.Address = "https://demo.duendesoftware.com/connect/token";
+                        client.TokenEndpoint = "https://demo.duendesoftware.com/connect/token";
                         client.ClientId = "m2m.short.jwt";
 
                         client.Scope = "api";

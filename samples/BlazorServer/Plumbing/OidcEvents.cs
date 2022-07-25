@@ -21,7 +21,7 @@ public class OidcEvents : OpenIdConnectEvents
 
         await _store.StoreTokenAsync(context.Principal!, new UserAccessToken
         {
-            Value = context.TokenEndpointResponse.AccessToken,
+            AccessToken = context.TokenEndpointResponse.AccessToken,
             Expiration = exp,
             RefreshToken = context.TokenEndpointResponse.RefreshToken,
             Scope = context.TokenEndpointResponse.Scope

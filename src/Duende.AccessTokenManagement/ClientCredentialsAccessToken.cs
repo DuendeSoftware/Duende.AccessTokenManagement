@@ -13,7 +13,7 @@ public class ClientCredentialsAccessToken
     /// <summary>
     /// The access token
     /// </summary>
-    public string? Value { get; set; }
+    public string? AccessToken { get; set; }
         
     /// <summary>
     /// The access token expiration

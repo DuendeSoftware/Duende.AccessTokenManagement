@@ -93,7 +93,7 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
         }
         else
         {
-            token.Value = response.AccessToken;
+            token.AccessToken = response.AccessToken;
             token.Expiration = response.ExpiresIn == 0
                 ? DateTimeOffset.MaxValue
                 : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn);
@@ -148,24 +148,6 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
         if (response.IsError)
         {
             _logger.LogInformation("Error revoking refresh token. Error = {error}", response.Error);
-        }
-    }
-    
-    private async Task ApplyAssertionAsync(ProtocolRequest request, string schemename, ClientCredentialsTokenRequestParameters parameters)
-    {
-        if (parameters.Assertion != null)
-        {
-            request.ClientAssertion = parameters.Assertion;
-            request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
-        }
-        else
-        {
-            var assertion = await _clientAssertionService.GetClientAssertionAsync(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + schemename, parameters);
-            if (assertion != null)
-            {
-                request.ClientAssertion = parameters.Assertion;
-                request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
-            }
         }
     }
 }

@@ -32,7 +32,6 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     /// <param name="clock"></param>
     /// <param name="options"></param>
     /// <param name="tokenEndpointService"></param>
-    /// <param name="clientCredentialsTokenManagementService"></param>
     /// <param name="logger"></param>
     public UserAccessAccessTokenManagementService(
         IUserAccessTokenRequestSynchronization sync,
@@ -40,7 +39,6 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         ISystemClock clock,
         IOptions<UserAccessTokenManagementOptions> options,
         IUserTokenEndpointService tokenEndpointService,
-        IClientCredentialsTokenManagementService clientCredentialsTokenManagementService,
         ILogger<UserAccessAccessTokenManagementService> logger)
     {
         _sync = sync;
@@ -64,20 +62,20 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         if (!user.Identity!.IsAuthenticated)
         {
             _logger.LogDebug("No active user. Cannot retrieve token");
-            return new UserAccessToken();
+            return new UserAccessToken() { Error = "No active user" };
         }
 
         var userName = user.FindFirst(JwtClaimTypes.Name)?.Value ??
                        user.FindFirst(JwtClaimTypes.Subject)?.Value ?? "unknown";
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
 
-        if (userToken.Value.IsMissing() && userToken.RefreshToken.IsMissing())
+        if (userToken.AccessToken.IsMissing() && userToken.RefreshToken.IsMissing())
         {
             _logger.LogDebug("No token data found in user token store for user {user}.", userName);
-            return new UserAccessToken();
+            return new UserAccessToken() { Error = "No token data for user" };
         }
 
-        if (userToken.Value.IsPresent() && userToken.RefreshToken.IsMissing())
+        if (userToken.AccessToken.IsPresent() && userToken.RefreshToken.IsMissing())
         {
             _logger.LogDebug(
                 "No refresh token found in user token store for user {user} / resource {resource}. Returning current access token.",
@@ -85,7 +83,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
             return userToken;
         }
 
-        if (userToken.Value.IsMissing() && userToken.RefreshToken.IsPresent())
+        if (userToken.AccessToken.IsMissing() && userToken.RefreshToken.IsPresent())
         {
             _logger.LogDebug(
                 "No access token found in user token store for user {user} / resource {resource}. Trying to refresh.",
@@ -101,12 +99,11 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
             {
                 var token = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
 
-                if (token.IsError)
+                if (!token.IsError)
                 {
-                    return new UserAccessToken();
+                    _logger.LogTrace("Returning refreshed token for user: {user}", userName);
                 }
 
-                _logger.LogTrace("Returning refreshed token for user: {user}", userName);
                 return token;
             });
         }

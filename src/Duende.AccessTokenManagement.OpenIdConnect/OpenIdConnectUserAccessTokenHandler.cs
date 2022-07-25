@@ -66,9 +66,9 @@ public class OpenIdConnectUserAccessTokenHandler : DelegatingHandler
               
         var token = await _httpContextAccessor.HttpContext!.GetUserAccessTokenAsync(parameters);
 
-        if (!string.IsNullOrWhiteSpace(token.Value))
+        if (!string.IsNullOrWhiteSpace(token.AccessToken))
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
         }
     }
 }

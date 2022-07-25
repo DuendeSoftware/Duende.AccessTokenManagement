@@ -63,9 +63,9 @@ public class ClientCredentialsTokenHandler : DelegatingHandler
             
         var token = await _accessTokenManagementService.GetAccessTokenAsync(_tokenClientName, parameters: parameters, cancellationToken: cancellationToken);
 
-        if (!string.IsNullOrWhiteSpace(token.Value))
+        if (!string.IsNullOrWhiteSpace(token.AccessToken))
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
         }
     }
 }
