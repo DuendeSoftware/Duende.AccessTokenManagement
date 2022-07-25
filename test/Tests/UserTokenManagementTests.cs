@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using RichardSzalay.MockHttp;
 
@@ -6,6 +7,9 @@ namespace Duende.AccessTokenManagement.Tests;
 
 public class UserTokenManagementTests : IntegrationTestBase
 {
+    public UserTokenManagementTests() : base("web")
+    { }
+    
     [Fact]
     public async Task Anonymous_user_should_return_user_token_error()
     {
@@ -22,21 +26,22 @@ public class UserTokenManagementTests : IntegrationTestBase
         var token = await response.Content.ReadFromJsonAsync<ClientCredentialsAccessToken>();
 
         token.AccessToken.ShouldNotBeNull();
+        token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
+        
         token.IsError.ShouldBeFalse();
     }
 
     [Fact]
     public async Task Logged_on_user_should_return_access_and_refresh_token()
     {
-        var mockHttp = new MockHttpMessageHandler();
-        AppHost.MockHttpHandler = mockHttp;
-        
-        await AppHost.InitializeAsync();
         await AppHost.LoginAsync("alice");
 
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserAccessToken>();
 
         token.AccessToken.ShouldNotBeNull();
+        token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
+        token.RefreshToken.ShouldNotBeNull();
+        token.IsError.ShouldBeFalse();
     }
 }

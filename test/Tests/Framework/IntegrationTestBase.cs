@@ -15,7 +15,7 @@ public class IntegrationTestBase
     protected ApiHost ApiHost;
     protected AppHost AppHost;
 
-    public IntegrationTestBase()
+    public IntegrationTestBase(string clientId)
     {
         IdentityServerHost = new IdentityServerHost();
             
@@ -29,13 +29,26 @@ public class IntegrationTestBase
             AllowOfflineAccess = true,
             AllowedScopes = { "openid", "profile", "scope1" }
         });
+        
+        IdentityServerHost.Clients.Add(new Client
+        {
+            ClientId = "web.short",
+            ClientSecrets = { new Secret("secret".Sha256()) },
+            AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
+            RedirectUris = { "https://app/signin-oidc" },
+            PostLogoutRedirectUris = { "https://app/signout-callback-oidc" },
+            AllowOfflineAccess = true,
+            AllowedScopes = { "openid", "profile", "scope1" },
+            
+            AccessTokenLifetime = 10
+        });
             
         IdentityServerHost.InitializeAsync().Wait();
 
         ApiHost = new ApiHost(IdentityServerHost, "scope1");
         ApiHost.InitializeAsync().Wait();
 
-        AppHost = new AppHost(IdentityServerHost, ApiHost, "web");
+        AppHost = new AppHost(IdentityServerHost, ApiHost, clientId);
         AppHost.InitializeAsync().Wait();
     }
 
