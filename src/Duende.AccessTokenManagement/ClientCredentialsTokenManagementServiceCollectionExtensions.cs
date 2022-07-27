@@ -13,6 +13,16 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class ClientCredentialsTokenManagementServiceCollectionExtensions
 {
+    public static ClientCredentialsTokenManagementBuilder AddClientCredentialsTokenManagement(
+        this IServiceCollection services, 
+        Action<ClientCredentialsTokenManagementOptions> options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        services.Configure(options);
+        return services.AddClientCredentialsTokenManagement();
+    }
+
     /// <summary>
     /// Adds all necessary services for client credentials token management
     /// </summary>
@@ -31,8 +41,6 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
 
         return new ClientCredentialsTokenManagementBuilder(services);
     }
-        
-   
     
     /// <summary>
     /// Adds a named HTTP client for the factory that automatically sends the a client access token
