@@ -42,7 +42,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     }
 
     /// <inheritdoc/>
-    public async Task<ClientCredentialsAccessToken> RequestToken(
+    public async Task<ClientCredentialsToken> RequestToken(
         string clientName,
         ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
@@ -99,7 +99,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
             }
         }
         
-        request.Options.TryAdd(AccessTokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+        request.Options.TryAdd(ClientCredentialsTokenManagementDefaults.TokenRequestParametersOptionsName, parameters);
 
         HttpClient httpClient;
         if (client.HttpClient != null)
@@ -112,7 +112,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         }
         else
         {
-            httpClient = _httpClientFactory.CreateClient(AccessTokenManagementDefaults.BackChannelHttpClientName);    
+            httpClient = _httpClientFactory.CreateClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName);    
         }
         
         _logger.LogDebug("Requesting client credentials access token at endpoint: {endpoint}", request.Address);
@@ -120,13 +120,13 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
 
         if (response.IsError)
         {
-            return new ClientCredentialsAccessToken
+            return new ClientCredentialsToken
             {
                 Error = response.Error
             };
         }
         
-        return new ClientCredentialsAccessToken
+        return new ClientCredentialsToken
         {
             AccessToken = response.AccessToken,
             Expiration = response.ExpiresIn == 0

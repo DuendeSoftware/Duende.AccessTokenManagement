@@ -62,7 +62,7 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
             RefreshToken = refreshToken
         };
         
-        request.Options.TryAdd(AccessTokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+        request.Options.TryAdd(ClientCredentialsTokenManagementDefaults.TokenRequestParametersOptionsName, parameters);
         
         if (!string.IsNullOrEmpty(parameters.Resource))
         {
@@ -126,7 +126,7 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
             TokenTypeHint = OidcConstants.TokenTypes.RefreshToken
         };
         
-        request.Options.TryAdd(AccessTokenManagementDefaults.AccessTokenParametersOptionsName, parameters);
+        request.Options.TryAdd(ClientCredentialsTokenManagementDefaults.TokenRequestParametersOptionsName, parameters);
        
         if (parameters.Assertion != null)
         {

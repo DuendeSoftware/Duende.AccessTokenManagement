@@ -14,5 +14,5 @@ public interface ITokenRequestSynchronization
     /// <summary>
     /// Method to perform synchronization of work.
     /// </summary>
-    public Task<ClientCredentialsAccessToken> SynchronizeAsync(string name, Func<Task<ClientCredentialsAccessToken>> func);
+    public Task<ClientCredentialsToken> SynchronizeAsync(string name, Func<Task<ClientCredentialsToken>> func);
 }

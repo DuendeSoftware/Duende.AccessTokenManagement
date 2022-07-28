@@ -37,7 +37,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         services.TryAddTransient<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
         services.TryAddTransient<IClientAssertionService, DefaultClientAssertionService>();
         
-        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName);
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName);
 
         return new ClientCredentialsTokenManagementBuilder(services);
     }
@@ -56,6 +56,9 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         string tokenClientName,
         Action<HttpClient>? configureClient = null)
     {
+        ArgumentNullException.ThrowIfNull(httpClientName);
+        ArgumentNullException.ThrowIfNull(tokenClientName);
+        
         if (configureClient != null)
         {
             return services.AddHttpClient(httpClientName, configureClient)
@@ -80,6 +83,9 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         string tokenClientName,
         Action<IServiceProvider, HttpClient>? configureClient = null)
     {
+        ArgumentNullException.ThrowIfNull(httpClientName);
+        ArgumentNullException.ThrowIfNull(tokenClientName);
+        
         if (configureClient != null)
         {
             return services.AddHttpClient(httpClientName, configureClient)
@@ -89,8 +95,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         return services.AddHttpClient(httpClientName)
             .AddClientCredentialsTokenHandler(tokenClientName);
     }
-
-    //
+    
     /// <summary>
     /// Adds the client access token handler to an HttpClient
     /// </summary>
@@ -101,6 +106,8 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         this IHttpClientBuilder httpClientBuilder,
         string tokenClientName)
     {
+        ArgumentNullException.ThrowIfNull(tokenClientName);
+        
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {
             var accessTokenManagementService = provider.GetRequiredService<IClientCredentialsTokenManagementService>();

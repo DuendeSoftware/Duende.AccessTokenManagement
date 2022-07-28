@@ -23,7 +23,7 @@ public class UserTokenManagementTests : IntegrationTestBase
     public async Task Anonymous_user_should_return_client_token()
     {
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/client_token"));
-        var token = await response.Content.ReadFromJsonAsync<ClientCredentialsAccessToken>();
+        var token = await response.Content.ReadFromJsonAsync<ClientCredentialsToken>();
 
         token.AccessToken.ShouldNotBeNull();
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);

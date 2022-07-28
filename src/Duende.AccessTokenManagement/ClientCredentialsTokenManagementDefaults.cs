@@ -6,7 +6,7 @@ namespace Duende.AccessTokenManagement;
 /// <summary>
 /// Default values
 /// </summary>
-public static class AccessTokenManagementDefaults
+public static class ClientCredentialsTokenManagementDefaults
 {
     /// <summary>
     /// Name of the back-channel HTTP client
@@ -16,5 +16,5 @@ public static class AccessTokenManagementDefaults
     /// <summary>
     /// Name used to propagate access token parameters to HttpRequestMessage
     /// </summary>
-    public const string AccessTokenParametersOptionsName = "Duende.AccessTokenManagement.AccessTokenParameters";
+    public const string TokenRequestParametersOptionsName = "Duende.AccessTokenManagement.AccessTokenParameters";
 }

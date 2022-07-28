@@ -37,7 +37,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
     }
 
     /// <inheritdoc/>
-    public async Task<ClientCredentialsAccessToken> GetAccessTokenAsync(
+    public async Task<ClientCredentialsToken> GetAccessTokenAsync(
         string clientName,
         ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)

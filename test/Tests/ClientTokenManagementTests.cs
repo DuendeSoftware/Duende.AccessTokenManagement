@@ -84,7 +84,7 @@ public class ClientTokenManagementTests
                 .Respond("application/json", JsonSerializer.Serialize(response));
         }
 
-        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();
@@ -127,7 +127,7 @@ public class ClientTokenManagementTests
         mockHttp.Expect("/connect/token")
             .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
 
-        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();
@@ -186,7 +186,7 @@ public class ClientTokenManagementTests
             .WithFormData(expectedRequestFormData)
             .Respond("application/json", JsonSerializer.Serialize(response));
 
-        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();
@@ -244,7 +244,7 @@ public class ClientTokenManagementTests
             .WithFormData(expectedRequestFormData)
             .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
 
-        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();
@@ -296,7 +296,7 @@ public class ClientTokenManagementTests
             .WithFormData(expectedRequestFormData)
             .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
 
-        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();
@@ -357,7 +357,7 @@ public class ClientTokenManagementTests
             .WithFormData(expectedRequestFormData)
             .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
 
-        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();
@@ -395,7 +395,7 @@ public class ClientTokenManagementTests
         var mockedRequest = mockHttp.Expect("/connect/token")
             .Respond("application/json", JsonSerializer.Serialize(response));
         
-        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();
@@ -440,7 +440,7 @@ public class ClientTokenManagementTests
         mockHttp.Expect("/connect/token")
             .Respond("application/json", JsonSerializer.Serialize(response));
         
-        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();

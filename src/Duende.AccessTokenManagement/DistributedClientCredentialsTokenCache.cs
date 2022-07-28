@@ -39,14 +39,14 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     /// <inheritdoc/>
     public async Task SetAsync(
         string clientName,
-        ClientCredentialsAccessToken clientCredentialsAccessToken,
+        ClientCredentialsToken clientCredentialsToken,
         ClientCredentialsTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(clientName);
             
-        var cacheExpiration = clientCredentialsAccessToken.Expiration.AddSeconds(-_options.CacheLifetimeBuffer);
-        var data = JsonSerializer.Serialize(clientCredentialsAccessToken);
+        var cacheExpiration = clientCredentialsToken.Expiration.AddSeconds(-_options.CacheLifetimeBuffer);
+        var data = JsonSerializer.Serialize(clientCredentialsToken);
 
         var entryOptions = new DistributedCacheEntryOptions
         {
@@ -60,7 +60,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     }
 
     /// <inheritdoc/>
-    public async Task<ClientCredentialsAccessToken?> GetAsync(
+    public async Task<ClientCredentialsToken?> GetAsync(
         string clientName, 
         ClientCredentialsTokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
@@ -75,7 +75,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
             try
             {
                 _logger.LogDebug("Cache hit for access token for client: {clientName}", clientName);
-                return JsonSerializer.Deserialize<ClientCredentialsAccessToken>(entry);
+                return JsonSerializer.Deserialize<ClientCredentialsToken>(entry);
             }
             catch (Exception ex)
             {

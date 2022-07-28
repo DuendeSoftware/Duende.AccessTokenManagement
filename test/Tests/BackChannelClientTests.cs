@@ -26,7 +26,7 @@ public class BackChannelClientTests
         var request = mockHttp.When("https://as/*")
             .Respond(HttpStatusCode.NotFound);
         
-        services.AddHttpClient(AccessTokenManagementDefaults.BackChannelHttpClientName)
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
         var provider = services.BuildServiceProvider();

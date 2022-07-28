@@ -18,7 +18,7 @@ public interface IClientCredentialsTokenEndpointService
     /// <param name="parameters"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<ClientCredentialsAccessToken> RequestToken(
+    Task<ClientCredentialsToken> RequestToken(
         string clientName,
         ClientCredentialsTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default);

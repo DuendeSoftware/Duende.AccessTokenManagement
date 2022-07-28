@@ -6,7 +6,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <summary>
 /// Models a user access token
 /// </summary>
-public class UserAccessToken : ClientCredentialsAccessToken
+public class UserAccessToken : ClientCredentialsToken
 {
     /// <summary>
     /// The refresh token

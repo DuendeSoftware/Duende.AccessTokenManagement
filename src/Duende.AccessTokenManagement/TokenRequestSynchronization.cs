@@ -13,16 +13,16 @@ namespace Duende.AccessTokenManagement;
 internal class TokenRequestSynchronization : ITokenRequestSynchronization
 {
     // this is what provides the synchronization; assumes this service is a singleton in DI.
-    ConcurrentDictionary<string, Lazy<Task<ClientCredentialsAccessToken>>> _dictionary { get; } = new();
+    ConcurrentDictionary<string, Lazy<Task<ClientCredentialsToken>>> _dictionary { get; } = new();
 
     /// <inheritdoc/>
-    public async Task<ClientCredentialsAccessToken> SynchronizeAsync(string name, Func<Task<ClientCredentialsAccessToken>> func)
+    public async Task<ClientCredentialsToken> SynchronizeAsync(string name, Func<Task<ClientCredentialsToken>> func)
     {
         try
         {
             return await _dictionary.GetOrAdd(name, _ =>
             {
-                return new Lazy<Task<ClientCredentialsAccessToken>>(func);
+                return new Lazy<Task<ClientCredentialsToken>>(func);
             }).Value;
         }
         finally
