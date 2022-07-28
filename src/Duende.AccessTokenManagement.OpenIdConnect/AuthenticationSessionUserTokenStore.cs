@@ -27,7 +27,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly ILogger<AuthenticationSessionUserAccessTokenStore> _logger;
-        private readonly UserAccessTokenManagementOptions _options;
+        private readonly UserTokenManagementOptions _options;
 
         /// <summary>
         /// ctor
@@ -38,7 +38,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         public AuthenticationSessionUserAccessTokenStore(
             IHttpContextAccessor contextAccessor,
             ILogger<AuthenticationSessionUserAccessTokenStore> logger, 
-            IOptions<UserAccessTokenManagementOptions> options)
+            IOptions<UserTokenManagementOptions> options)
         {
             _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
             _logger = logger;
@@ -46,9 +46,9 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         }
 
         /// <inheritdoc/>
-        public async Task<UserAccessToken> GetTokenAsync(
+        public async Task<UserToken> GetTokenAsync(
             ClaimsPrincipal user,
-            UserAccessTokenRequestParameters? parameters = null)
+            UserTokenRequestParameters? parameters = null)
         {
             parameters ??= new();
             var result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme);
@@ -57,7 +57,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 _logger.LogInformation("Cannot authenticate scheme: {scheme}", parameters.SignInScheme ?? "default signin scheme");
 
-                return new UserAccessToken() { Error = "Cannot authenticate scheme" };
+                return new UserToken() { Error = "Cannot authenticate scheme" };
             }
 
             if (result.Properties == null)
@@ -65,7 +65,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 _logger.LogInformation("Authentication result properties are null for scheme: {scheme}",
                     parameters.SignInScheme ?? "default signin scheme");
 
-                return new UserAccessToken() { Error = "No properties on authentication result" };
+                return new UserToken() { Error = "No properties on authentication result" };
             }
 
             var tokens = result.Properties.Items.Where(i => i.Key.StartsWith(TokenPrefix)).ToList();
@@ -73,7 +73,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 _logger.LogInformation("No tokens found in cookie properties. SaveTokens must be enabled for automatic token refresh.");
 
-                return new UserAccessToken() { Error = "No tokens in properties" };
+                return new UserToken() { Error = "No tokens in properties" };
             }
 
             var tokenName = $"{TokenPrefix}{OpenIdConnectParameterNames.AccessToken}";
@@ -112,7 +112,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 dtExpires = DateTimeOffset.Parse(expiresAt, CultureInfo.InvariantCulture);
             }
 
-            return new UserAccessToken
+            return new UserToken
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
@@ -123,8 +123,8 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         /// <inheritdoc/>
         public async Task StoreTokenAsync(
             ClaimsPrincipal user,
-            UserAccessToken token,
-            UserAccessTokenRequestParameters? parameters = null)
+            UserToken token,
+            UserTokenRequestParameters? parameters = null)
         {
             parameters ??= new ();
             var result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme)!;
@@ -192,7 +192,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         /// <inheritdoc/>
         public Task ClearTokenAsync(
             ClaimsPrincipal user, 
-            UserAccessTokenRequestParameters? parameters = null)
+            UserTokenRequestParameters? parameters = null)
         {
             // todo
             return Task.CompletedTask;
@@ -213,7 +213,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        protected virtual bool AppendChallengeSchemeToTokenNames(UserAccessTokenRequestParameters parameters)
+        protected virtual bool AppendChallengeSchemeToTokenNames(UserTokenRequestParameters parameters)
         {
             return _options.UseChallengeSchemeScopedTokens && !string.IsNullOrEmpty(parameters!.ChallengeScheme);
         }

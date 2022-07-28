@@ -30,7 +30,7 @@ public class UserTokenManagementTestsShort : IntegrationTestBase
         await AppHost.LoginAsync("alice");
 
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
-        var token = await response.Content.ReadFromJsonAsync<UserAccessToken>();
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
 
         token.AccessToken.ShouldBe("access_token");
         token.RefreshToken.ShouldBe("refresh_token");
@@ -58,7 +58,7 @@ public class UserTokenManagementTestsShort : IntegrationTestBase
         await AppHost.LoginAsync("alice");
 
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
-        var token = await response.Content.ReadFromJsonAsync<UserAccessToken>();
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
 
         token.AccessToken.ShouldBe("access_token");
         token.RefreshToken.ShouldBeNull();

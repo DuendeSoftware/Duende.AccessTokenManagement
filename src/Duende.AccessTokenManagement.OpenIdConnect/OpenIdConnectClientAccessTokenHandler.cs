@@ -16,17 +16,17 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly UserAccessTokenRequestParameters _parameters;
+    private readonly UserTokenRequestParameters _parameters;
 
     /// <summary>
     /// ctor
     /// </summary>
     /// <param name="httpContextAccessor"></param>
     /// <param name="parameters"></param>
-    public OpenIdConnectClientAccessTokenHandler(IHttpContextAccessor httpContextAccessor, UserAccessTokenRequestParameters? parameters = null)
+    public OpenIdConnectClientAccessTokenHandler(IHttpContextAccessor httpContextAccessor, UserTokenRequestParameters? parameters = null)
     {
         _httpContextAccessor = httpContextAccessor;
-        _parameters = parameters ?? new UserAccessTokenRequestParameters();
+        _parameters = parameters ?? new UserTokenRequestParameters();
     }
 
     /// <inheritdoc/>
@@ -55,7 +55,7 @@ public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
     /// <returns></returns>
     protected virtual async Task SetTokenAsync(HttpRequestMessage request, bool forceRenewal)
     {
-        var parameters = new UserAccessTokenRequestParameters
+        var parameters = new UserTokenRequestParameters
         {
             ChallengeScheme = _parameters.ChallengeScheme,
             

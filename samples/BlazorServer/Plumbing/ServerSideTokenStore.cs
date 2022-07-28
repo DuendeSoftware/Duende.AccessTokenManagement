@@ -13,9 +13,9 @@ namespace BlazorServer.Plumbing;
 /// </summary>
 public class ServerSideTokenStore : IUserTokenStore
 {
-    private readonly ConcurrentDictionary<string, UserAccessToken> _tokens = new ConcurrentDictionary<string, UserAccessToken>();
+    private readonly ConcurrentDictionary<string, UserToken> _tokens = new ConcurrentDictionary<string, UserToken>();
 
-    public Task<UserAccessToken> GetTokenAsync(ClaimsPrincipal user, UserAccessTokenRequestParameters? parameters = null)
+    public Task<UserToken> GetTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null)
     {
         var sub = user.FindFirst("sub")?.Value ?? throw new InvalidOperationException("no sub claim");
         
@@ -24,7 +24,7 @@ public class ServerSideTokenStore : IUserTokenStore
         return Task.FromResult(value)!;
     }
     
-    public Task StoreTokenAsync(ClaimsPrincipal user, UserAccessToken token, UserAccessTokenRequestParameters? parameters = null)
+    public Task StoreTokenAsync(ClaimsPrincipal user, UserToken token, UserTokenRequestParameters? parameters = null)
     {
         var sub = user.FindFirst("sub")?.Value ?? throw new InvalidOperationException("no sub claim");
         _tokens[sub] = token;
@@ -32,7 +32,7 @@ public class ServerSideTokenStore : IUserTokenStore
         return Task.CompletedTask;
     }
     
-    public Task ClearTokenAsync(ClaimsPrincipal user, UserAccessTokenRequestParameters? parameters = null)
+    public Task ClearTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null)
     {
         var sub = user.FindFirst("sub")?.Value ?? throw new InvalidOperationException("no sub claim");
         

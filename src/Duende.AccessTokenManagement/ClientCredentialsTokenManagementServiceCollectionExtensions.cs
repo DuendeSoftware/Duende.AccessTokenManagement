@@ -13,6 +13,12 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class ClientCredentialsTokenManagementServiceCollectionExtensions
 {
+    /// <summary>
+    /// Adds all necessary services for client credentials token management
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public static ClientCredentialsTokenManagementBuilder AddClientCredentialsTokenManagement(
         this IServiceCollection services, 
         Action<ClientCredentialsTokenManagementOptions> options)

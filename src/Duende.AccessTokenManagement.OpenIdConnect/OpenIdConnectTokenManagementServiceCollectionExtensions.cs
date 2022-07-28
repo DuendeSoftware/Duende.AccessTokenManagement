@@ -33,8 +33,8 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
         services.TryAddTransient<IOpenIdConnectConfigurationService, OpenIdConnectConfigurationService>();
         services.TryAddTransient<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
-        services.TryAddSingleton<IUserAccessTokenRequestSynchronization, UserAccessTokenRequestSynchronization>();
-        services.TryAddTransient<IUserTokenEndpointService, UserAccessTokenEndpointService>();
+        services.TryAddSingleton<IUserTokenRequestSynchronization, UserTokenRequestSynchronization>();
+        services.TryAddTransient<IUserTokenEndpointService, UserTokenEndpointService>();
         
         return services;
     }
@@ -46,7 +46,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <param name="configureAction"></param>
     /// <returns></returns>
     public static IServiceCollection AddOpenIdConnectAccessTokenManagement(this IServiceCollection services,
-        Action<UserAccessTokenManagementOptions> configureAction)
+        Action<UserTokenManagementOptions> configureAction)
     {
         services.Configure(configureAction);
 
@@ -63,7 +63,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddUserAccessTokenHttpClient(this IServiceCollection services,
         string name,
-        UserAccessTokenRequestParameters? parameters = null,
+        UserTokenRequestParameters? parameters = null,
         Action<IServiceProvider, HttpClient>? configureClient = null)
     {
         if (configureClient != null)
@@ -86,7 +86,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddUserAccessTokenHttpClient(this IServiceCollection services,
         string name,
-        UserAccessTokenRequestParameters? parameters = null,
+        UserTokenRequestParameters? parameters = null,
         Action<HttpClient>? configureClient = null)
     {
         if (configureClient != null)
@@ -109,7 +109,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddClientAccessTokenHttpClient(this IServiceCollection services,
         string name,
-        UserAccessTokenRequestParameters? parameters = null,
+        UserTokenRequestParameters? parameters = null,
         Action<HttpClient>? configureClient = null)
     {
         if (configureClient != null)
@@ -131,7 +131,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddUserAccessTokenHandler(
         this IHttpClientBuilder httpClientBuilder,
-        UserAccessTokenRequestParameters? parameters = null)
+        UserTokenRequestParameters? parameters = null)
     {
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {
@@ -149,7 +149,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     /// <returns></returns>
     public static IHttpClientBuilder AddClientAccessTokenHandler(
         this IHttpClientBuilder httpClientBuilder,
-        UserAccessTokenRequestParameters? parameters = null)
+        UserTokenRequestParameters? parameters = null)
     {
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {

@@ -20,8 +20,8 @@ public interface IUserTokenStore
     /// <returns></returns>
     Task StoreTokenAsync(
         ClaimsPrincipal user,
-        UserAccessToken token,
-        UserAccessTokenRequestParameters? parameters = null);
+        UserToken token,
+        UserTokenRequestParameters? parameters = null);
 
     /// <summary>
     /// Retrieves tokens from store
@@ -29,9 +29,9 @@ public interface IUserTokenStore
     /// <param name="user">User the tokens belong to</param>
     /// <param name="parameters">Extra optional parameters</param>
     /// <returns>access and refresh token and access token expiration</returns>
-    Task<UserAccessToken> GetTokenAsync(
+    Task<UserToken> GetTokenAsync(
         ClaimsPrincipal user, 
-        UserAccessTokenRequestParameters? parameters = null);
+        UserTokenRequestParameters? parameters = null);
 
     /// <summary>
     /// Clears the stored tokens for a given user
@@ -41,5 +41,5 @@ public interface IUserTokenStore
     /// <returns></returns>
     Task ClearTokenAsync(
         ClaimsPrincipal user, 
-        UserAccessTokenRequestParameters? parameters = null);
+        UserTokenRequestParameters? parameters = null);
 }

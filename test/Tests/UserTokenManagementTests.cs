@@ -14,7 +14,7 @@ public class UserTokenManagementTests : IntegrationTestBase
     public async Task Anonymous_user_should_return_user_token_error()
     {
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
-        var token = await response.Content.ReadFromJsonAsync<UserAccessToken>();
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
 
         token.IsError.ShouldBeTrue();
     }
@@ -37,7 +37,7 @@ public class UserTokenManagementTests : IntegrationTestBase
         await AppHost.LoginAsync("alice");
 
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
-        var token = await response.Content.ReadFromJsonAsync<UserAccessToken>();
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
 
         token.AccessToken.ShouldNotBeNull();
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);

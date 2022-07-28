@@ -14,7 +14,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <inheritdoc />
 public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationService
 {
-    private readonly IOptions<UserAccessTokenManagementOptions> _userAccessTokenManagementOptions;
+    private readonly IOptions<UserTokenManagementOptions> _userAccessTokenManagementOptions;
     private readonly IOptionsMonitor<OpenIdConnectOptions> _oidcOptionsMonitor;
     private readonly IAuthenticationSchemeProvider _schemeProvider;
 
@@ -25,7 +25,7 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
     /// <param name="oidcOptionsMonitor"></param>
     /// <param name="schemeProvider"></param>
     public OpenIdConnectConfigurationService(
-        IOptions<UserAccessTokenManagementOptions> userAccessTokenManagementOptions,
+        IOptions<UserTokenManagementOptions> userAccessTokenManagementOptions,
         IOptionsMonitor<OpenIdConnectOptions> oidcOptionsMonitor,
         IAuthenticationSchemeProvider schemeProvider)
     {

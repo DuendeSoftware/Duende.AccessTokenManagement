@@ -24,9 +24,9 @@ public static class TokenManagementHttpContextExtensions
     /// <param name="parameters">Extra optional parameters</param>
     /// <param name="cancellationToken">A cancellation token to cancel operation.</param>
     /// <returns></returns>
-    public static async Task<UserAccessToken> GetUserAccessTokenAsync(
+    public static async Task<UserToken> GetUserAccessTokenAsync(
         this HttpContext httpContext,
-        UserAccessTokenRequestParameters? parameters = null,
+        UserTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         var service = httpContext.RequestServices.GetRequiredService<IUserTokenManagementService>();
@@ -43,7 +43,7 @@ public static class TokenManagementHttpContextExtensions
     /// <returns></returns>
     public static async Task RevokeRefreshTokenAsync(
         this HttpContext httpContext,
-        UserAccessTokenRequestParameters? parameters = null,
+        UserTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         var service = httpContext.RequestServices.GetRequiredService<IUserTokenManagementService>();
@@ -64,11 +64,11 @@ public static class TokenManagementHttpContextExtensions
     /// <returns></returns>
     public static async Task<ClientCredentialsToken> GetClientAccessTokenAsync(
         this HttpContext httpContext,
-        UserAccessTokenRequestParameters? parameters = null,
+        UserTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         var service = httpContext.RequestServices.GetRequiredService<IClientCredentialsTokenManagementService>();
-        var options = httpContext.RequestServices.GetRequiredService<IOptions<UserAccessTokenManagementOptions>>();
+        var options = httpContext.RequestServices.GetRequiredService<IOptions<UserTokenManagementOptions>>();
         var schemes = httpContext.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
 
         var schemeName = parameters?.ChallengeScheme ?? options.Value.ChallengeScheme;

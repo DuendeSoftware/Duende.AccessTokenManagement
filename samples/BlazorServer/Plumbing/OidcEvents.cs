@@ -19,7 +19,7 @@ public class OidcEvents : OpenIdConnectEvents
     {
         var exp = DateTimeOffset.UtcNow.AddSeconds(Double.Parse(context.TokenEndpointResponse!.ExpiresIn));
 
-        await _store.StoreTokenAsync(context.Principal!, new UserAccessToken
+        await _store.StoreTokenAsync(context.Principal!, new UserToken
         {
             AccessToken = context.TokenEndpointResponse.AccessToken,
             Expiration = exp,

@@ -12,7 +12,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOptions<ClientCredentialsClient>
 {
     private readonly IOpenIdConnectConfigurationService _configurationService;
-    private readonly UserAccessTokenManagementOptions _options;
+    private readonly UserTokenManagementOptions _options;
 
     /// <summary>
     /// ctor
@@ -21,7 +21,7 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
     /// <param name="options"></param>
     public ConfigureOpenIdConnectClientCredentialsOptions(
         IOpenIdConnectConfigurationService configurationService,
-        IOptions<UserAccessTokenManagementOptions> options)
+        IOptions<UserTokenManagementOptions> options)
     {
         _configurationService = configurationService;
         _options = options.Value;

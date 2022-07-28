@@ -15,12 +15,12 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <summary>
 /// Implements token endpoint operations using IdentityModel
 /// </summary>
-public class UserAccessTokenEndpointService : IUserTokenEndpointService
+public class UserTokenEndpointService : IUserTokenEndpointService
 {
     private readonly IOpenIdConnectConfigurationService _configurationService;
     private readonly IClientAssertionService _clientAssertionService;
-    private readonly ILogger<UserAccessTokenEndpointService> _logger;
-    private readonly UserAccessTokenManagementOptions _options;
+    private readonly ILogger<UserTokenEndpointService> _logger;
+    private readonly UserTokenManagementOptions _options;
 
     /// <summary>
     /// ctor
@@ -29,11 +29,11 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
     /// <param name="clientAssertionService"></param>
     /// <param name="logger"></param>
     /// <param name="configurationService"></param>
-    public UserAccessTokenEndpointService(
+    public UserTokenEndpointService(
         IOpenIdConnectConfigurationService configurationService,
-        IOptions<UserAccessTokenManagementOptions> options,
+        IOptions<UserTokenManagementOptions> options,
         IClientAssertionService clientAssertionService,
-        ILogger<UserAccessTokenEndpointService> logger)
+        ILogger<UserTokenEndpointService> logger)
     {
         _configurationService = configurationService;
         _clientAssertionService = clientAssertionService;
@@ -42,9 +42,9 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
     }
 
     /// <inheritdoc/>
-    public async Task<UserAccessToken> RefreshAccessTokenAsync(
+    public async Task<UserToken> RefreshAccessTokenAsync(
         string refreshToken,
-        UserAccessTokenRequestParameters parameters,
+        UserTokenRequestParameters parameters,
         CancellationToken cancellationToken = default)
     {
         _logger.LogTrace("Refreshing refresh token: {token}",  refreshToken);
@@ -86,7 +86,7 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
 
         var response = await oidc.HttpClient.RequestRefreshTokenAsync(request, cancellationToken);
 
-        var token = new UserAccessToken();
+        var token = new UserToken();
         if (response.IsError)
         {
             token.Error = response.Error;
@@ -107,7 +107,7 @@ public class UserAccessTokenEndpointService : IUserTokenEndpointService
     /// <inheritdoc/>
     public async Task RevokeRefreshTokenAsync(
         string refreshToken,
-        UserAccessTokenRequestParameters parameters,
+        UserTokenRequestParameters parameters,
         CancellationToken cancellationToken = default)
     {
         _logger.LogTrace("Revoking refresh token: {token}", refreshToken);

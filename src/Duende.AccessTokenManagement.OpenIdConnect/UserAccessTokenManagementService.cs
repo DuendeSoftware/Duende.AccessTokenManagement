@@ -17,10 +17,10 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// </summary>
 public class UserAccessAccessTokenManagementService : IUserTokenManagementService
 {
-    private readonly IUserAccessTokenRequestSynchronization _sync;
+    private readonly IUserTokenRequestSynchronization _sync;
     private readonly IUserTokenStore _userAccessTokenStore;
     private readonly ISystemClock _clock;
-    private readonly UserAccessTokenManagementOptions _options;
+    private readonly UserTokenManagementOptions _options;
     private readonly IUserTokenEndpointService _tokenEndpointService;
     private readonly ILogger<UserAccessAccessTokenManagementService> _logger;
 
@@ -34,10 +34,10 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     /// <param name="tokenEndpointService"></param>
     /// <param name="logger"></param>
     public UserAccessAccessTokenManagementService(
-        IUserAccessTokenRequestSynchronization sync,
+        IUserTokenRequestSynchronization sync,
         IUserTokenStore userAccessTokenStore,
         ISystemClock clock,
-        IOptions<UserAccessTokenManagementOptions> options,
+        IOptions<UserTokenManagementOptions> options,
         IUserTokenEndpointService tokenEndpointService,
         ILogger<UserAccessAccessTokenManagementService> logger)
     {
@@ -50,19 +50,19 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     }
 
     /// <inheritdoc/>
-    public async Task<UserAccessToken> GetAccessTokenAsync(
+    public async Task<UserToken> GetAccessTokenAsync(
         ClaimsPrincipal user,
-        UserAccessTokenRequestParameters? parameters = null,
+        UserTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         _logger.LogTrace("Starting user token acquisition");
 
-        parameters ??= new UserAccessTokenRequestParameters();
+        parameters ??= new UserTokenRequestParameters();
 
         if (!user.Identity!.IsAuthenticated)
         {
             _logger.LogDebug("No active user. Cannot retrieve token");
-            return new UserAccessToken() { Error = "No active user" };
+            return new UserToken() { Error = "No active user" };
         }
 
         var userName = user.FindFirst(JwtClaimTypes.Name)?.Value ??
@@ -72,7 +72,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         if (userToken.AccessToken.IsMissing() && userToken.RefreshToken.IsMissing())
         {
             _logger.LogDebug("No token data found in user token store for user {user}.", userName);
-            return new UserAccessToken() { Error = "No token data for user" };
+            return new UserToken() { Error = "No token data for user" };
         }
 
         if (userToken.AccessToken.IsPresent() && userToken.RefreshToken.IsMissing())
@@ -115,10 +115,10 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     /// <inheritdoc/>
     public async Task RevokeRefreshTokenAsync(
         ClaimsPrincipal user,
-        UserAccessTokenRequestParameters? parameters = null,
+        UserTokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
-        parameters ??= new UserAccessTokenRequestParameters();
+        parameters ??= new UserTokenRequestParameters();
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
 
         if (!string.IsNullOrWhiteSpace(userToken.RefreshToken))
@@ -127,9 +127,9 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         }
     }
 
-    private async Task<UserAccessToken> RefreshUserAccessTokenAsync(
+    private async Task<UserToken> RefreshUserAccessTokenAsync(
         ClaimsPrincipal user,
-        UserAccessTokenRequestParameters parameters,
+        UserTokenRequestParameters parameters,
         CancellationToken cancellationToken = default)
     {
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);

@@ -9,10 +9,10 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <summary>
 /// Service to provide synchronization to token endpoint requests
 /// </summary>
-public interface IUserAccessTokenRequestSynchronization
+public interface IUserTokenRequestSynchronization
 {
     /// <summary>
     /// Method to perform synchronization of work.
     /// </summary>
-    public Task<UserAccessToken> SynchronizeAsync(string name, Func<Task<UserAccessToken>> func);
+    public Task<UserToken> SynchronizeAsync(string name, Func<Task<UserToken>> func);
 }

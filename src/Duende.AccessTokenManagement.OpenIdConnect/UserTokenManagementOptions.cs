@@ -9,7 +9,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <summary>
 /// Options for user access token management
 /// </summary>
-public class UserAccessTokenManagementOptions
+public class UserTokenManagementOptions
 {
     /// <summary>
     /// Name of the authentication scheme to use for deriving token service configuration
