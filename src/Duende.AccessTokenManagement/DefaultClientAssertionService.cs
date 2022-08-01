@@ -10,7 +10,7 @@ namespace Duende.AccessTokenManagement;
 public class DefaultClientAssertionService : IClientAssertionService
 {
     /// <inheritdoc />
-    public Task<ClientAssertion?> GetClientAssertionAsync(string clientName, ClientCredentialsTokenRequestParameters? parameters = null)
+    public Task<ClientAssertion?> GetClientAssertionAsync(string? clientName = null, TokenRequestParameters? parameters = null)
     {
         return Task.FromResult<ClientAssertion?>(null);
     }

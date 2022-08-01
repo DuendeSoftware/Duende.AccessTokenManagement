@@ -40,7 +40,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     public async Task SetAsync(
         string clientName,
         ClientCredentialsToken clientCredentialsToken,
-        ClientCredentialsTokenRequestParameters requestParameters,
+        TokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(clientName);
@@ -62,7 +62,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     /// <inheritdoc/>
     public async Task<ClientCredentialsToken?> GetAsync(
         string clientName, 
-        ClientCredentialsTokenRequestParameters requestParameters,
+        TokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(clientName);
@@ -91,7 +91,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     /// <inheritdoc/>
     public Task DeleteAsync(
         string clientName,
-        ClientCredentialsTokenRequestParameters requestParameters,
+        TokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
         if (clientName is null) throw new ArgumentNullException(nameof(clientName));
@@ -110,7 +110,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
     protected virtual string GenerateCacheKey(
         ClientCredentialsTokenManagementOptions options, 
         string clientName,
-        ClientCredentialsTokenRequestParameters? parameters = null)
+        TokenRequestParameters? parameters = null)
     {
         var s = "s_" + parameters?.Scope ?? "";
         var r = "r_" + parameters?.Resource ?? "";

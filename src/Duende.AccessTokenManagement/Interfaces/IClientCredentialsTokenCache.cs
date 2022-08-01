@@ -22,7 +22,7 @@ public interface IClientCredentialsTokenCache
     Task SetAsync(
         string clientName,
         ClientCredentialsToken clientCredentialsToken,
-        ClientCredentialsTokenRequestParameters requestParameters,
+        TokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -34,7 +34,7 @@ public interface IClientCredentialsTokenCache
     /// <returns></returns>
     Task<ClientCredentialsToken?> GetAsync(
         string clientName,
-        ClientCredentialsTokenRequestParameters requestParameters,
+        TokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -46,6 +46,6 @@ public interface IClientCredentialsTokenCache
     /// <returns></returns>
     Task DeleteAsync(
         string clientName,
-        ClientCredentialsTokenRequestParameters requestParameters,
+        TokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default);
 }

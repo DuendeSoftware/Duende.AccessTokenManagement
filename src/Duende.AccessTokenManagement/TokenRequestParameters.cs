@@ -8,7 +8,7 @@ namespace Duende.AccessTokenManagement;
 /// <summary>
 /// Additional optional parameters for a client credentials access token request
 /// </summary>
-public class ClientCredentialsTokenRequestParameters
+public class TokenRequestParameters
 {
     /// <summary>
     /// Force renewal of token.

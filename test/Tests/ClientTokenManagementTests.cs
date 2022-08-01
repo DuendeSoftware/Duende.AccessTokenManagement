@@ -160,7 +160,7 @@ public class ClientTokenManagementTests
                 client.Resource = "resource";
             });
 
-        var request = new ClientCredentialsTokenRequestParameters
+        var request = new TokenRequestParameters
         {
             Scope = "scope_per_request",
             Resource = "resource_per_request"
@@ -215,7 +215,7 @@ public class ClientTokenManagementTests
                 client.Resource = "resource";
             });
 
-        var request = new ClientCredentialsTokenRequestParameters
+        var request = new TokenRequestParameters
         {
             Assertion = new()
             {
@@ -328,7 +328,7 @@ public class ClientTokenManagementTests
         services.AddTransient<IClientAssertionService>(sp =>
             new TestClientAssertionService("test", "service_type", "service_value"));
 
-        var request = new ClientCredentialsTokenRequestParameters
+        var request = new TokenRequestParameters
         {
             Assertion = new()
             {
@@ -455,7 +455,7 @@ public class ClientTokenManagementTests
         mockHttp.Expect("/connect/token")
             .Respond("application/json", JsonSerializer.Serialize(response));
         
-        token = await sut.GetAccessTokenAsync("test", new ClientCredentialsTokenRequestParameters { ForceRenewal = true });
+        token = await sut.GetAccessTokenAsync("test", new TokenRequestParameters { ForceRenewal = true });
         
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("access_token");

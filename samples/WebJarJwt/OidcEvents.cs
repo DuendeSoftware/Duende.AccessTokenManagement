@@ -18,7 +18,7 @@ namespace WebJarJwt
         
         public override async Task AuthorizationCodeReceived(AuthorizationCodeReceivedContext context)
         {
-            var assertion = await _assertionService.GetClientAssertionAsync("default");
+            var assertion = await _assertionService.GetClientAssertionAsync();
 
             context.TokenEndpointRequest!.ClientAssertionType = assertion!.Type;
             context.TokenEndpointRequest.ClientAssertion = assertion.Value;

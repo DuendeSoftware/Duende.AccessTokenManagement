@@ -44,7 +44,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     /// <inheritdoc/>
     public async Task<ClientCredentialsToken> RequestToken(
         string clientName,
-        ClientCredentialsTokenRequestParameters? parameters = null,
+        TokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)
     {
         var client = _options.Get(clientName);
@@ -63,7 +63,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
             ClientCredentialStyle = client.ClientCredentialStyle
         };
         
-        parameters ??= new ClientCredentialsTokenRequestParameters();
+        parameters ??= new TokenRequestParameters();
         
         if (!string.IsNullOrWhiteSpace(parameters.Scope))
         {

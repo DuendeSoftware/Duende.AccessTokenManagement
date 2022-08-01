@@ -17,5 +17,5 @@ public interface IClientAssertionService
     /// <param name="clientName"></param>
     /// <param name="parameters"></param>
     /// <returns></returns>
-    Task<ClientAssertion?> GetClientAssertionAsync(string clientName, ClientCredentialsTokenRequestParameters? parameters = null);
+    Task<ClientAssertion?> GetClientAssertionAsync(string? clientName = null, TokenRequestParameters? parameters = null);
 }

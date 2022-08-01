@@ -27,7 +27,7 @@ public class ClientAssertionService : IClientAssertionService
         _options = options;
     }
 
-    public Task<ClientAssertion?> GetClientAssertionAsync(string clientName, ClientCredentialsTokenRequestParameters? parameters = null)
+    public Task<ClientAssertion?> GetClientAssertionAsync(string? clientName = null, TokenRequestParameters? parameters = null)
     {
         if (clientName == "demo.jwt")
         {

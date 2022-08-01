@@ -20,6 +20,6 @@ public interface IClientCredentialsTokenEndpointService
     /// <returns></returns>
     Task<ClientCredentialsToken> RequestToken(
         string clientName,
-        ClientCredentialsTokenRequestParameters? parameters = null,
+        TokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default);
 }

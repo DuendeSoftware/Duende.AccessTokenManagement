@@ -33,8 +33,8 @@ public class ClientAssertionService : IClientAssertionService
         _configurationService = configurationService;
     }
 
-    public async Task<ClientAssertion?> GetClientAssertionAsync(string clientName,
-        ClientCredentialsTokenRequestParameters? parameters = null)
+    public async Task<ClientAssertion?> GetClientAssertionAsync(string? clientName = null,
+        TokenRequestParameters? parameters = null)
     {
         var config = await _configurationService.GetOpenIdConnectConfigurationAsync();
 
