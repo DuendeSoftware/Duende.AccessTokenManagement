@@ -84,6 +84,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
             }
         }
 
+        _logger.LogDebug("refresh token request to: {endpoint}", request.Address);
         var response = await oidc.HttpClient.RequestRefreshTokenAsync(request, cancellationToken);
 
         var token = new UserToken();
@@ -143,6 +144,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
             }
         }
         
+        _logger.LogDebug("token revocation request to: {endpoint}", request.Address);
         var response = await oidc.HttpClient.RevokeTokenAsync(request, cancellationToken);
 
         if (response.IsError)

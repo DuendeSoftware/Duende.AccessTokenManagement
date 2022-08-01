@@ -4,7 +4,26 @@
         <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+        <Authors>Duende Software</Authors>
+        <Company>Duende Software</Company>
+        <Copyright>Duende Software</Copyright>
+        <Product>Duende Access Token Management</Product>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageProjectUrl>https://github.com/DuendeSoftware/Duende.AccessTokenManagement</PackageProjectUrl>
+        <PackageReleaseNotes>https://github.com/DuendeSoftware/Duende.AccessTokenManagement/releases</PackageReleaseNotes>
+
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <DebugType>embedded</DebugType>
+        <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">True</ContinuousIntegrationBuild>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="../../icon.png" Pack="true" Visible="false" PackagePath="" />
+    </ItemGroup>
 
 
     <ItemGroup>
@@ -12,6 +31,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.0" />
 
         <PackageReference Include="MinVer" Version="4.0.0" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 
         <ProjectReference Include="..\Duende.AccessTokenManagement\Duende.AccessTokenManagement.csproj" />
     </ItemGroup>

@@ -69,15 +69,15 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
 
         return new OpenIdConnectClientConfiguration
         {
+            Scheme = configScheme,
+            
             Authority = options.Authority,
             TokenEndpoint = configuration.TokenEndpoint,
             RevocationEndpoint = configuration.AdditionalData[OidcConstants.Discovery.RevocationEndpoint].ToString(),
             
             ClientId = options.ClientId,
             ClientSecret = options.ClientSecret,
-            
             HttpClient = options.Backchannel,
-            Scheme = configScheme
         };
     }
 }
