@@ -62,7 +62,7 @@ public class AppHost : GenericHost
                 options.ResponseMode = "query";
 
                 options.MapInboundClaims = false;
-                options.GetClaimsFromUserInfoEndpoint = true;
+                options.GetClaimsFromUserInfoEndpoint = false;
                 options.SaveTokens = true;
 
                 options.Scope.Clear();
@@ -77,13 +77,21 @@ public class AppHost : GenericHost
                     options.Scope.Add("offline_access");
                 }
 
+                var identityServerHandler = _identityServerHost.Server.CreateHandler();   
                 if (MockHttpHandler != null)
                 {
-                    MockHttpHandler.Fallback.Respond(_identityServerHost.Server.CreateClient());
-                    options.Backchannel = MockHttpHandler.ToHttpClient();
+                    // allow discovery document
+                    MockHttpHandler.When("/.well-known/*")
+                        .Respond(identityServerHandler);
+                    
+                    options.BackchannelHttpHandler = MockHttpHandler;
                 }
-                
-                options.BackchannelHttpHandler = _identityServerHost.Server.CreateHandler();
+                else
+                {
+                    options.BackchannelHttpHandler = identityServerHandler;
+                }
+
+                options.ProtocolValidator.RequireNonce = false;
             });
     }
 
@@ -146,7 +154,7 @@ public class AppHost : GenericHost
         return response;
     }
 
-    public async Task<HttpResponseMessage> BffLogoutAsync(string sid = null)
+    public async Task<HttpResponseMessage> LogoutAsync(string sid = null)
     {
         var response = await BrowserClient.GetAsync(Url("/logout") + "?sid=" + sid);
         response.StatusCode.ShouldBe((HttpStatusCode)302); // endsession

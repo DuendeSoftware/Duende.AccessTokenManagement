@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Duende.AccessTokenManagement.Tests;
 
@@ -27,7 +29,8 @@ public class IdentityServerHost : GenericHost
         new IdentityResources.Profile(),
         new IdentityResources.Email(),
     };
-    public List<ApiScope> ApiScopes { get; set; } = new List<ApiScope>();
+    
+    public List<ApiScope> ApiScopes { get; set; } = new();
 
     private void ConfigureServices(IServiceCollection services)
     {
@@ -86,5 +89,21 @@ public class IdentityServerHost : GenericHost
         }
             
         await IssueSessionCookieAsync(props, new Claim("sub", sub));
+    }
+
+    public string CreateIdToken(string sub, string clientId)
+    {
+        var descriptor = new SecurityTokenDescriptor
+        {
+            Issuer = _baseAddress,
+            Audience = clientId,
+            Claims = new Dictionary<string, object>
+            {
+                { "sub", sub }
+            }
+        };
+
+        var handler = new JsonWebTokenHandler();
+        return handler.CreateToken(descriptor);
     }
 }

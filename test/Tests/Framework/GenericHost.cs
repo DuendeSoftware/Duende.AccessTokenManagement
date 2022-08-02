@@ -23,7 +23,7 @@ public class GenericHost
         _baseAddress = baseAddress;
     }
 
-    private readonly string _baseAddress;
+    protected readonly string _baseAddress;
     IServiceProvider _appServices;
 
     public Assembly HostAssembly { get; set; }
