@@ -29,6 +29,10 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         private readonly ILogger<AuthenticationSessionUserAccessTokenStore> _logger;
         private readonly UserTokenManagementOptions _options;
 
+        // per-request cache so that if SignInAsync is used, we won't re-read the old/cached AuthenticateResult from the handler
+        // this requires this service to be added as scoped to the DI system
+        private readonly Dictionary<string, AuthenticateResult> _cache = new Dictionary<string, AuthenticateResult>();
+
         /// <summary>
         /// ctor
         /// </summary>
@@ -51,7 +55,13 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             UserTokenRequestParameters? parameters = null)
         {
             parameters ??= new();
-            var result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme);
+
+            // check the cache in case the cookie was re-issued via StoreTokenAsync
+            // we use String.Empty as the key for a null SignInScheme
+            if (!_cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
+            {
+                result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme);
+            }
 
             if (!result.Succeeded)
             {
@@ -127,7 +137,13 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             UserTokenRequestParameters? parameters = null)
         {
             parameters ??= new ();
-            var result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme)!;
+
+            // check the cache in case the cookie was re-issued via StoreTokenAsync
+            // we use String.Empty as the key for a null SignInScheme
+            if (!_cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
+            {
+                result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme)!;
+            }
 
             if (result is not { Succeeded: true })
             {
@@ -187,6 +203,9 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
             await _contextAccessor.HttpContext.SignInAsync(parameters.SignInScheme, transformedPrincipal, result.Properties);
 
+            // add to the cache so if GetTokenAsync is called again, we will use the updated property values
+            // we use String.Empty as the key for a null SignInScheme
+            _cache[parameters.SignInScheme ?? String.Empty] = AuthenticateResult.Success(new AuthenticationTicket(transformedPrincipal, result.Properties, scheme!));
         }
 
         /// <inheritdoc/>

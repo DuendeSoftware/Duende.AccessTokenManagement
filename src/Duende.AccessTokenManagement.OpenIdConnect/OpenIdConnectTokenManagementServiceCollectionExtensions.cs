@@ -32,7 +32,8 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
 
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
         services.TryAddTransient<IOpenIdConnectConfigurationService, OpenIdConnectConfigurationService>();
-        services.TryAddTransient<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
+        // scoped since it will be caching per-request authentication results
+        services.TryAddScoped<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
         services.TryAddSingleton<IUserTokenRequestSynchronization, UserTokenRequestSynchronization>();
         services.TryAddTransient<IUserTokenEndpointService, UserTokenEndpointService>();
         
