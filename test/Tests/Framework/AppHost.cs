@@ -31,7 +31,7 @@ public class AppHost : GenericHost
         OnConfigure += Configure;
     }
 
-    public MockHttpMessageHandler? MockHttpHandler { get; set; }
+    public MockHttpMessageHandler? IdentityServerHttpHandler { get; set; }
 
     private void ConfigureServices(IServiceCollection services)
     {
@@ -78,13 +78,13 @@ public class AppHost : GenericHost
                 }
 
                 var identityServerHandler = _identityServerHost.Server.CreateHandler();   
-                if (MockHttpHandler != null)
+                if (IdentityServerHttpHandler != null)
                 {
                     // allow discovery document
-                    MockHttpHandler.When("/.well-known/*")
+                    IdentityServerHttpHandler.When("/.well-known/*")
                         .Respond(identityServerHandler);
                     
-                    options.BackchannelHttpHandler = MockHttpHandler;
+                    options.BackchannelHttpHandler = IdentityServerHttpHandler;
                 }
                 else
                 {
