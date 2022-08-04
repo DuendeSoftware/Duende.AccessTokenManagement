@@ -13,15 +13,18 @@ namespace BlazorServer.Plumbing;
 /// </summary>
 public class ServerSideTokenStore : IUserTokenStore
 {
-    private readonly ConcurrentDictionary<string, UserToken> _tokens = new ConcurrentDictionary<string, UserToken>();
+    private readonly ConcurrentDictionary<string, UserToken> _tokens = new();
 
     public Task<UserToken> GetTokenAsync(ClaimsPrincipal user, UserTokenRequestParameters? parameters = null)
     {
         var sub = user.FindFirst("sub")?.Value ?? throw new InvalidOperationException("no sub claim");
-        
-        _tokens.TryGetValue(sub, out var value);
-        
-        return Task.FromResult(value)!;
+
+        if (_tokens.TryGetValue(sub, out var value))
+        {
+            return Task.FromResult(value);
+        }
+
+        return Task.FromResult(new UserToken { Error = "not found" });
     }
     
     public Task StoreTokenAsync(ClaimsPrincipal user, UserToken token, UserTokenRequestParameters? parameters = null)

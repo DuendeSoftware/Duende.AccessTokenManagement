@@ -19,7 +19,10 @@ public class CookieEvents : CookieAuthenticationEvents
     public override async Task ValidatePrincipal(CookieValidatePrincipalContext context)
     {
         var token = await _store.GetTokenAsync(context.Principal!);
-        if (token == null) context.RejectPrincipal();
+        if (token.IsError)
+        {
+            context.RejectPrincipal();
+        }
 
         await base.ValidatePrincipal(context);
     }
@@ -28,6 +31,6 @@ public class CookieEvents : CookieAuthenticationEvents
     {
         await context.HttpContext.RevokeRefreshTokenAsync();
         
-        await base.SigningOut(context);
+        base.SigningOut(context);
     }
 }

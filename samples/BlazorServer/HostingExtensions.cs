@@ -9,9 +9,6 @@ public static class HostingExtensions
 {
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddTransient<CookieEvents>();
-        builder.Services.AddTransient<OidcEvents>();
-        
         builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = "cookie";
@@ -54,6 +51,10 @@ public static class HostingExtensions
 
         // adds access token management
         builder.Services.AddOpenIdConnectAccessTokenManagement();
+        
+        // register events to customize authentication handlers
+        builder.Services.AddTransient<CookieEvents>();
+        builder.Services.AddTransient<OidcEvents>();
 
         // not allowed to programmatically use HttpContext in Blazor Server.
         // that's why tokens cannot be managed in the login session
