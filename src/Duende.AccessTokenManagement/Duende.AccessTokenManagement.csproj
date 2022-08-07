@@ -9,6 +9,8 @@
         <Company>Duende Software</Company>
         <Copyright>Duende Software</Copyright>
         <Product>Duende Access Token Management</Product>
+        <PackageId>Duende.AccessTokenManagement</PackageId>
+        <Description>Automatic access token management for OAuth client credential flows</Description>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 
         <PackageIcon>icon.png</PackageIcon>
