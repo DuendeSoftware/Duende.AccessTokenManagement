@@ -115,6 +115,11 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         
         var oidc = await _configurationService.GetOpenIdConnectConfigurationAsync(parameters.ChallengeScheme);
 
+        if (string.IsNullOrEmpty(oidc.RevocationEndpoint))
+        {
+            throw new InvalidOperationException("Revocation endpoint not configured");
+        }
+
         var request = new TokenRevocationRequest
         {
             Address = oidc.RevocationEndpoint,
