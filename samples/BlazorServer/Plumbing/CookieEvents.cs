@@ -31,6 +31,6 @@ public class CookieEvents : CookieAuthenticationEvents
     {
         await context.HttpContext.RevokeRefreshTokenAsync();
         
-        base.SigningOut(context);
+        await base.SigningOut(context);
     }
 }
