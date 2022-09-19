@@ -24,6 +24,11 @@ public class TokenRequestParameters
     /// Override the statically configured resource parameter.
     /// </summary>
     public string? Resource { get; set; }
+
+    /// <summary>
+    /// Additional parameters to send.
+    /// </summary>
+    public Parameters Parameters { get; set; } = new Parameters();
     
     /// <summary>
     /// Specifies the client assertion.

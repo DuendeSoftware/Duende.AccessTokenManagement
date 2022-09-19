@@ -45,12 +45,14 @@ public class ClientTokenManagementTests
 
                 client.Scope = "scope";
                 client.Resource = "resource";
+                client.Parameters.Add("audience", "audience");
             });
 
         var expectedRequestFormData = new Dictionary<string, string>
         {
             { "scope", "scope" },
             { "resource", "resource" },
+            { "audience", "audience" },
         };
 
         if (style == ClientCredentialStyle.PostBody)
@@ -158,18 +160,24 @@ public class ClientTokenManagementTests
 
                 client.Scope = "scope";
                 client.Resource = "resource";
+                client.Parameters.Add("audience", "audience");
             });
 
         var request = new TokenRequestParameters
         {
             Scope = "scope_per_request",
-            Resource = "resource_per_request"
+            Resource = "resource_per_request",
+            Parameters =
+            {
+                { "audience", "audience_per_request" },
+            },
         };
 
         var expectedRequestFormData = new Dictionary<string, string>
         {
             { "scope", "scope_per_request" },
             { "resource", "resource_per_request" },
+            { "audience", "audience_per_request" },
         };
 
         var response = new
