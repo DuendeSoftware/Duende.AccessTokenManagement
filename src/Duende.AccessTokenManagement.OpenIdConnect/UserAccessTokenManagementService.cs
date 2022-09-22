@@ -135,8 +135,10 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     {
         var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
 
-        // todo: should not happen - should we use better exception?
-        ArgumentNullException.ThrowIfNull(userToken.RefreshToken);
+        if (String.IsNullOrWhiteSpace(userToken.RefreshToken))
+        {
+            throw new InvalidOperationException("No refresh token in store.");
+        }
 
         var refreshedToken =
             await _tokenEndpointService.RefreshAccessTokenAsync(userToken.RefreshToken, parameters, cancellationToken);

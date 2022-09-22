@@ -213,7 +213,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             ClaimsPrincipal user, 
             UserTokenRequestParameters? parameters = null)
         {
-            // todo
+            // don't bother here, since likely we're in the middle of signing out
             return Task.CompletedTask;
         }
 
