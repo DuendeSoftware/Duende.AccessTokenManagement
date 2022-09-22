@@ -47,12 +47,8 @@ public static class TokenManagementHttpContextExtensions
         CancellationToken cancellationToken = default)
     {
         var service = httpContext.RequestServices.GetRequiredService<IUserTokenManagementService>();
-        var store = httpContext.RequestServices.GetRequiredService<IUserTokenStore>();
-
-        await service.RevokeRefreshTokenAsync(httpContext.User, parameters, cancellationToken);
         
-        // todo: is this the right place to call that - or should revoke do that?
-        await store.ClearTokenAsync(httpContext.User, parameters);
+        await service.RevokeRefreshTokenAsync(httpContext.User, parameters, cancellationToken);
     }
     
     /// <summary>

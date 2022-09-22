@@ -124,6 +124,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         if (!string.IsNullOrWhiteSpace(userToken.RefreshToken))
         {
             await _tokenEndpointService.RevokeRefreshTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
+            await _userAccessTokenStore.ClearTokenAsync(user, parameters);
         }
     }
 

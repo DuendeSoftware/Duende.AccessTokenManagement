@@ -25,7 +25,7 @@ public interface IUserTokenManagementService
         CancellationToken cancellationToken = default);
     
     /// <summary>
-    /// Revokes the current refresh token
+    /// Revokes the current refresh token, and removes the access token from the store.
     /// </summary>
     /// <param name="user"></param>
     /// <param name="parameters"></param>
