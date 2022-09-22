@@ -62,6 +62,7 @@ public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
             ForceRenewal = forceRenewal,
             Scope = _parameters.Scope,
             Resource = _parameters.Resource,
+            Parameters = _parameters.Parameters,
             Assertion = _parameters.Assertion,
             Context =  _parameters.Context
         };

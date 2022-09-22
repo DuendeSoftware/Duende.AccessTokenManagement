@@ -62,6 +62,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
             ClientSecret = client.ClientSecret,
             ClientCredentialStyle = client.ClientCredentialStyle
         };
+        request.Parameters.AddRange(client.Parameters);
         
         parameters ??= new TokenRequestParameters();
         
@@ -80,6 +81,8 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
             request.Resource.Clear();
             request.Resource.Add(client.Resource);
         }
+
+        request.Parameters.AddRange(parameters.Parameters);
 
         // if assertion gets passed in explicitly, use it.
         // otherwise call assertion service
