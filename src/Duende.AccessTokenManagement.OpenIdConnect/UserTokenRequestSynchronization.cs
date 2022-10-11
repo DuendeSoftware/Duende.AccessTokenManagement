@@ -27,7 +27,12 @@ internal class UserTokenRequestSynchronization : IUserTokenRequestSynchronizatio
         }
         finally
         {
-            _dictionary.TryRemove(name, out _);
+            // Workaround "caching" for concurrent requests that are using the same cookie / refresh token
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(10000);
+                _dictionary.TryRemove(name, out _);
+            });
         }
     }
 }
