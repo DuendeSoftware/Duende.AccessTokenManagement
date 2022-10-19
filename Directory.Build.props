@@ -1,0 +1,28 @@
+<Project>
+    <PropertyGroup>
+        <PackageTags>OAuth 2.0;OpenID Connect;Security;BFF;IdentityServer;ASP.NET Core;SPA;Blazor;Token Management</PackageTags>
+        <Authors>Duende Software</Authors>
+        <Company>Duende Software</Company>
+        <Copyright>Duende Software</Copyright>
+        <Product>Duende Access Token Management</Product>
+
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageProjectUrl>https://github.com/DuendeSoftware/Duende.AccessTokenManagement</PackageProjectUrl>
+        <PackageReleaseNotes>https://github.com/DuendeSoftware/Duende.AccessTokenManagement/releases</PackageReleaseNotes>
+
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <DebugType>embedded</DebugType>
+        <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">True</ContinuousIntegrationBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="../../icon.png" Pack="true" Visible="false" PackagePath="" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <MinVerAutoIncrement>minor</MinVerAutoIncrement>
+    </PropertyGroup>
+</Project>

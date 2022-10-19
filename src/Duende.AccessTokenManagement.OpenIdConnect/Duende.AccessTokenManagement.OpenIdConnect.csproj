@@ -5,28 +5,9 @@
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-        <Authors>Duende Software</Authors>
-        <Company>Duende Software</Company>
-        <Copyright>Duende Software</Copyright>
-        <Product>Duende Access Token Management</Product>
         <PackageId>Duende.AccessTokenManagement.OpenIdConnect</PackageId>
         <Description>Automatic access token management for interactive OpenIdConnect-based ASP.NET Core applications</Description>
-        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-
-        <PackageIcon>icon.png</PackageIcon>
-        <PackageProjectUrl>https://github.com/DuendeSoftware/Duende.AccessTokenManagement</PackageProjectUrl>
-        <PackageReleaseNotes>https://github.com/DuendeSoftware/Duende.AccessTokenManagement/releases</PackageReleaseNotes>
-
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <DebugType>embedded</DebugType>
-        <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">True</ContinuousIntegrationBuild>
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Include="../../icon.png" Pack="true" Visible="false" PackagePath="" />
-    </ItemGroup>
-
 
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />

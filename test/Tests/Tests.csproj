@@ -6,8 +6,6 @@
         <Nullable>enable</Nullable>
 
         <IsPackable>false</IsPackable>
-
-        <RootNamespace>ClientCredentialTests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
