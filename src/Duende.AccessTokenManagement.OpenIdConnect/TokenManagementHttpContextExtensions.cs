@@ -72,7 +72,7 @@ public static class TokenManagementHttpContextExtensions
         if (string.IsNullOrEmpty(schemeName))
         {
             var defaultScheme = await schemes.GetDefaultChallengeSchemeAsync();
-            ArgumentNullException.ThrowIfNull(defaultScheme);
+            defaultScheme.ThrowIfNull(nameof(defaultScheme));
 
             schemeName = defaultScheme.Name;
         }

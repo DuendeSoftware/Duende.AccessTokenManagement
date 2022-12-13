@@ -39,7 +39,7 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
         string? scheme = null;
         if (name.Length > OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix.Length)
         {
-            scheme = name[OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix.Length..];
+            scheme = name.AsSpan().Slice(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix.Length).ToString();
         }
 
         if (String.IsNullOrWhiteSpace(scheme))

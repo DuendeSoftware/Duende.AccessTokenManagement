@@ -43,7 +43,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
         TokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(clientName);
+        clientName.ThrowIfNull(nameof(clientName));
             
         var cacheExpiration = clientCredentialsToken.Expiration.AddSeconds(-_options.CacheLifetimeBuffer);
         var data = JsonSerializer.Serialize(clientCredentialsToken);
@@ -65,7 +65,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
         TokenRequestParameters requestParameters,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(clientName);
+        clientName.ThrowIfNull(nameof(clientName));
             
         var cacheKey = GenerateCacheKey(_options, clientName, requestParameters);
         var entry = await _cache.GetStringAsync(cacheKey, token: cancellationToken);

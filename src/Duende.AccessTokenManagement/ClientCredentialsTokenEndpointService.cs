@@ -102,7 +102,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
             }
         }
         
-        request.Options.TryAdd(ClientCredentialsTokenManagementDefaults.TokenRequestParametersOptionsName, parameters);
+        request.Properties[ClientCredentialsTokenManagementDefaults.TokenRequestParametersOptionsName] = parameters;
 
         HttpClient httpClient;
         if (client.HttpClient != null)
