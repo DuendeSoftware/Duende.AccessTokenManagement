@@ -23,7 +23,7 @@ internal class TokenRequestSynchronization : ITokenRequestSynchronization
             return await _dictionary.GetOrAdd(name, _ =>
             {
                 return new Lazy<Task<ClientCredentialsToken>>(func);
-            }).Value;
+            }).Value.ConfigureAwait(false);
         }
         finally
         {

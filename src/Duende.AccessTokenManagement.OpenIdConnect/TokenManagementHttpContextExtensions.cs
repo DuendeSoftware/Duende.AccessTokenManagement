@@ -31,7 +31,7 @@ public static class TokenManagementHttpContextExtensions
     {
         var service = httpContext.RequestServices.GetRequiredService<IUserTokenManagementService>();
 
-        return await service.GetAccessTokenAsync(httpContext.User, parameters, cancellationToken);
+        return await service.GetAccessTokenAsync(httpContext.User, parameters, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public static class TokenManagementHttpContextExtensions
     {
         var service = httpContext.RequestServices.GetRequiredService<IUserTokenManagementService>();
         
-        await service.RevokeRefreshTokenAsync(httpContext.User, parameters, cancellationToken);
+        await service.RevokeRefreshTokenAsync(httpContext.User, parameters, cancellationToken).ConfigureAwait(false);
     }
     
     /// <summary>
@@ -71,7 +71,7 @@ public static class TokenManagementHttpContextExtensions
         
         if (string.IsNullOrEmpty(schemeName))
         {
-            var defaultScheme = await schemes.GetDefaultChallengeSchemeAsync();
+            var defaultScheme = await schemes.GetDefaultChallengeSchemeAsync().ConfigureAwait(false);
             ArgumentNullException.ThrowIfNull(defaultScheme);
 
             schemeName = defaultScheme.Name;
@@ -80,6 +80,6 @@ public static class TokenManagementHttpContextExtensions
         return await service.GetAccessTokenAsync(
             OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + schemeName,
             parameters, 
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
 }

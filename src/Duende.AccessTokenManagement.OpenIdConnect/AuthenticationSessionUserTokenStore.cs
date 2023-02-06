@@ -60,7 +60,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             // we use String.Empty as the key for a null SignInScheme
             if (!_cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
             {
-                result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme);
+                result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme).ConfigureAwait(false);
             }
 
             if (!result.Succeeded)
@@ -142,7 +142,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             // we use String.Empty as the key for a null SignInScheme
             if (!_cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
             {
-                result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme)!;
+                result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme)!.ConfigureAwait(false);
             }
 
             if (result is not { Succeeded: true })
@@ -151,7 +151,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             }
 
             // in case you want to filter certain claims before re-issuing the authentication session
-            var transformedPrincipal = await FilterPrincipalAsync(result.Principal!);
+            var transformedPrincipal = await FilterPrincipalAsync(result.Principal!).ConfigureAwait(false);
 
             var expiresName = "expires_at";
             if (!string.IsNullOrEmpty(parameters.Resource))
@@ -187,7 +187,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
             var options = _contextAccessor!.HttpContext!.RequestServices.GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>();
             var schemeProvider = _contextAccessor.HttpContext.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
-            var scheme = parameters.SignInScheme ?? (await schemeProvider.GetDefaultSignInSchemeAsync())?.Name;
+            var scheme = parameters.SignInScheme ?? (await schemeProvider.GetDefaultSignInSchemeAsync().ConfigureAwait(false))?.Name;
             var cookieOptions = options.Get(scheme);
 
             if (result.Properties.AllowRefresh == true ||
@@ -201,7 +201,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             result.Properties.Items.Remove(TokenNamesKey);
             result.Properties.Items.Add(new KeyValuePair<string, string?>(TokenNamesKey, string.Join(";", result.Properties.Items.Select(t => t.Key).ToList())));
 
-            await _contextAccessor.HttpContext.SignInAsync(parameters.SignInScheme, transformedPrincipal, result.Properties);
+            await _contextAccessor.HttpContext.SignInAsync(parameters.SignInScheme, transformedPrincipal, result.Properties).ConfigureAwait(false);
 
             // add to the cache so if GetTokenAsync is called again, we will use the updated property values
             // we use String.Empty as the key for a null SignInScheme

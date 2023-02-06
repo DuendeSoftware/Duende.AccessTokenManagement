@@ -32,16 +32,16 @@ public class ClientCredentialsTokenHandler : DelegatingHandler
     /// <inheritdoc/>
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        await SetTokenAsync(request, forceRenewal: false, cancellationToken);
-        var response = await base.SendAsync(request, cancellationToken);
+        await SetTokenAsync(request, forceRenewal: false, cancellationToken).ConfigureAwait(false);
+        var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         // retry if 401
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             response.Dispose();
 
-            await SetTokenAsync(request, forceRenewal: true, cancellationToken);
-            return await base.SendAsync(request, cancellationToken);
+            await SetTokenAsync(request, forceRenewal: true, cancellationToken).ConfigureAwait(false);
+            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
         return response;
@@ -61,7 +61,7 @@ public class ClientCredentialsTokenHandler : DelegatingHandler
             ForceRenewal = forceRenewal
         };
             
-        var token = await _accessTokenManagementService.GetAccessTokenAsync(_tokenClientName, parameters: parameters, cancellationToken: cancellationToken);
+        var token = await _accessTokenManagementService.GetAccessTokenAsync(_tokenClientName, parameters: parameters, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         if (!string.IsNullOrWhiteSpace(token.AccessToken))
         {

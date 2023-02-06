@@ -49,7 +49,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
     {
         _logger.LogTrace("Refreshing refresh token: {token}",  refreshToken);
 
-        var oidc = await _configurationService.GetOpenIdConnectConfigurationAsync(parameters.ChallengeScheme);
+        var oidc = await _configurationService.GetOpenIdConnectConfigurationAsync(parameters.ChallengeScheme).ConfigureAwait(false);
 
         var request = new RefreshTokenRequest
         {
@@ -76,7 +76,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         }
         else
         {
-            var assertion = await _clientAssertionService.GetClientAssertionAsync(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + oidc.Scheme, parameters);
+            var assertion = await _clientAssertionService.GetClientAssertionAsync(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + oidc.Scheme, parameters).ConfigureAwait(false);
             if (assertion != null)
             {
                 request.ClientAssertion = assertion;
@@ -85,7 +85,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         }
 
         _logger.LogDebug("refresh token request to: {endpoint}", request.Address);
-        var response = await oidc.HttpClient.RequestRefreshTokenAsync(request, cancellationToken);
+        var response = await oidc.HttpClient.RequestRefreshTokenAsync(request, cancellationToken).ConfigureAwait(false);
 
         var token = new UserToken();
         if (response.IsError)
@@ -113,7 +113,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
     {
         _logger.LogTrace("Revoking refresh token: {token}", refreshToken);
         
-        var oidc = await _configurationService.GetOpenIdConnectConfigurationAsync(parameters.ChallengeScheme);
+        var oidc = await _configurationService.GetOpenIdConnectConfigurationAsync(parameters.ChallengeScheme).ConfigureAwait(false);
 
         if (string.IsNullOrEmpty(oidc.RevocationEndpoint))
         {
@@ -141,7 +141,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         }
         else
         {
-            var assertion = await _clientAssertionService.GetClientAssertionAsync(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + oidc.Scheme, parameters);
+            var assertion = await _clientAssertionService.GetClientAssertionAsync(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + oidc.Scheme, parameters).ConfigureAwait(false);
             if (assertion != null)
             {
                 request.ClientAssertion = parameters.Assertion;
@@ -150,7 +150,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         }
         
         _logger.LogDebug("token revocation request to: {endpoint}", request.Address);
-        var response = await oidc.HttpClient.RevokeTokenAsync(request, cancellationToken);
+        var response = await oidc.HttpClient.RevokeTokenAsync(request, cancellationToken).ConfigureAwait(false);
 
         if (response.IsError)
         {

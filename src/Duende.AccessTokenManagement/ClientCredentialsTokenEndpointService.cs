@@ -93,7 +93,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         }
         else
         {
-            var assertion = await _clientAssertionService.GetClientAssertionAsync(clientName);
+            var assertion = await _clientAssertionService.GetClientAssertionAsync(clientName).ConfigureAwait(false);
                 
             if (assertion != null)
             {
@@ -119,7 +119,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         }
         
         _logger.LogDebug("Requesting client credentials access token at endpoint: {endpoint}", request.Address);
-        var response = await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken);
+        var response = await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken).ConfigureAwait(false);
 
         if (response.IsError)
         {
