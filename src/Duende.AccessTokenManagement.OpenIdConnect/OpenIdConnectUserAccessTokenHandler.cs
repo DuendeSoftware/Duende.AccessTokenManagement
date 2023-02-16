@@ -32,7 +32,7 @@ public class OpenIdConnectUserAccessTokenHandler : DelegatingHandler
     /// <inheritdoc/>
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        await SetTokenAsync(request, forceRenewal: false);
+        await SetTokenAsync(request, forceRenewal: false).ConfigureAwait(false);
         var response = await base.SendAsync(request, cancellationToken);
 
         // retry if 401
@@ -40,8 +40,8 @@ public class OpenIdConnectUserAccessTokenHandler : DelegatingHandler
         {
             response.Dispose();
 
-            await SetTokenAsync(request, forceRenewal: true);
-            return await base.SendAsync(request, cancellationToken);
+            await SetTokenAsync(request, forceRenewal: true).ConfigureAwait(false);
+            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
         return response;
@@ -64,7 +64,7 @@ public class OpenIdConnectUserAccessTokenHandler : DelegatingHandler
             Context =  _parameters.Context
         };
               
-        var token = await _httpContextAccessor.HttpContext!.GetUserAccessTokenAsync(parameters);
+        var token = await _httpContextAccessor.HttpContext!.GetUserAccessTokenAsync(parameters).ConfigureAwait(false);
 
         if (!string.IsNullOrWhiteSpace(token.AccessToken))
         {

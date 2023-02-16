@@ -46,7 +46,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
 
         if (parameters.ForceRenewal == false)
         {
-            var item = await _tokenCache.GetAsync(clientName, parameters, cancellationToken);
+            var item = await _tokenCache.GetAsync(clientName, parameters, cancellationToken).ConfigureAwait(false);
             if (item != null)
             {
                 return item;
@@ -55,7 +55,7 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
 
         return await _sync.SynchronizeAsync(clientName, async () =>
         {
-            var token = await _clientCredentialsTokenEndpointService.RequestToken(clientName, parameters, cancellationToken);
+            var token = await _clientCredentialsTokenEndpointService.RequestToken(clientName, parameters, cancellationToken).ConfigureAwait(false);
             if (token.IsError)
             {
                 _logger.LogError(
@@ -65,9 +65,9 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
                 return token;
             }
 
-            await _tokenCache.SetAsync(clientName, token, parameters, cancellationToken);
+            await _tokenCache.SetAsync(clientName, token, parameters, cancellationToken).ConfigureAwait(false);
             return token;
-        });
+        }).ConfigureAwait(false);
     }
 
 

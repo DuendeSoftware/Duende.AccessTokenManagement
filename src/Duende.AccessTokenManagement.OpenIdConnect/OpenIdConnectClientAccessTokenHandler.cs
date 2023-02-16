@@ -32,16 +32,16 @@ public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
     /// <inheritdoc/>
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        await SetTokenAsync(request, forceRenewal: false);
-        var response = await base.SendAsync(request, cancellationToken);
+        await SetTokenAsync(request, forceRenewal: false).ConfigureAwait(false);
+        var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         // retry if 401
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             response.Dispose();
 
-            await SetTokenAsync(request, forceRenewal: true);
-            return await base.SendAsync(request, cancellationToken);
+            await SetTokenAsync(request, forceRenewal: true).ConfigureAwait(false);
+            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
 
         return response;
@@ -67,7 +67,7 @@ public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
             Context =  _parameters.Context
         };
               
-        var token = await _httpContextAccessor.HttpContext!.GetClientAccessTokenAsync(parameters);
+        var token = await _httpContextAccessor.HttpContext!.GetClientAccessTokenAsync(parameters).ConfigureAwait(false);
 
         if (!string.IsNullOrWhiteSpace(token.AccessToken))
         {

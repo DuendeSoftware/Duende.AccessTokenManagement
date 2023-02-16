@@ -56,7 +56,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
         _logger.LogDebug("Caching access token for client: {clientName}. Expiration: {expiration}", clientName, cacheExpiration);
             
         var cacheKey = GenerateCacheKey(_options, clientName, requestParameters);
-        await _cache.SetStringAsync(cacheKey, data, entryOptions, token: cancellationToken);
+        await _cache.SetStringAsync(cacheKey, data, entryOptions, token: cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -68,7 +68,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
         ArgumentNullException.ThrowIfNull(clientName);
             
         var cacheKey = GenerateCacheKey(_options, clientName, requestParameters);
-        var entry = await _cache.GetStringAsync(cacheKey, token: cancellationToken);
+        var entry = await _cache.GetStringAsync(cacheKey, token: cancellationToken).ConfigureAwait(false);
 
         if (entry != null)
         {

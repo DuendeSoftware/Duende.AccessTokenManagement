@@ -67,7 +67,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
 
         var userName = user.FindFirst(JwtClaimTypes.Name)?.Value ??
                        user.FindFirst(JwtClaimTypes.Subject)?.Value ?? "unknown";
-        var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
+        var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters).ConfigureAwait(false);
 
         if (userToken.AccessToken.IsMissing() && userToken.RefreshToken.IsMissing())
         {
@@ -97,7 +97,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
 
             return await _sync.SynchronizeAsync(userToken.RefreshToken!, async () =>
             {
-                var token = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken);
+                var token = await RefreshUserAccessTokenAsync(user, parameters, cancellationToken).ConfigureAwait(false);
 
                 if (!token.IsError)
                 {
@@ -105,7 +105,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
                 }
 
                 return token;
-            });
+            }).ConfigureAwait(false);
         }
 
         _logger.LogTrace("Returning current token for user: {user}", userName);
@@ -119,12 +119,12 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         CancellationToken cancellationToken = default)
     {
         parameters ??= new UserTokenRequestParameters();
-        var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
+        var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters).ConfigureAwait(false);
 
         if (!string.IsNullOrWhiteSpace(userToken.RefreshToken))
         {
-            await _tokenEndpointService.RevokeRefreshTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
-            await _userAccessTokenStore.ClearTokenAsync(user, parameters);
+            await _tokenEndpointService.RevokeRefreshTokenAsync(userToken.RefreshToken, parameters, cancellationToken).ConfigureAwait(false);
+            await _userAccessTokenStore.ClearTokenAsync(user, parameters).ConfigureAwait(false);
         }
     }
 
@@ -133,7 +133,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         UserTokenRequestParameters parameters,
         CancellationToken cancellationToken = default)
     {
-        var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters);
+        var userToken = await _userAccessTokenStore.GetTokenAsync(user, parameters).ConfigureAwait(false);
 
         if (String.IsNullOrWhiteSpace(userToken.RefreshToken))
         {
@@ -141,14 +141,14 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         }
 
         var refreshedToken =
-            await _tokenEndpointService.RefreshAccessTokenAsync(userToken.RefreshToken, parameters, cancellationToken);
+            await _tokenEndpointService.RefreshAccessTokenAsync(userToken.RefreshToken, parameters, cancellationToken).ConfigureAwait(false);
         if (refreshedToken.IsError)
         {
             _logger.LogError("Error refreshing access token. Error = {error}", refreshedToken.Error);
         }
         else
         {
-            await _userAccessTokenStore.StoreTokenAsync(user, refreshedToken, parameters);
+            await _userAccessTokenStore.StoreTokenAsync(user, refreshedToken, parameters).ConfigureAwait(false);
         }
 
         return refreshedToken;

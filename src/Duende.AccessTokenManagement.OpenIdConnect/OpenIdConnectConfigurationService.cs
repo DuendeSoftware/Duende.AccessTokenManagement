@@ -43,7 +43,7 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
 
         if (string.IsNullOrWhiteSpace(configScheme))
         {
-            var defaultScheme = await _schemeProvider.GetDefaultChallengeSchemeAsync();
+            var defaultScheme = await _schemeProvider.GetDefaultChallengeSchemeAsync().ConfigureAwait(false);
 
             if (defaultScheme is null)
             {
@@ -59,7 +59,7 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
         OpenIdConnectConfiguration configuration;
         try
         {
-            configuration = await options.ConfigurationManager!.GetConfigurationAsync(default);
+            configuration = await options.ConfigurationManager!.GetConfigurationAsync(default).ConfigureAwait(false);
         }
         catch (Exception e)
         {
