@@ -18,7 +18,7 @@ namespace Duende.AccessTokenManagement;
 public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndpointService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IOptionsSnapshot<ClientCredentialsClient> _options;
+    private readonly IOptionsMonitor<ClientCredentialsClient> _options;
     private readonly IClientAssertionService _clientAssertionService;
     private readonly ILogger<ClientCredentialsTokenEndpointService> _logger;
 
@@ -31,7 +31,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     /// <param name="options"></param>
     public ClientCredentialsTokenEndpointService(
         IHttpClientFactory httpClientFactory,
-        IOptionsSnapshot<ClientCredentialsClient> options,
+        IOptionsMonitor<ClientCredentialsClient> options,
         IClientAssertionService clientAssertionService,
         ILogger<ClientCredentialsTokenEndpointService> logger)
     {
