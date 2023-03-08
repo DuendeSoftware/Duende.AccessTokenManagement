@@ -64,6 +64,7 @@ public class ClientTokenManagementTests
         var response = new
         {
             access_token = "access_token",
+            token_type = "token_type",
             expires_in = 60,
             scope = "scope"
         };
@@ -96,6 +97,7 @@ public class ClientTokenManagementTests
         mockHttp.VerifyNoOutstandingExpectation();
 
         token.AccessToken.ShouldBe("access_token");
+        token.AccessTokenType.ShouldBe("token_type");
         token.Scope.ShouldBe("scope");
         token.IsError.ShouldBeFalse();
 
@@ -120,6 +122,7 @@ public class ClientTokenManagementTests
         var expectedResponse = new
         {
             access_token = "access_token",
+            token_type = "token_type",
             scope = "scope"
         };
 
@@ -139,6 +142,7 @@ public class ClientTokenManagementTests
         mockHttp.VerifyNoOutstandingExpectation();
 
         token.AccessToken.ShouldBe("access_token");
+        token.AccessTokenType.ShouldBe("token_type");
         token.Scope.ShouldBe("scope");
         token.IsError.ShouldBeFalse();
 
@@ -183,6 +187,7 @@ public class ClientTokenManagementTests
         var response = new
         {
             access_token = "access_token",
+            token_type = "token_type",
             expires_in = 60,
             scope = "scope_per_request"
         };
@@ -241,6 +246,7 @@ public class ClientTokenManagementTests
         var expectedResponse = new
         {
             access_token = "access_token",
+            token_type = "token_type",
             expires_in = 60,
             scope = "scope"
         };
@@ -293,6 +299,7 @@ public class ClientTokenManagementTests
         var expectedResponse = new
         {
             access_token = "access_token",
+            token_type = "token_type",
             expires_in = 60,
             scope = "scope"
         };
@@ -354,6 +361,7 @@ public class ClientTokenManagementTests
         var expectedResponse = new
         {
             access_token = "access_token",
+            token_type = "token_type",
             expires_in = 60,
             scope = "scope"
         };
@@ -393,6 +401,7 @@ public class ClientTokenManagementTests
         var response = new
         {
             access_token = "access_token",
+            token_type = "token_type",
             expires_in = 3600,
             scope = "scope"
         };
@@ -413,12 +422,14 @@ public class ClientTokenManagementTests
         mockHttp.VerifyNoOutstandingExpectation();
 
         token.AccessToken.ShouldBe("access_token");
-        
+        token.AccessTokenType.ShouldBe("token_type");
+
         // 2nd request
         token = await sut.GetAccessTokenAsync("test");
         
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("access_token");
+        token.AccessTokenType.ShouldBe("token_type");
         mockHttp.GetMatchCount(mockedRequest).ShouldBe(1);
     }
     
@@ -438,6 +449,7 @@ public class ClientTokenManagementTests
         var response = new
         {
             access_token = "access_token",
+            token_type = "token_type",
             expires_in = 3600,
             scope = "scope"
         };
@@ -458,7 +470,8 @@ public class ClientTokenManagementTests
         mockHttp.VerifyNoOutstandingExpectation();
 
         token.AccessToken.ShouldBe("access_token");
-        
+        token.AccessTokenType.ShouldBe("token_type");
+
         // 2nd request
         mockHttp.Expect("/connect/token")
             .Respond("application/json", JsonSerializer.Serialize(response));
@@ -467,5 +480,6 @@ public class ClientTokenManagementTests
         
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("access_token");
+        token.AccessTokenType.ShouldBe("token_type");
     }
 }

@@ -71,7 +71,9 @@ public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
 
         if (!string.IsNullOrWhiteSpace(token.AccessToken))
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+            // checking for null AccessTokenType and falling back to "Bearer" since this might be coming
+            // from an old cache/store prior to adding the AccessTokenType property.
+            request.Headers.Authorization = new AuthenticationHeaderValue(token.AccessTokenType ?? "Bearer", token.AccessToken);
         }
     }
 }

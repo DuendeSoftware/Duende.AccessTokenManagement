@@ -14,7 +14,12 @@ public class ClientCredentialsToken
     /// The access token
     /// </summary>
     public string? AccessToken { get; set; }
-        
+    
+    /// <summary>
+    /// The access token type
+    /// </summary>
+    public string? AccessTokenType { get; set; }
+
     /// <summary>
     /// The access token expiration
     /// </summary>

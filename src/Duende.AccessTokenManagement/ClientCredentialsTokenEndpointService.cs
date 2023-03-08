@@ -132,6 +132,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         return new ClientCredentialsToken
         {
             AccessToken = response.AccessToken,
+            AccessTokenType = response.TokenType,
             Expiration = response.ExpiresIn == 0
                 ? DateTimeOffset.MaxValue
                 : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),

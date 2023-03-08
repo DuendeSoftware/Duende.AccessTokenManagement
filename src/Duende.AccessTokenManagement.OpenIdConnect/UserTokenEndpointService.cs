@@ -95,6 +95,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         else
         {
             token.AccessToken = response.AccessToken;
+            token.AccessTokenType = response.TokenType;
             token.Expiration = response.ExpiresIn == 0
                 ? DateTimeOffset.MaxValue
                 : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn);

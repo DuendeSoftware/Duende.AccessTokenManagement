@@ -91,9 +91,15 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 tokenName += $"::{parameters.Resource}";
             }
+            var tokenTypeName = $"{TokenPrefix}{OpenIdConnectParameterNames.TokenType}";
+            if (!string.IsNullOrEmpty(parameters.Resource))
+            {
+                tokenTypeName += $"::{parameters.Resource}";
+            }
 
             var expiresName = $"{TokenPrefix}expires_at"; string? refreshToken = null;
             string? accessToken = null;
+            string? accessTokenType = null;
             string? expiresAt = null;
             if (!string.IsNullOrEmpty(parameters.Resource))
             {
@@ -108,12 +114,15 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                         .SingleOrDefault(t => t.Key == $"{refreshTokenName}||{parameters.ChallengeScheme}").Value;
                 accessToken = tokens.SingleOrDefault(t => t.Key == $"{tokenName}||{parameters.ChallengeScheme}")
                     .Value;
+                accessTokenType = tokens.SingleOrDefault(t => t.Key == $"{tokenTypeName}||{parameters.ChallengeScheme}")
+                    .Value;
                 expiresAt = tokens.SingleOrDefault(t => t.Key == $"{expiresName}||{parameters.ChallengeScheme}")
                     .Value;
             }
 
             refreshToken ??= tokens.SingleOrDefault(t => t.Key == $"{refreshTokenName}").Value;
             accessToken ??= tokens.SingleOrDefault(t => t.Key == $"{tokenName}").Value;
+            accessTokenType ??= tokens.SingleOrDefault(t => t.Key == $"{tokenTypeName}").Value;
             expiresAt ??= tokens.SingleOrDefault(t => t.Key == $"{expiresName}").Value;
 
             DateTimeOffset dtExpires = DateTimeOffset.MaxValue;
@@ -125,6 +134,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             return new UserToken
             {
                 AccessToken = accessToken,
+                AccessTokenType = accessTokenType,
                 RefreshToken = refreshToken,
                 Expiration = dtExpires
             };
@@ -164,6 +174,11 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 tokenName += $"::{parameters.Resource}";
             }
+            var tokenTypeName = $"{TokenPrefix}{OpenIdConnectParameterNames.TokenType}";
+            if (!string.IsNullOrEmpty(parameters.Resource))
+            {
+                tokenTypeName += $"::{parameters.Resource}";
+            }
 
             var refreshTokenName = $"{OpenIdConnectParameterNames.RefreshToken}";
 
@@ -171,10 +186,12 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 refreshTokenName += $"||{parameters.ChallengeScheme}";
                 tokenName += $"||{parameters.ChallengeScheme}";
+                tokenTypeName += $"||{parameters.ChallengeScheme}";
                 expiresName += $"||{parameters.ChallengeScheme}";
             }
 
             result.Properties!.Items[$"{TokenPrefix}{tokenName}"] = token.AccessToken;
+            result.Properties!.Items[$"{TokenPrefix}{tokenTypeName}"] = token.AccessTokenType;
             result.Properties!.Items[$"{TokenPrefix}{expiresName}"] = token.Expiration.ToString("o", CultureInfo.InvariantCulture);
 
             if (token.RefreshToken != null)

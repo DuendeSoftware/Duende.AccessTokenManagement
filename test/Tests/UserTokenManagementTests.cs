@@ -13,19 +13,20 @@ public class UserTokenManagementTests : IntegrationTestBase
     [Fact]
     public async Task Anonymous_user_should_return_user_token_error()
     {
-        var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
+        var response = await AppHost.BrowserClient!.GetAsync(AppHost.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
 
-        token.IsError.ShouldBeTrue();
+        token!.IsError.ShouldBeTrue();
     }
     
     [Fact]
     public async Task Anonymous_user_should_return_client_token()
     {
-        var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/client_token"));
+        var response = await AppHost.BrowserClient!.GetAsync(AppHost.Url("/client_token"));
         var token = await response.Content.ReadFromJsonAsync<ClientCredentialsToken>();
 
-        token.AccessToken.ShouldNotBeNull();
+        token!.AccessToken.ShouldNotBeNull();
+        token.AccessTokenType.ShouldBe("Bearer");
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
         
         token.IsError.ShouldBeFalse();
@@ -41,6 +42,7 @@ public class UserTokenManagementTests : IntegrationTestBase
         {
             id_token = IdentityServerHost.CreateIdToken("1", "web"),
             access_token = "initial_access_token",
+            token_type = "token_type",
             expires_in = 3600,
             refresh_token = "initial_refresh_token",
         };
@@ -57,8 +59,10 @@ public class UserTokenManagementTests : IntegrationTestBase
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
 
+        token.ShouldNotBeNull();
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("initial_access_token");
+        token.AccessTokenType.ShouldBe("token_type");
         token.RefreshToken.ShouldBe("initial_refresh_token");
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
         
@@ -66,8 +70,10 @@ public class UserTokenManagementTests : IntegrationTestBase
         response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
         token = await response.Content.ReadFromJsonAsync<UserToken>();
 
+        token.ShouldNotBeNull();
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("initial_access_token");
+        token.AccessTokenType.ShouldBe("token_type");
         token.RefreshToken.ShouldBe("initial_refresh_token");
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
     }
@@ -82,6 +88,7 @@ public class UserTokenManagementTests : IntegrationTestBase
         {
             id_token = IdentityServerHost.CreateIdToken("1", "web"),
             access_token = "initial_access_token",
+            token_type = "token_type",
             refresh_token = "initial_refresh_token",
         };
         
@@ -96,8 +103,10 @@ public class UserTokenManagementTests : IntegrationTestBase
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
 
+        token.ShouldNotBeNull();
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("initial_access_token");
+        token.AccessTokenType.ShouldBe("token_type");
         token.RefreshToken.ShouldBe("initial_refresh_token");
         token.Expiration.ShouldBe(DateTimeOffset.MaxValue);
     }
@@ -112,6 +121,7 @@ public class UserTokenManagementTests : IntegrationTestBase
         {
             id_token = IdentityServerHost.CreateIdToken("1", "web"),
             access_token = "initial_access_token",
+            token_type = "token_type",
             expires_in = 3600
         };
         
@@ -126,8 +136,10 @@ public class UserTokenManagementTests : IntegrationTestBase
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
 
+        token.ShouldNotBeNull();
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("initial_access_token");
+        token.AccessTokenType.ShouldBe("token_type");
         token.RefreshToken.ShouldBeNull();
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
     }
@@ -142,6 +154,7 @@ public class UserTokenManagementTests : IntegrationTestBase
         {
             id_token = IdentityServerHost.CreateIdToken("1", "web"),
             access_token = "initial_access_token",
+            token_type = "token_type",
             expires_in = 10
         };
         
@@ -156,8 +169,10 @@ public class UserTokenManagementTests : IntegrationTestBase
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
 
+        token.ShouldNotBeNull();
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("initial_access_token");
+        token.AccessTokenType.ShouldBe("token_type");
         token.RefreshToken.ShouldBeNull();
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
     }
@@ -173,6 +188,7 @@ public class UserTokenManagementTests : IntegrationTestBase
         {
             id_token = IdentityServerHost.CreateIdToken("1", "web"),
             access_token = "initial_access_token",
+            token_type = "token_type",
             expires_in = 10,
             refresh_token = "initial_refresh_token",
         };
@@ -186,6 +202,7 @@ public class UserTokenManagementTests : IntegrationTestBase
         var refreshTokenResponse = new
         {
             access_token = "refreshed1_access_token",
+            token_type = "token_type1",
             expires_in = 10,
             refresh_token = "refreshed1_refresh_token",
         };
@@ -200,6 +217,7 @@ public class UserTokenManagementTests : IntegrationTestBase
         var refreshTokenResponse2 = new
         {
             access_token = "refreshed2_access_token",
+            token_type = "token_type2",
             expires_in = 3600,
             refresh_token = "refreshed2_refresh_token",
         };
@@ -219,8 +237,10 @@ public class UserTokenManagementTests : IntegrationTestBase
         var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
         var token = await response.Content.ReadFromJsonAsync<UserToken>();
 
+        token.ShouldNotBeNull();
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("refreshed1_access_token");
+        token.AccessTokenType.ShouldBe("token_type1");
         token.RefreshToken.ShouldBe("refreshed1_refresh_token");
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
         
@@ -228,8 +248,10 @@ public class UserTokenManagementTests : IntegrationTestBase
         response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
         token = await response.Content.ReadFromJsonAsync<UserToken>();
 
+        token.ShouldNotBeNull();
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("refreshed2_access_token");
+        token.AccessTokenType.ShouldBe("token_type2");
         token.RefreshToken.ShouldBe("refreshed2_refresh_token");
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
         
@@ -237,8 +259,10 @@ public class UserTokenManagementTests : IntegrationTestBase
         response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
         token = await response.Content.ReadFromJsonAsync<UserToken>();
 
+        token.ShouldNotBeNull();
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("refreshed2_access_token");
+        token.AccessTokenType.ShouldBe("token_type");
         token.RefreshToken.ShouldBe("refreshed2_refresh_token");
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
     }
