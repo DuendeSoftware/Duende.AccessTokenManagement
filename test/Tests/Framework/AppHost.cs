@@ -130,7 +130,7 @@ public class AppHost : GenericHost
         });
     }
 
-    public async Task<HttpResponseMessage> LoginAsync(string sub, string sid = null)
+    public async Task<HttpResponseMessage> LoginAsync(string sub, string? sid = null)
     {
         await _identityServerHost.CreateIdentityServerSessionCookieAsync(sub, sid);
         return await OidcLoginAsync();
@@ -140,37 +140,37 @@ public class AppHost : GenericHost
     {
         var response = await BrowserClient.GetAsync(Url("/login"));
         response.StatusCode.ShouldBe((HttpStatusCode)302); // authorize
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/authorize"));
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/authorize"));
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe((HttpStatusCode)302); // client callback
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(Url("/signin-oidc"));
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signin-oidc"));
 
         response = await BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe((HttpStatusCode)302); // root
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldBe("/");
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/");
 
         response = await BrowserClient.GetAsync(Url(response.Headers.Location.ToString()));
         return response;
     }
 
-    public async Task<HttpResponseMessage> LogoutAsync(string sid = null)
+    public async Task<HttpResponseMessage> LogoutAsync(string? sid = null)
     {
         var response = await BrowserClient.GetAsync(Url("/logout") + "?sid=" + sid);
         response.StatusCode.ShouldBe((HttpStatusCode)302); // endsession
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/endsession"));
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/endsession"));
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe((HttpStatusCode)302); // logout
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/account/logout"));
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/account/logout"));
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe((HttpStatusCode)302); // post logout redirect uri
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldStartWith(Url("/signout-callback-oidc"));
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(Url("/signout-callback-oidc"));
 
         response = await BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe((HttpStatusCode)302); // root
-        response.Headers.Location.ToString().ToLowerInvariant().ShouldBe("/");
+        response.Headers.Location!.ToString().ToLowerInvariant().ShouldBe("/");
 
         response = await BrowserClient.GetAsync(Url(response.Headers.Location.ToString()));
         return response;

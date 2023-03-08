@@ -24,25 +24,26 @@ public class GenericHost
     }
 
     protected readonly string _baseAddress;
-    IServiceProvider _appServices;
+    IServiceProvider _appServices = default!;
 
-    public Assembly HostAssembly { get; set; }
-    public bool IsDevelopment { get; set; }
+    public Assembly HostAssembly { get; set; } = default!;
+    public bool IsDevelopment { get; set; } = default!;
 
-    public TestServer Server { get; private set; }
-    public TestBrowserClient BrowserClient { get; set; }
-    public HttpClient HttpClient { get; set; }
+    public TestServer Server { get; private set; } = default!;
+    public TestBrowserClient BrowserClient { get; set; } = default!;
+    public HttpClient HttpClient { get; set; } = default!;
 
     public TestLoggerProvider Logger { get; set; } = new TestLoggerProvider();
 
 
     public T Resolve<T>()
+        where T : notnull
     {
         // not calling dispose on scope on purpose
         return _appServices.GetRequiredService<IServiceScopeFactory>().CreateScope().ServiceProvider.GetRequiredService<T>();
     }
 
-    public string Url(string path = null)
+    public string Url(string? path = null)
     {
         path = path ?? String.Empty;
         if (!path.StartsWith("/")) path = "/" + path;
@@ -158,8 +159,8 @@ public class GenericHost
         });
     }
         
-    ClaimsPrincipal _userToSignIn;
-    AuthenticationProperties _propsToSignIn;
+    ClaimsPrincipal? _userToSignIn = default!;
+    AuthenticationProperties? _propsToSignIn = default!;
         
     public async Task IssueSessionCookieAsync(params Claim[] claims)
     {

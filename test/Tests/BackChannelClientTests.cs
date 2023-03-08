@@ -33,8 +33,9 @@ public class BackChannelClientTests
         var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
 
         var token = await sut.GetAccessTokenAsync("test");
-        
+
         token.AccessToken.ShouldBeNull();
+        token.AccessTokenType.ShouldBeNull();
         token.Error.ShouldBe("Not Found");
         mockHttp.GetMatchCount(request).ShouldBe(1);
     }
@@ -67,6 +68,7 @@ public class BackChannelClientTests
         var token = await sut.GetAccessTokenAsync("test");
         
         token.AccessToken.ShouldBeNull();
+        token.AccessTokenType.ShouldBeNull();
         token.Error.ShouldBe("Not Found");
         mockHttp.GetMatchCount(request).ShouldBe(1);
     }
@@ -97,6 +99,7 @@ public class BackChannelClientTests
         var token = await sut.GetAccessTokenAsync("test");
         
         token.AccessToken.ShouldBeNull();
+        token.AccessTokenType.ShouldBeNull();
         token.Error.ShouldBe("Not Found");
         mockHttp.GetMatchCount(request).ShouldBe(1);
     }
