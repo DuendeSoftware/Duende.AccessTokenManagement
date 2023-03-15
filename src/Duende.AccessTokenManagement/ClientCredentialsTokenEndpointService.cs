@@ -3,9 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using IdentityModel;
 using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,6 +22,8 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptionsMonitor<ClientCredentialsClient> _options;
     private readonly IClientAssertionService _clientAssertionService;
+    private readonly IDPoPKeyStore _dPoPKeyMaterialService;
+    private readonly IDPoPProofService _dPoPProofService;
     private readonly ILogger<ClientCredentialsTokenEndpointService> _logger;
 
     /// <summary>
@@ -27,17 +31,23 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     /// </summary>
     /// <param name="httpClientFactory"></param>
     /// <param name="clientAssertionService"></param>
+    /// <param name="dPoPKeyMaterialService"></param>
+    /// <param name="dPoPProofService"></param>
     /// <param name="logger"></param>
     /// <param name="options"></param>
     public ClientCredentialsTokenEndpointService(
         IHttpClientFactory httpClientFactory,
         IOptionsMonitor<ClientCredentialsClient> options,
         IClientAssertionService clientAssertionService,
+        IDPoPKeyStore dPoPKeyMaterialService,
+        IDPoPProofService dPoPProofService,
         ILogger<ClientCredentialsTokenEndpointService> logger)
     {
         _httpClientFactory = httpClientFactory;
         _options = options;
         _clientAssertionService = clientAssertionService;
+        _dPoPKeyMaterialService = dPoPKeyMaterialService;
+        _dPoPProofService = dPoPProofService;
         _logger = logger;
     }
 
@@ -53,15 +63,16 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         {
             throw new InvalidOperationException("unknown client");
         }
-        
+
         var request = new ClientCredentialsTokenRequest
         {
             Address = client.TokenEndpoint,
             Scope = client.Scope,
             ClientId = client.ClientId,
             ClientSecret = client.ClientSecret,
-            ClientCredentialStyle = client.ClientCredentialStyle
+            ClientCredentialStyle = client.ClientCredentialStyle,
         };
+
         request.Parameters.AddRange(client.Parameters);
         
         parameters ??= new TokenRequestParameters();
@@ -104,6 +115,18 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         
         request.Options.TryAdd(ClientCredentialsTokenManagementDefaults.TokenRequestParametersOptionsName, parameters);
 
+        var key = await _dPoPKeyMaterialService.GetKeyAsync(clientName);
+        if (key != null)
+        {
+            var proof = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
+            {
+                Url = request.Address!,
+                Method = "POST",
+                DPoPJsonWebKey = key.JsonWebKey,
+            });
+            request.DPoPProofToken = proof?.ProofToken;
+        }
+
         HttpClient httpClient;
         if (client.HttpClient != null)
         {
@@ -121,6 +144,22 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         _logger.LogDebug("Requesting client credentials access token at endpoint: {endpoint}", request.Address);
         var response = await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken).ConfigureAwait(false);
 
+        if (response.IsError && response.Error == OidcConstants.TokenErrors.UseDPoPNonce && key != null)
+        {
+            var proof = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
+            {
+                Url = request.Address!,
+                Method = "POST",
+                DPoPJsonWebKey = key.JsonWebKey,
+                DPoPNonce = response.DPoPNonce
+            });
+            request.DPoPProofToken = proof?.ProofToken;
+            if (request.DPoPProofToken != null)
+            {
+                response = await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
         if (response.IsError)
         {
             return new ClientCredentialsToken
@@ -133,6 +172,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         {
             AccessToken = response.AccessToken,
             AccessTokenType = response.TokenType,
+            DPoPJsonWebKey = key?.JsonWebKey,
             Expiration = response.ExpiresIn == 0
                 ? DateTimeOffset.MaxValue
                 : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),

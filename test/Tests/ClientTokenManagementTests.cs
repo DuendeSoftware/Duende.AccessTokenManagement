@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using IdentityModel;
 using IdentityModel.Client;
@@ -408,10 +409,10 @@ public class ClientTokenManagementTests
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
-        
+
         var mockedRequest = mockHttp.Expect("/connect/token")
             .Respond("application/json", JsonSerializer.Serialize(response));
-        
+
         services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
@@ -426,13 +427,13 @@ public class ClientTokenManagementTests
 
         // 2nd request
         token = await sut.GetAccessTokenAsync("test");
-        
+
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("access_token");
         token.AccessTokenType.ShouldBe("token_type");
         mockHttp.GetMatchCount(mockedRequest).ShouldBe(1);
     }
-    
+
     [Fact]
     public async Task Service_should_always_hit_network_with_force_renewal()
     {
@@ -456,10 +457,10 @@ public class ClientTokenManagementTests
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
-        
+
         mockHttp.Expect("/connect/token")
             .Respond("application/json", JsonSerializer.Serialize(response));
-        
+
         services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
             .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
 
@@ -475,11 +476,107 @@ public class ClientTokenManagementTests
         // 2nd request
         mockHttp.Expect("/connect/token")
             .Respond("application/json", JsonSerializer.Serialize(response));
-        
+
         token = await sut.GetAccessTokenAsync("test", new TokenRequestParameters { ForceRenewal = true });
-        
+
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("access_token");
         token.AccessTokenType.ShouldBe("token_type");
+    }
+
+    [Fact]
+    public async Task client_with_dpop_key_should_send_proof_token()
+    {
+        var proof = new TestDPoPProofService() { ProofToken = "proof_token" };
+
+        var services = new ServiceCollection();
+        services.AddDistributedMemoryCache();
+        services.AddSingleton<IDPoPProofService>(proof);
+
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.TokenEndpoint = "https://as/connect/token";
+                client.ClientId = "client_id";
+                client.DPoPJsonWebKey = "key";
+            });
+
+        var expectedResponse = new
+        {
+            access_token = "access_token",
+            token_type = "token_type",
+            scope = "scope"
+        };
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+
+        mockHttp.Expect("/connect/token")
+            .With(m => m.Headers.Any(h => h.Key == "DPoP" && h.Value.FirstOrDefault() == "proof_token"))
+            .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
+
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test");
+        mockHttp.VerifyNoOutstandingExpectation();
+
+        token.IsError.ShouldBeFalse();
+        token.DPoPJsonWebKey.ShouldBe("key");
+    }
+
+
+    [Fact]
+    public async Task client_should_use_nonce_when_sending_dpop_proof()
+    {
+        var proof = new TestDPoPProofService() { ProofToken = "proof_token", AppendNonce = true };
+
+        var services = new ServiceCollection();
+        services.AddDistributedMemoryCache();
+        services.AddSingleton<IDPoPProofService>(proof);
+
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.TokenEndpoint = "https://as/connect/token";
+                client.ClientId = "client_id";
+                client.DPoPJsonWebKey = "key";
+            });
+
+        var expectedResponse = new
+        {
+            access_token = "access_token",
+            token_type = "token_type",
+            scope = "scope"
+        };
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+
+        mockHttp.Expect("/connect/token")
+            .With(m => m.Headers.Any(h => h.Key == "DPoP" && h.Value.FirstOrDefault() == "proof_token"))
+            .Respond(HttpStatusCode.BadRequest, 
+                new[] { new KeyValuePair<string, string>("DPoP-Nonce", "some_nonce") }, 
+                "application/json", 
+                JsonSerializer.Serialize(new { error = "use_dpop_nonce" }));
+        
+        mockHttp.Expect("/connect/token")
+            .With(m => m.Headers.Any(h => h.Key == "DPoP" && h.Value.First() == ("proof_tokensome_nonce")))
+            .Respond("application/json", JsonSerializer.Serialize(expectedResponse));
+
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test");
+        mockHttp.VerifyNoOutstandingExpectation();
+
+        token.IsError.ShouldBeFalse();
+        token.DPoPJsonWebKey.ShouldBe("key");
     }
 }

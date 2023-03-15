@@ -42,7 +42,9 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         services.TryAddTransient<IClientCredentialsTokenCache, DistributedClientCredentialsTokenCache>();
         services.TryAddTransient<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
         services.TryAddTransient<IClientAssertionService, DefaultClientAssertionService>();
-        
+        services.TryAddTransient<IDPoPProofService, DefaultDPoPProofService>();
+        services.TryAddTransient<IDPoPKeyStore, DefaultDPoPKeyStore>();
+
         services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName);
 
         return new ClientCredentialsTokenManagementBuilder(services);
@@ -117,8 +119,9 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {
             var accessTokenManagementService = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+            var dpop = provider.GetRequiredService<IDPoPProofService>();
 
-            return new ClientCredentialsTokenHandler(accessTokenManagementService, tokenClientName);
+            return new ClientCredentialsTokenHandler(accessTokenManagementService, dpop, tokenClientName);
         });
     }
 }

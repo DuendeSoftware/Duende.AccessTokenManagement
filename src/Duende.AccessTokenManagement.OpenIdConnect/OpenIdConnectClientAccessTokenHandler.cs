@@ -14,6 +14,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// Delegating handler that injects the current access token into an outgoing request
 /// </summary>
 public class OpenIdConnectClientAccessTokenHandler : DelegatingHandler
+// TODO: can we derive from ClientCredentialsTokenHandler or create a common base?
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserTokenRequestParameters _parameters;

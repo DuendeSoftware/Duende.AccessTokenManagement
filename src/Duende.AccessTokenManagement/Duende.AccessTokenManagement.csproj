@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
@@ -11,7 +11,7 @@
         
 
     <ItemGroup>
-        <PackageReference Include="IdentityModel" Version="6.0.0" />
+        <PackageReference Include="IdentityModel" Version="6.1.0-preview.5" />
         
         <PackageReference Include="MinVer" Version="4.0.0" PrivateAssets="All" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
@@ -21,6 +21,7 @@
         <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.1" />
     </ItemGroup>
 
 </Project>

@@ -35,6 +35,11 @@ public class TokenRequestParameters
     /// </summary>
     public ClientAssertion? Assertion { get; set; }
 
+    ///// <summary>
+    ///// The DPoP proof token to use on the token endpoint.
+    ///// </summary>
+    //public string? DPoPProofToken { get; set; }
+
     /// <summary>
     /// Additional context that might be relevant in the pipeline
     /// </summary>

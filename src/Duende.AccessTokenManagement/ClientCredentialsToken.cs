@@ -21,6 +21,16 @@ public class ClientCredentialsToken
     public string? AccessTokenType { get; set; }
 
     /// <summary>
+    /// The string representation of the JSON web key to use for DPoP.
+    /// </summary>
+    public string? DPoPJsonWebKey { get; set; }
+    
+    ///// <summary>
+    ///// The nonce value for the DPoP proof token.
+    ///// </summary>
+    //public string? DPoPNonce { get; set; }
+
+    /// <summary>
     /// The access token expiration
     /// </summary>
     public DateTimeOffset Expiration { get; set; }
