@@ -15,10 +15,18 @@ public class IntegrationTestBase
     protected ApiHost ApiHost;
     protected AppHost AppHost;
 
-    public IntegrationTestBase(string clientId)
+    public IntegrationTestBase(string clientId = "web")
     {
         IdentityServerHost = new IdentityServerHost();
-            
+
+        IdentityServerHost.Clients.Add(new Client
+        {
+            ClientId = "client_credentials_client",
+            ClientSecrets = { new Secret("secret".Sha256()) },
+            AllowedGrantTypes = GrantTypes.ClientCredentials,
+            AllowedScopes = { "scope1" }
+        });
+
         IdentityServerHost.Clients.Add(new Client
         {
             ClientId = "web",

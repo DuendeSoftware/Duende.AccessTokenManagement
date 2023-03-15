@@ -20,7 +20,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     /// <param name="options"></param>
     /// <returns></returns>
     public static ClientCredentialsTokenManagementBuilder AddClientCredentialsTokenManagement(
-        this IServiceCollection services, 
+        this IServiceCollection services,
         Action<ClientCredentialsTokenManagementOptions> options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -37,7 +37,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     public static ClientCredentialsTokenManagementBuilder AddClientCredentialsTokenManagement(this IServiceCollection services)
     {
         services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
-        
+
         services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
         services.TryAddTransient<IClientCredentialsTokenCache, DistributedClientCredentialsTokenCache>();
         services.TryAddTransient<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
@@ -51,7 +51,22 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
 
         return new ClientCredentialsTokenManagementBuilder(services);
     }
-    
+
+    /// <summary>
+    /// Adds a named HTTP client for the factory that automatically sends the a client access token
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/>.</param>
+    /// <param name="httpClientName">The name of the client.</param>
+    /// <param name="tokenClientName">The name of the token client.</param>
+    /// <returns></returns>
+    public static IHttpClientBuilder AddClientCredentialsHttpClient(
+        this IServiceCollection services,
+        string httpClientName,
+        string tokenClientName)
+    {
+        return services.AddClientCredentialsHttpClient(httpClientName, tokenClientName, (Action<HttpClient>)null!);
+    }
+
     /// <summary>
     /// Adds a named HTTP client for the factory that automatically sends the a client access token
     /// </summary>
@@ -61,14 +76,14 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     /// <param name="configureClient">A delegate that is used to configure a <see cref="HttpClient"/>.</param>
     /// <returns></returns>
     public static IHttpClientBuilder AddClientCredentialsHttpClient(
-        this IServiceCollection services, 
-        string httpClientName,
-        string tokenClientName,
-        Action<HttpClient>? configureClient = null)
+    this IServiceCollection services,
+    string httpClientName,
+    string tokenClientName,
+    Action<HttpClient>? configureClient = null)
     {
         ArgumentNullException.ThrowIfNull(httpClientName);
         ArgumentNullException.ThrowIfNull(tokenClientName);
-        
+
         if (configureClient != null)
         {
             return services.AddHttpClient(httpClientName, configureClient)
@@ -78,7 +93,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         return services.AddHttpClient(httpClientName)
             .AddClientCredentialsTokenHandler(tokenClientName);
     }
-        
+
     /// <summary>
     /// Adds a named HTTP client for the factory that automatically sends the a client access token
     /// </summary>
@@ -95,7 +110,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(httpClientName);
         ArgumentNullException.ThrowIfNull(tokenClientName);
-        
+
         if (configureClient != null)
         {
             return services.AddHttpClient(httpClientName, configureClient)
@@ -105,7 +120,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         return services.AddHttpClient(httpClientName)
             .AddClientCredentialsTokenHandler(tokenClientName);
     }
-    
+
     /// <summary>
     /// Adds the client access token handler to an HttpClient
     /// </summary>
@@ -117,7 +132,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         string tokenClientName)
     {
         ArgumentNullException.ThrowIfNull(tokenClientName);
-        
+
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {
             var accessTokenManagementService = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
