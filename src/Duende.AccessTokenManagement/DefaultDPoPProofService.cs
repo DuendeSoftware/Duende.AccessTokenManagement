@@ -18,8 +18,18 @@ namespace Duende.AccessTokenManagement;
 /// </summary>
 public class DefaultDPoPProofService : IDPoPProofService
 {
+    private readonly IDPoPNonceStore _dPoPNonceStore;
+
+    /// <summary>
+    /// ctor
+    /// </summary>
+    public DefaultDPoPProofService(IDPoPNonceStore dPoPNonceStore)
+    {
+        _dPoPNonceStore = dPoPNonceStore;
+    }
+
     /// <inheritdoc/>
-    public Task<DPoPProof?> CreateProofTokenAsync(DPoPProofRequest request)
+    public async Task<DPoPProof?> CreateProofTokenAsync(DPoPProofRequest request)
     {
         var jsonWebKey = new JsonWebKey(request.DPoPJsonWebKey);
 
@@ -76,15 +86,33 @@ public class DefaultDPoPProofService : IDPoPProofService
             payload.Add(JwtClaimTypes.AccessTokenHash, ath);
         }
 
-        if (!string.IsNullOrEmpty(request.DPoPNonce))
+        var nonce = request.DPoPNonce;
+        if (string.IsNullOrEmpty(nonce))
         {
-            payload.Add(JwtClaimTypes.Nonce, request.DPoPNonce);
+            nonce = await _dPoPNonceStore.GetNonceAsync(new DPoPNonceContext
+            {
+                Url = request.Url,
+                Method = request.Method,
+            });
+        }
+        else
+        {
+            await _dPoPNonceStore.StoreNonceAsync(new DPoPNonceContext
+            {
+                Url = request.Url,
+                Method = request.Method,
+            }, nonce);
+        }
+
+        if (!string.IsNullOrEmpty(nonce))
+        {
+            payload.Add(JwtClaimTypes.Nonce, nonce);
         }
 
         var handler = new JsonWebTokenHandler() { SetDefaultTimesOnTokenCreation = false };
         var key = new SigningCredentials(jsonWebKey, jsonWebKey.Alg);
         var proofToken = handler.CreateToken(JsonSerializer.Serialize(payload), key, header);
 
-        return Task.FromResult<DPoPProof?>(new DPoPProof { ProofToken = proofToken! });
+        return new DPoPProof { ProofToken = proofToken! };
     }
 }

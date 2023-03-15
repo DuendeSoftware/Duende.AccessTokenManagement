@@ -25,11 +25,6 @@ public class ClientCredentialsToken
     /// </summary>
     public string? DPoPJsonWebKey { get; set; }
     
-    ///// <summary>
-    ///// The nonce value for the DPoP proof token.
-    ///// </summary>
-    //public string? DPoPNonce { get; set; }
-
     /// <summary>
     /// The access token expiration
     /// </summary>
@@ -39,7 +34,7 @@ public class ClientCredentialsToken
     /// The scope of the access tokens
     /// </summary>
     public string? Scope { get; set; }
-    
+
     /// <summary>
     /// Error (if any) during token request
     /// </summary>

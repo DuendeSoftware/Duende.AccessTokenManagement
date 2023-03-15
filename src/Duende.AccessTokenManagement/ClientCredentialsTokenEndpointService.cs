@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,6 +32,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     /// <param name="clientAssertionService"></param>
     /// <param name="dPoPKeyMaterialService"></param>
     /// <param name="dPoPProofService"></param>
+    /// <param name="dPoPNonceStore"></param>
     /// <param name="logger"></param>
     /// <param name="options"></param>
     public ClientCredentialsTokenEndpointService(
@@ -41,6 +41,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         IClientAssertionService clientAssertionService,
         IDPoPKeyStore dPoPKeyMaterialService,
         IDPoPProofService dPoPProofService,
+        IDPoPNonceStore dPoPNonceStore,
         ILogger<ClientCredentialsTokenEndpointService> logger)
     {
         _httpClientFactory = httpClientFactory;
@@ -144,7 +145,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         _logger.LogDebug("Requesting client credentials access token at endpoint: {endpoint}", request.Address);
         var response = await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (response.IsError && response.Error == OidcConstants.TokenErrors.UseDPoPNonce && key != null)
+        if (response.IsError && response.Error == OidcConstants.TokenErrors.UseDPoPNonce && key != null && response.DPoPNonce != null)
         {
             var proof = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
             {
@@ -154,6 +155,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
                 DPoPNonce = response.DPoPNonce
             });
             request.DPoPProofToken = proof?.ProofToken;
+
             if (request.DPoPProofToken != null)
             {
                 response = await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken).ConfigureAwait(false);
