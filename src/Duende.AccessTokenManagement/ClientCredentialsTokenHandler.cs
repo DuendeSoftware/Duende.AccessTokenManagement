@@ -106,9 +106,6 @@ public class ClientCredentialsTokenHandler : DelegatingHandler
     /// <summary>
     /// Set an access token on the HTTP request
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="forceRenewal"></param>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     protected virtual async Task SetTokenAsync(HttpRequestMessage request, bool forceRenewal, CancellationToken cancellationToken, string? dpopNonce = null)
     {

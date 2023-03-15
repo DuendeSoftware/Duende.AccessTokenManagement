@@ -32,7 +32,6 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     /// <param name="clientAssertionService"></param>
     /// <param name="dPoPKeyMaterialService"></param>
     /// <param name="dPoPProofService"></param>
-    /// <param name="dPoPNonceStore"></param>
     /// <param name="logger"></param>
     /// <param name="options"></param>
     public ClientCredentialsTokenEndpointService(
@@ -41,7 +40,6 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         IClientAssertionService clientAssertionService,
         IDPoPKeyStore dPoPKeyMaterialService,
         IDPoPProofService dPoPProofService,
-        IDPoPNonceStore dPoPNonceStore,
         ILogger<ClientCredentialsTokenEndpointService> logger)
     {
         _httpClientFactory = httpClientFactory;

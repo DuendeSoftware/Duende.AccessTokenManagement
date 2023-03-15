@@ -121,9 +121,10 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {
             var accessTokenManagementService = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
-            var dpop = provider.GetRequiredService<IDPoPProofService>();
+            var dpopService = provider.GetRequiredService<IDPoPProofService>();
+            var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
 
-            return new ClientCredentialsTokenHandler(accessTokenManagementService, dpop, tokenClientName);
+            return new ClientCredentialsTokenHandler(accessTokenManagementService, dpopService, dpopNonceStore, tokenClientName);
         });
     }
 }
