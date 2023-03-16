@@ -145,7 +145,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
             var assertion = await _clientAssertionService.GetClientAssertionAsync(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + oidc.Scheme, parameters).ConfigureAwait(false);
             if (assertion != null)
             {
-                request.ClientAssertion = parameters.Assertion;
+                request.ClientAssertion = assertion;
                 request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
             }
         }
