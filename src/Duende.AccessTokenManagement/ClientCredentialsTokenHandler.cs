@@ -115,7 +115,7 @@ public class ClientCredentialsTokenHandler : DelegatingHandler
         };
 
         var token = await _accessTokenManagementService.GetAccessTokenAsync(_tokenClientName, parameters: parameters, cancellationToken: cancellationToken).ConfigureAwait(false);
-
+        
         if (!string.IsNullOrWhiteSpace(token.AccessToken))
         {
             var scheme = token.AccessTokenType ?? "Bearer";
@@ -123,7 +123,7 @@ public class ClientCredentialsTokenHandler : DelegatingHandler
             if (!string.IsNullOrWhiteSpace(token.DPoPJsonWebKey))
             {
                 // looks like this is a DPoP bound token, so try to generate the proof token
-                if (!await SetDPoPProofTokenAsync(request, token, cancellationToken))
+                if (!await SetDPoPProofTokenAsync(request, token, cancellationToken, dpopNonce))
                 {
                     // failed or opted out for this request, to fall back to Bearer 
                     scheme = "Bearer";

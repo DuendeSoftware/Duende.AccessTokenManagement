@@ -22,7 +22,7 @@ public interface IDPoPKeyStore
 public class DPoPKey
 {
     /// <summary>
-    /// The proof token
+    /// The JSON web key
     /// </summary>
     public string JsonWebKey { get; set; } = default!;
 }

@@ -61,11 +61,11 @@ public class DefaultDPoPProofService : IDPoPProofService
         }
 
         var header = new Dictionary<string, object>()
-            {
-                //{ "alg", "RS265" }, // JsonWebTokenHandler requires adding this itself
-                { "typ", "dpop+jwk" },
-                { "jwk", jwk },
-            };
+        {
+            //{ "alg", "RS265" }, // JsonWebTokenHandler requires adding this itself
+            { "typ", "dpop+jwk" },
+            { "jwk", jwk },
+        };
 
         var payload = new Dictionary<string, object>
         {
