@@ -40,7 +40,7 @@ public class RemoteApiService
         var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var token = await _tokenManagementService.GetAccessTokenAsync(state.User);
 
-        request.SetToken(token.AccessTokenType, token.AccessToken);
+        request.SetToken(token.AccessTokenType!, token.AccessToken!);
         return  await _client.SendAsync(request);
     }
 }
