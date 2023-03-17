@@ -38,9 +38,6 @@ public class AppHost : GenericHost
         services.AddRouting();
         services.AddAuthorization();
 
-        services.AddDistributedMemoryCache();
-        services.AddOpenIdConnectAccessTokenManagement();
-
         services.AddAuthentication("cookie")
             .AddCookie("cookie", options =>
             {
@@ -93,6 +90,10 @@ public class AppHost : GenericHost
 
                 options.ProtocolValidator.RequireNonce = false;
             });
+
+        services.AddDistributedMemoryCache();
+        services.AddOpenIdConnectAccessTokenManagement();
+
     }
 
     private void Configure(IApplicationBuilder app)

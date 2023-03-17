@@ -3,8 +3,6 @@
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +11,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <summary>
 /// Delegating handler that injects the current access token into an outgoing request
 /// </summary>
-public class OpenIdConnectUserAccessTokenHandler : DelegatingHandler
+public class OpenIdConnectUserAccessTokenHandler : AccessTokenHandler
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserTokenRequestParameters _parameters;
@@ -21,56 +19,33 @@ public class OpenIdConnectUserAccessTokenHandler : DelegatingHandler
     /// <summary>
     /// ctor
     /// </summary>
+    /// <param name="dPoPProofService"></param>
+    /// <param name="dPoPNonceStore"></param>
     /// <param name="httpContextAccessor"></param>
     /// <param name="parameters"></param>
-    public OpenIdConnectUserAccessTokenHandler(IHttpContextAccessor httpContextAccessor, UserTokenRequestParameters? parameters = null)
+    public OpenIdConnectUserAccessTokenHandler(
+        IDPoPProofService dPoPProofService,
+        IDPoPNonceStore dPoPNonceStore,
+        IHttpContextAccessor httpContextAccessor,
+        UserTokenRequestParameters? parameters = null)
+        : base(dPoPProofService, dPoPNonceStore)
     {
         _httpContextAccessor = httpContextAccessor;
         _parameters = parameters ?? new UserTokenRequestParameters();
     }
 
     /// <inheritdoc/>
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        await SetTokenAsync(request, forceRenewal: false).ConfigureAwait(false);
-        var response = await base.SendAsync(request, cancellationToken);
-
-        // retry if 401
-        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-        {
-            response.Dispose();
-
-            await SetTokenAsync(request, forceRenewal: true).ConfigureAwait(false);
-            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        }
-
-        return response;
-    }
-
-    /// <summary>
-    /// Set an access token on the HTTP request
-    /// </summary>
-    /// <param name="request"></param>
-    /// <param name="forceRenewal"></param>
-    /// <returns></returns>
-    protected virtual async Task SetTokenAsync(HttpRequestMessage request, bool forceRenewal)
+    protected override async Task<ClientCredentialsToken> GetAccessTokenAsync(bool forceRenewal, CancellationToken cancellationToken)
     {
         var parameters = new UserTokenRequestParameters
         {
             SignInScheme = _parameters.SignInScheme,
             ChallengeScheme = _parameters.ChallengeScheme,
             Resource = _parameters.Resource,
+            Context = _parameters.Context,
             ForceRenewal = forceRenewal,
-            Context =  _parameters.Context
         };
-              
-        var token = await _httpContextAccessor.HttpContext!.GetUserAccessTokenAsync(parameters).ConfigureAwait(false);
 
-        if (!string.IsNullOrWhiteSpace(token.AccessToken))
-        {
-            // checking for null AccessTokenType and falling back to "Bearer" since this might be coming
-            // from an old cache/store prior to adding the AccessTokenType property.
-            request.Headers.Authorization = new AuthenticationHeaderValue(token.AccessTokenType ?? "Bearer", token.AccessToken);
-        }
+        return await _httpContextAccessor.HttpContext!.GetUserAccessTokenAsync(parameters).ConfigureAwait(false);
     }
 }

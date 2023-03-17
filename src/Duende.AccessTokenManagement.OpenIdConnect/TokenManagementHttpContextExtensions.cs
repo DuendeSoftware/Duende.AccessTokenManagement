@@ -82,4 +82,38 @@ public static class TokenManagementHttpContextExtensions
             parameters, 
             cancellationToken).ConfigureAwait(false);
     }
+
+
+    internal static void SetProofKey(this AuthenticationProperties properties, string key)
+    {
+        properties.Items["dpop_proof_key"] = key;
+    }
+    internal static string? GetProofKey(this AuthenticationProperties properties)
+    {
+        if (properties.Items.ContainsKey("dpop_proof_key"))
+        {
+            return properties.Items["dpop_proof_key"] as string;
+        }
+        return null;
+    }
+    internal static void RemoveProofKey(this AuthenticationProperties properties)
+    {
+        if (properties.Items.ContainsKey("dpop_proof_key"))
+        {
+            properties.Items.Remove("dpop_proof_key");
+        }
+    }
+
+    internal static void SetOutboundProofKey(this HttpContext context, string key)
+    {
+        context.Items["dpop_proof_key"] = key;
+    }
+    internal static string? GetOutboundProofKey(this HttpContext context)
+    {
+        if (context.Items.ContainsKey("dpop_proof_key"))
+        {
+            return context.Items["dpop_proof_key"] as string;
+        }
+        return null;
+    }
 }

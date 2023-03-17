@@ -123,7 +123,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
 
         if (!string.IsNullOrWhiteSpace(userToken.RefreshToken))
         {
-            await _tokenEndpointService.RevokeRefreshTokenAsync(userToken.RefreshToken, parameters, cancellationToken).ConfigureAwait(false);
+            await _tokenEndpointService.RevokeRefreshTokenAsync(userToken, parameters, cancellationToken).ConfigureAwait(false);
             await _userAccessTokenStore.ClearTokenAsync(user, parameters).ConfigureAwait(false);
         }
     }
@@ -141,7 +141,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         }
 
         var refreshedToken =
-            await _tokenEndpointService.RefreshAccessTokenAsync(userToken.RefreshToken, parameters, cancellationToken).ConfigureAwait(false);
+            await _tokenEndpointService.RefreshAccessTokenAsync(userToken, parameters, cancellationToken).ConfigureAwait(false);
         if (refreshedToken.IsError)
         {
             _logger.LogError("Error refreshing access token. Error = {error}", refreshedToken.Error);

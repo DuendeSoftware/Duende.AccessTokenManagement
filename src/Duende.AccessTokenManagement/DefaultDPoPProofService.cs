@@ -10,6 +10,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.Extensions.Logging;
 
 namespace Duende.AccessTokenManagement;
 
@@ -19,19 +20,31 @@ namespace Duende.AccessTokenManagement;
 public class DefaultDPoPProofService : IDPoPProofService
 {
     private readonly IDPoPNonceStore _dPoPNonceStore;
+    private readonly ILogger<DefaultDPoPProofService> _logger;
 
     /// <summary>
     /// ctor
     /// </summary>
-    public DefaultDPoPProofService(IDPoPNonceStore dPoPNonceStore)
+    public DefaultDPoPProofService(IDPoPNonceStore dPoPNonceStore, ILogger<DefaultDPoPProofService> logger)
     {
         _dPoPNonceStore = dPoPNonceStore;
+        _logger = logger;
     }
 
     /// <inheritdoc/>
     public async Task<DPoPProof?> CreateProofTokenAsync(DPoPProofRequest request)
     {
-        var jsonWebKey = new JsonWebKey(request.DPoPJsonWebKey);
+        JsonWebKey jsonWebKey;
+        
+        try
+        {
+            jsonWebKey = new JsonWebKey(request.DPoPJsonWebKey);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to parse JSON web key.");
+            return null;
+        }
 
         // jwk: representing the public key chosen by the client, in JSON Web Key (JWK) [RFC7517] format,
         // as defined in Section 4.1.3 of [RFC7515]. MUST NOT contain a private key.
@@ -114,5 +127,20 @@ public class DefaultDPoPProofService : IDPoPProofService
         var proofToken = handler.CreateToken(JsonSerializer.Serialize(payload), key, header);
 
         return new DPoPProof { ProofToken = proofToken! };
+    }
+
+    /// <inheritdoc/>
+    public string? GetProofKeyThumbprint(DPoPProofRequest request)
+    {
+        try
+        {
+            var jsonWebKey = new JsonWebKey(request.DPoPJsonWebKey);
+            return Base64UrlEncoder.Encode(jsonWebKey.ComputeJwkThumbprint());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create thumbprint from JSON web key.");
+        }
+        return null;
     }
 }

@@ -51,7 +51,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     }
 
     /// <inheritdoc/>
-    public async Task<ClientCredentialsToken> RequestToken(
+    public virtual async Task<ClientCredentialsToken> RequestToken(
         string clientName,
         TokenRequestParameters? parameters = null,
         CancellationToken cancellationToken = default)

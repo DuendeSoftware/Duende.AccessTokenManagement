@@ -14,6 +14,11 @@ public interface IDPoPProofService
     /// Creates DPoP proof token
     /// </summary>
     Task<DPoPProof?> CreateProofTokenAsync(DPoPProofRequest request);
+    
+    /// <summary>
+    /// Gets the thumbprint from the JSON web key
+    /// </summary>
+    string? GetProofKeyThumbprint(DPoPProofRequest request);
 }
 
 /// <summary>

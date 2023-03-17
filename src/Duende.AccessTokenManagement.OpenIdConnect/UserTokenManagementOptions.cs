@@ -45,4 +45,9 @@ public class UserTokenManagementOptions
     /// </summary>
     public ClientCredentialStyle ClientCredentialStyle { get; set; } = ClientCredentialStyle.AuthorizationHeader;
     // TODO: should we make this same as the AspNet OIDC handler (which defaults to the form body)
+
+    /// <summary>
+    /// The string representation of the JSON web key to use for DPoP.
+    /// </summary>
+    public string? DPoPJsonWebKey { get; set; }
 }
