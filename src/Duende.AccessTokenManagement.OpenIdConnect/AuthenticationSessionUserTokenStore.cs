@@ -24,6 +24,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
     {
         private const string TokenPrefix = ".Token.";
         private const string TokenNamesKey = ".TokenNames";
+        private const string DPoPKeyName = "dpop_proof_key";
 
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly ILogger<AuthenticationSessionUserAccessTokenStore> _logger;
@@ -96,17 +97,22 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 tokenTypeName += $"::{parameters.Resource}";
             }
-
+            var dpopKeyName = $"{TokenPrefix}{DPoPKeyName}";
+            if (!string.IsNullOrEmpty(parameters.Resource))
+            {
+                dpopKeyName += $"::{parameters.Resource}";
+            }
             var expiresName = $"{TokenPrefix}expires_at"; string? refreshToken = null;
-            string? accessToken = null;
-            string? accessTokenType = null;
-            string? expiresAt = null;
             if (!string.IsNullOrEmpty(parameters.Resource))
             {
                 expiresName += $"::{parameters.Resource}";
             }
-
             const string refreshTokenName = $"{TokenPrefix}{OpenIdConnectParameterNames.RefreshToken}";
+
+            string? accessToken = null;
+            string? accessTokenType = null;
+            string? dpopKey = null;
+            string? expiresAt = null;
 
             if (AppendChallengeSchemeToTokenNames(parameters))
             {
@@ -116,6 +122,8 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                     .Value;
                 accessTokenType = tokens.SingleOrDefault(t => t.Key == $"{tokenTypeName}||{parameters.ChallengeScheme}")
                     .Value;
+                dpopKey = tokens.SingleOrDefault(t => t.Key == $"{dpopKeyName}||{parameters.ChallengeScheme}")
+                    .Value;
                 expiresAt = tokens.SingleOrDefault(t => t.Key == $"{expiresName}||{parameters.ChallengeScheme}")
                     .Value;
             }
@@ -123,6 +131,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             refreshToken ??= tokens.SingleOrDefault(t => t.Key == $"{refreshTokenName}").Value;
             accessToken ??= tokens.SingleOrDefault(t => t.Key == $"{tokenName}").Value;
             accessTokenType ??= tokens.SingleOrDefault(t => t.Key == $"{tokenTypeName}").Value;
+            dpopKey ??= tokens.SingleOrDefault(t => t.Key == $"{dpopKeyName}").Value;
             expiresAt ??= tokens.SingleOrDefault(t => t.Key == $"{expiresName}").Value;
 
             DateTimeOffset dtExpires = DateTimeOffset.MaxValue;
@@ -135,6 +144,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 AccessToken = accessToken,
                 AccessTokenType = accessTokenType,
+                DPoPJsonWebKey = dpopKey,
                 RefreshToken = refreshToken,
                 Expiration = dtExpires
             };
@@ -179,6 +189,11 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 tokenTypeName += $"::{parameters.Resource}";
             }
+            var dpopKeyName = $"{TokenPrefix}{DPoPKeyName}";
+            if (!string.IsNullOrEmpty(parameters.Resource))
+            {
+                dpopKeyName += $"::{parameters.Resource}";
+            }
 
             var refreshTokenName = $"{OpenIdConnectParameterNames.RefreshToken}";
 
@@ -187,11 +202,16 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 refreshTokenName += $"||{parameters.ChallengeScheme}";
                 tokenName += $"||{parameters.ChallengeScheme}";
                 tokenTypeName += $"||{parameters.ChallengeScheme}";
+                dpopKeyName += $"||{parameters.ChallengeScheme}";
                 expiresName += $"||{parameters.ChallengeScheme}";
             }
 
             result.Properties!.Items[$"{TokenPrefix}{tokenName}"] = token.AccessToken;
             result.Properties!.Items[$"{TokenPrefix}{tokenTypeName}"] = token.AccessTokenType;
+            if (token.DPoPJsonWebKey != null)
+            {
+                result.Properties!.Items[$"{TokenPrefix}{dpopKeyName}"] = token.DPoPJsonWebKey;
+            }
             result.Properties!.Items[$"{TokenPrefix}{expiresName}"] = token.Expiration.ToString("o", CultureInfo.InvariantCulture);
 
             if (token.RefreshToken != null)

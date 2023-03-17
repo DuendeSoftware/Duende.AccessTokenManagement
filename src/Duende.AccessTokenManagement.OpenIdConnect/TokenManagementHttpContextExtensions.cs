@@ -83,36 +83,37 @@ public static class TokenManagementHttpContextExtensions
             cancellationToken).ConfigureAwait(false);
     }
 
-
+    const string AuthenticationPropertiesDPoPKey = ".Token.dpop_proof_key";
     internal static void SetProofKey(this AuthenticationProperties properties, string key)
     {
-        properties.Items["dpop_proof_key"] = key;
+        properties.Items[AuthenticationPropertiesDPoPKey] = key;
     }
     internal static string? GetProofKey(this AuthenticationProperties properties)
     {
-        if (properties.Items.ContainsKey("dpop_proof_key"))
+        if (properties.Items.ContainsKey(AuthenticationPropertiesDPoPKey))
         {
-            return properties.Items["dpop_proof_key"] as string;
+            return properties.Items[AuthenticationPropertiesDPoPKey] as string;
         }
         return null;
     }
     internal static void RemoveProofKey(this AuthenticationProperties properties)
     {
-        if (properties.Items.ContainsKey("dpop_proof_key"))
+        if (properties.Items.ContainsKey(AuthenticationPropertiesDPoPKey))
         {
-            properties.Items.Remove("dpop_proof_key");
+            properties.Items.Remove(AuthenticationPropertiesDPoPKey);
         }
     }
 
+    const string HttpContextDPoPKey = "dpop_proof_key";
     internal static void SetOutboundProofKey(this HttpContext context, string key)
     {
-        context.Items["dpop_proof_key"] = key;
+        context.Items[HttpContextDPoPKey] = key;
     }
     internal static string? GetOutboundProofKey(this HttpContext context)
     {
-        if (context.Items.ContainsKey("dpop_proof_key"))
+        if (context.Items.ContainsKey(HttpContextDPoPKey))
         {
-            return context.Items["dpop_proof_key"] as string;
+            return context.Items[HttpContextDPoPKey] as string;
         }
         return null;
     }

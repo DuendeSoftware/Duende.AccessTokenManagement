@@ -70,6 +70,7 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
             // add the event handling to enable DPoP for this OIDC client
             options.Events.OnRedirectToIdentityProvider = CreateCallback(options.Events.OnRedirectToIdentityProvider);
             options.Events.OnAuthorizationCodeReceived = CreateCallback(options.Events.OnAuthorizationCodeReceived);
+            options.Events.OnTokenValidated = CreateCallback(options.Events.OnTokenValidated);
 
             options.BackchannelHttpHandler = new DPoPProofTokenHandler(_dPoPProofService, _dPoPNonceStore, _httpContextAccessor)
             {
@@ -124,11 +125,33 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
             var jwk = context.Properties?.GetProofKey();
             if (jwk != null)
             {
-                // TODO: we still need to figure out how to store this
-                context.Properties!.RemoveProofKey();
                 // set it so the OIDC message handler can find it
                 context.HttpContext.SetOutboundProofKey(jwk);
             }
+
+            return result;
+        };
+
+        return Callback;
+    }
+
+    private Func<TokenValidatedContext, Task> CreateCallback(Func<TokenValidatedContext, Task> inner)
+    {
+        Task Callback(TokenValidatedContext context)
+        {
+            var result = inner?.Invoke(context) ?? Task.CompletedTask;
+
+            // TODO: we don't have a good approach for this right now, since the IUserTokenStore
+            // just assumes that the session management has been populated with all the token values
+            //
+            // get key from storage
+            //var jwk = context.Properties?.GetProofKey();
+            //if (jwk != null)
+            //{
+            //    // clear this so the properties are not bloated
+            //    // and defer to the host and/or IUserTokenStore implementation to decide where the key is kept
+            //    //context.Properties!.RemoveProofKey();
+            //}
 
             return result;
         };
