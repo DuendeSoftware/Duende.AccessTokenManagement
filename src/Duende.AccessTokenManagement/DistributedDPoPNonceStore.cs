@@ -34,7 +34,7 @@ public class DistributedDPoPNonceStore : IDPoPNonceStore
     }
         
     /// <inheritdoc/>
-    public async Task<string?> GetNonceAsync(DPoPNonceContext context, CancellationToken cancellationToken = default)
+    public virtual async Task<string?> GetNonceAsync(DPoPNonceContext context, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(context);
 
@@ -52,7 +52,7 @@ public class DistributedDPoPNonceStore : IDPoPNonceStore
     }
 
     /// <inheritdoc/>
-    public async Task StoreNonceAsync(DPoPNonceContext context, string nonce, CancellationToken cancellationToken = default)
+    public virtual async Task StoreNonceAsync(DPoPNonceContext context, string nonce, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(context);
 

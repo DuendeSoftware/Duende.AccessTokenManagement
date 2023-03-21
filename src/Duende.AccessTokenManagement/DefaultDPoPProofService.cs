@@ -32,7 +32,7 @@ public class DefaultDPoPProofService : IDPoPProofService
     }
 
     /// <inheritdoc/>
-    public async Task<DPoPProof?> CreateProofTokenAsync(DPoPProofRequest request)
+    public virtual async Task<DPoPProof?> CreateProofTokenAsync(DPoPProofRequest request)
     {
         JsonWebKey jsonWebKey;
         
@@ -130,7 +130,7 @@ public class DefaultDPoPProofService : IDPoPProofService
     }
 
     /// <inheritdoc/>
-    public string? GetProofKeyThumbprint(DPoPProofRequest request)
+    public virtual string? GetProofKeyThumbprint(DPoPProofRequest request)
     {
         try
         {

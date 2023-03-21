@@ -22,7 +22,7 @@ public class DefaultDPoPKeyStore : IDPoPKeyStore
     }
 
     /// <inheritdoc/>
-    public Task<DPoPKey?> GetKeyAsync(string clientName)
+    public virtual Task<DPoPKey?> GetKeyAsync(string clientName)
     {
         var client = _options.Get(clientName);
 
