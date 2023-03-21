@@ -96,7 +96,7 @@ public class DefaultDPoPProofService : IDPoPProofService
             var hash = sha256.ComputeHash(Encoding.ASCII.GetBytes(request.AccessToken));
             var ath = Base64Url.Encode(hash);
 
-            payload.Add(JwtClaimTypes.AccessTokenHash, ath);
+            payload.Add(JwtClaimTypes.DPoPAccessTokenHash, ath);
         }
 
         var nonce = request.DPoPNonce;
