@@ -38,7 +38,7 @@ public class WorkerManual : BackgroundService
             client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
             
             var token = await _tokenManagementService.GetAccessTokenAsync("demo");
-            client.SetBearerToken(token.AccessToken);
+            client.SetBearerToken(token.AccessToken!);
             
             var response = await client.GetAsync("test", stoppingToken);
                 

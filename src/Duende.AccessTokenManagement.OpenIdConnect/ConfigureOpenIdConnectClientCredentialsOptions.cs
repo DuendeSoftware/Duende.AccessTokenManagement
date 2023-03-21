@@ -56,5 +56,6 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
         options.Scope = _options.ClientCredentialsScope;
         options.Resource = _options.ClientCredentialsResource;
         options.HttpClient = oidc.HttpClient;
+        options.DPoPJsonWebKey = _options.DPoPJsonWebKey;
     }
 }

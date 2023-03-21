@@ -12,8 +12,8 @@ public class TestBrowserClient : HttpClient
     class CookieHandler : DelegatingHandler
     {
         public CookieContainer CookieContainer { get; } = new();
-        public Uri CurrentUri { get; private set; }
-        public HttpResponseMessage LastResponse { get; private set; }
+        public Uri CurrentUri { get; private set; } = default!;
+        public HttpResponseMessage LastResponse { get; private set; } = default!;
 
         public CookieHandler(HttpMessageHandler next)
             : base(next)
@@ -22,8 +22,8 @@ public class TestBrowserClient : HttpClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            CurrentUri = request.RequestUri;
-            string cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri);
+            CurrentUri = request.RequestUri!;
+            string cookieHeader = CookieContainer.GetCookieHeader(request.RequestUri!);
             if (!string.IsNullOrEmpty(cookieHeader))
             {
                 request.Headers.Add("Cookie", cookieHeader);
@@ -34,7 +34,7 @@ public class TestBrowserClient : HttpClient
             if (response.Headers.Contains("Set-Cookie"))
             {
                 var responseCookieHeader = string.Join(",", response.Headers.GetValues("Set-Cookie"));
-                CookieContainer.SetCookies(request.RequestUri, responseCookieHeader);
+                CookieContainer.SetCookies(request.RequestUri!, responseCookieHeader);
             }
 
             LastResponse = response;
@@ -60,12 +60,12 @@ public class TestBrowserClient : HttpClient
         _handler = handler;
     }
 
-    public Cookie GetCookie(string name)
+    public Cookie? GetCookie(string name)
     {
         return GetCookie(_handler.CurrentUri.ToString(), name);
     }
         
-    public Cookie GetCookie(string uri, string name)
+    public Cookie? GetCookie(string uri, string name)
     {
         return _handler.CookieContainer.GetCookies(new Uri(uri)).Cast<Cookie>().Where(x => x.Name == name).FirstOrDefault();
     }
@@ -87,7 +87,7 @@ public class TestBrowserClient : HttpClient
     public async Task FollowRedirectAsync()
     {
         LastResponse.StatusCode.ShouldBe((HttpStatusCode)302);
-        var location = LastResponse.Headers.Location.ToString();
+        var location = LastResponse.Headers.Location!.ToString();
         await GetAsync(location);
     }
 
@@ -96,12 +96,12 @@ public class TestBrowserClient : HttpClient
         return PostAsync(form.Action, new FormUrlEncodedContent(form.Inputs));
     }
 
-    public Task<HtmlForm> ReadFormAsync(string selector = null)
+    public Task<HtmlForm> ReadFormAsync(string? selector = null)
     {
         return ReadFormAsync(LastResponse, selector);
     }
         
-    public async Task<HtmlForm> ReadFormAsync(HttpResponseMessage response, string selector = null)
+    public async Task<HtmlForm> ReadFormAsync(HttpResponseMessage response, string? selector = null)
     {
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
@@ -131,7 +131,7 @@ public class TestBrowserClient : HttpClient
         htmlForm.Action = postUrl;
 
 
-        var data = new Dictionary<string, string>();
+        var data = new Dictionary<string, string?>();
 
         var inputs = form.Find("input");
         foreach (var input in inputs)
@@ -211,11 +211,11 @@ public class TestBrowserClient : HttpClient
         element.Length.ShouldBe(0);
     }
 
-    public Task AssertErrorPageAsync(string error = null)
+    public Task AssertErrorPageAsync(string? error = null)
     {
         return AssertErrorPageAsync(LastResponse, error);
     }
-    public async Task AssertErrorPageAsync(HttpResponseMessage response, string error = null)
+    public async Task AssertErrorPageAsync(HttpResponseMessage response, string? error = null)
     {
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         await AssertExistsAsync(response, ".error-page");
@@ -227,11 +227,11 @@ public class TestBrowserClient : HttpClient
         }
     }
 
-    public Task AssertValidationErrorAsync(string error = null)
+    public Task AssertValidationErrorAsync(string? error = null)
     {
         return AssertValidationErrorAsync(error);
     }
-    public async Task AssertValidationErrorAsync(HttpResponseMessage response, string error = null)
+    public async Task AssertValidationErrorAsync(HttpResponseMessage response, string? error = null)
     {
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         await AssertExistsAsync(response, ".validation-summary-errors");
@@ -247,15 +247,15 @@ public class TestBrowserClient : HttpClient
 [DebuggerDisplay("{Action}, Inputs: {Inputs.Count}")]
 public class HtmlForm
 {
-    public HtmlForm(string action = null)
+    public HtmlForm(string? action = null)
     {
         Action = action;
     }
 
-    public string Action { get; set; }
-    public Dictionary<string, string> Inputs { get; set; } = new Dictionary<string, string>();
+    public string? Action { get; set; }
+    public Dictionary<string, string?> Inputs { get; set; } = new Dictionary<string, string?>();
 
-    public string this[string key]
+    public string? this[string key]
     {
         get
         {

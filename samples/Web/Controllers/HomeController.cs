@@ -31,8 +31,8 @@ public class HomeController : Controller
     {
         var token = await _tokenManagementService.GetAccessTokenAsync(User);
         var client = _httpClientFactory.CreateClient();
-        client.SetBearerToken(token.AccessToken);
-            
+        client.SetToken(token.AccessTokenType!, token.AccessToken!);
+
         var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/test");
         ViewBag.Json = PrettyPrint(response);
 
@@ -43,7 +43,7 @@ public class HomeController : Controller
     {
         var token = await HttpContext.GetUserAccessTokenAsync();
         var client = _httpClientFactory.CreateClient();
-        client.SetBearerToken(token.AccessToken);
+        client.SetToken(token.AccessTokenType!, token.AccessToken!);
             
         var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/test");
         ViewBag.Json = PrettyPrint(response);
@@ -74,8 +74,8 @@ public class HomeController : Controller
     {
         var token = await HttpContext.GetClientAccessTokenAsync();
         var client = _httpClientFactory.CreateClient();
-        client.SetBearerToken(token.AccessToken);
-            
+        client.SetToken(token.AccessTokenType!, token.AccessToken!);
+
         var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/test");
         
         ViewBag.Json = PrettyPrint(response);

@@ -32,7 +32,7 @@ public class TestLoggerProvider : ILoggerProvider
             return true;
         }
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             var msg = $"[{logLevel}] {_category} : {formatter(state, exception)}";
             _parent.Log(msg);

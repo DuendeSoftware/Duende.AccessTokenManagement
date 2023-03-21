@@ -55,4 +55,9 @@ public class ClientCredentialsClient
     /// The HTTP client instance to use for the back-channel operations, will override the HTTP client name if set
     /// </summary>
     public HttpClient? HttpClient { get; set; }
+
+    /// <summary>
+    /// The string representation of the JSON web key to use for DPoP.
+    /// </summary>
+    public string? DPoPJsonWebKey { get; set; }
 }

@@ -19,6 +19,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
 {
     private readonly IOpenIdConnectConfigurationService _configurationService;
     private readonly IClientAssertionService _clientAssertionService;
+    private readonly IDPoPProofService _dPoPProofService;
     private readonly ILogger<UserTokenEndpointService> _logger;
     private readonly UserTokenManagementOptions _options;
 
@@ -27,26 +28,31 @@ public class UserTokenEndpointService : IUserTokenEndpointService
     /// </summary>
     /// <param name="options"></param>
     /// <param name="clientAssertionService"></param>
+    /// <param name="dPoPProofService"></param>
     /// <param name="logger"></param>
     /// <param name="configurationService"></param>
     public UserTokenEndpointService(
         IOpenIdConnectConfigurationService configurationService,
         IOptions<UserTokenManagementOptions> options,
         IClientAssertionService clientAssertionService,
+        IDPoPProofService dPoPProofService,
         ILogger<UserTokenEndpointService> logger)
     {
         _configurationService = configurationService;
-        _clientAssertionService = clientAssertionService;
         _options = options.Value;
+        _clientAssertionService = clientAssertionService;
+        _dPoPProofService = dPoPProofService;
         _logger = logger;
     }
 
     /// <inheritdoc/>
     public async Task<UserToken> RefreshAccessTokenAsync(
-        string refreshToken,
+        UserToken userToken,
         UserTokenRequestParameters parameters,
         CancellationToken cancellationToken = default)
     {
+        var refreshToken = userToken.RefreshToken ?? throw new ArgumentNullException(nameof(userToken.RefreshToken));
+
         _logger.LogTrace("Refreshing refresh token: {token}",  refreshToken);
 
         var oidc = await _configurationService.GetOpenIdConnectConfigurationAsync(parameters.ChallengeScheme).ConfigureAwait(false);
@@ -55,7 +61,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         {
             Address = oidc.TokenEndpoint,
             
-            ClientId = oidc.ClientId,
+            ClientId = oidc.ClientId!,
             ClientSecret = oidc.ClientSecret,
             ClientCredentialStyle = _options.ClientCredentialStyle,
             
@@ -84,8 +90,37 @@ public class UserTokenEndpointService : IUserTokenEndpointService
             }
         }
 
+        var dPoPJsonWebKey = userToken.DPoPJsonWebKey;
+        if (dPoPJsonWebKey != null)
+        {
+            var proof = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
+            {
+                Url = request.Address!,
+                Method = "POST",
+                DPoPJsonWebKey = dPoPJsonWebKey,
+            });
+            request.DPoPProofToken = proof?.ProofToken;
+        }
+
         _logger.LogDebug("refresh token request to: {endpoint}", request.Address);
-        var response = await oidc.HttpClient.RequestRefreshTokenAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await oidc.HttpClient!.RequestRefreshTokenAsync(request, cancellationToken).ConfigureAwait(false);
+
+        if (response.IsError && response.Error == OidcConstants.TokenErrors.UseDPoPNonce && dPoPJsonWebKey != null && response.DPoPNonce != null)
+        {
+            var proof = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
+            {
+                Url = request.Address!,
+                Method = "POST",
+                DPoPJsonWebKey = dPoPJsonWebKey,
+                DPoPNonce = response.DPoPNonce
+            });
+            request.DPoPProofToken = proof?.ProofToken;
+
+            if (request.DPoPProofToken != null)
+            {
+                response = await oidc.HttpClient!.RequestRefreshTokenAsync(request, cancellationToken).ConfigureAwait(false);
+            }
+        }
 
         var token = new UserToken();
         if (response.IsError)
@@ -95,6 +130,8 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         else
         {
             token.AccessToken = response.AccessToken;
+            token.AccessTokenType = response.TokenType;
+            token.DPoPJsonWebKey = dPoPJsonWebKey;
             token.Expiration = response.ExpiresIn == 0
                 ? DateTimeOffset.MaxValue
                 : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn);
@@ -107,10 +144,12 @@ public class UserTokenEndpointService : IUserTokenEndpointService
 
     /// <inheritdoc/>
     public async Task RevokeRefreshTokenAsync(
-        string refreshToken,
+        UserToken userToken,
         UserTokenRequestParameters parameters,
         CancellationToken cancellationToken = default)
     {
+        var refreshToken = userToken.RefreshToken ?? throw new ArgumentNullException(nameof(userToken.RefreshToken));
+        
         _logger.LogTrace("Revoking refresh token: {token}", refreshToken);
         
         var oidc = await _configurationService.GetOpenIdConnectConfigurationAsync(parameters.ChallengeScheme).ConfigureAwait(false);
@@ -124,7 +163,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         {
             Address = oidc.RevocationEndpoint,
             
-            ClientId = oidc.ClientId,
+            ClientId = oidc.ClientId!,
             ClientSecret = oidc.ClientSecret,
             ClientCredentialStyle = _options.ClientCredentialStyle,
             
@@ -144,13 +183,13 @@ public class UserTokenEndpointService : IUserTokenEndpointService
             var assertion = await _clientAssertionService.GetClientAssertionAsync(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + oidc.Scheme, parameters).ConfigureAwait(false);
             if (assertion != null)
             {
-                request.ClientAssertion = parameters.Assertion;
+                request.ClientAssertion = assertion;
                 request.ClientCredentialStyle = ClientCredentialStyle.PostBody;
             }
         }
         
         _logger.LogDebug("token revocation request to: {endpoint}", request.Address);
-        var response = await oidc.HttpClient.RevokeTokenAsync(request, cancellationToken).ConfigureAwait(false);
+        var response = await oidc.HttpClient!.RevokeTokenAsync(request, cancellationToken).ConfigureAwait(false);
 
         if (response.IsError)
         {

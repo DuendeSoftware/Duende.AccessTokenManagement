@@ -5,6 +5,7 @@ using System;
 using System.Net.Http;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -25,6 +26,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     {
         services.AddHttpContextAccessor();
 
+
         services.AddClientCredentialsTokenManagement();
         services.AddSingleton<IConfigureOptions<ClientCredentialsClient>, ConfigureOpenIdConnectClientCredentialsOptions>();
         // TODO: maybe return a builder with a ConfigureScheme that adds IConfigureNamedOptions/IPostConfigureNamedOptions with the naming convention?
@@ -36,7 +38,9 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         services.TryAddScoped<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
         services.TryAddSingleton<IUserTokenRequestSynchronization, UserTokenRequestSynchronization>();
         services.TryAddTransient<IUserTokenEndpointService, UserTokenEndpointService>();
-        
+
+        services.ConfigureOptions<ConfigureOpenIdConnectOptions>();
+
         return services;
     }
 
@@ -136,9 +140,11 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     {
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {
+            var dpopService = provider.GetRequiredService<IDPoPProofService>();
+            var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
             var contextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
 
-            return new OpenIdConnectUserAccessTokenHandler(contextAccessor, parameters);
+            return new OpenIdConnectUserAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, parameters);
         });
     }
     
@@ -154,9 +160,11 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     {
         return httpClientBuilder.AddHttpMessageHandler(provider =>
         {
+            var dpopService = provider.GetRequiredService<IDPoPProofService>();
+            var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
             var contextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
 
-            return new OpenIdConnectClientAccessTokenHandler(contextAccessor, parameters);
+            return new OpenIdConnectClientAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, parameters);
         });
     }
 }
