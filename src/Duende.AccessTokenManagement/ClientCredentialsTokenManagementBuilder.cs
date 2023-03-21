@@ -3,6 +3,7 @@
 
 using System;
 using Duende.AccessTokenManagement;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -31,6 +32,18 @@ public class ClientCredentialsTokenManagementBuilder
     public ClientCredentialsTokenManagementBuilder AddClient(string name, Action<ClientCredentialsClient> configureOptions)
     {
         _services.Configure(name, configureOptions);
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a client credentials client to the token management system
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+    public ClientCredentialsTokenManagementBuilder AddClient(string name, Action<IServiceProvider, ClientCredentialsClient> configureOptions)
+    {
+        _services.AddTransient<IConfigureOptions<ClientCredentialsClient>>(sp => new ConfigureClientCredentialsOptions(name, sp, configureOptions));
         return this;
     }
 }
