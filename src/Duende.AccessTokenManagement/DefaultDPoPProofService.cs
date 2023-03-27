@@ -76,8 +76,8 @@ public class DefaultDPoPProofService : IDPoPProofService
         var header = new Dictionary<string, object>()
         {
             //{ "alg", "RS265" }, // JsonWebTokenHandler requires adding this itself
-            { "typ", "dpop+jwk" },
-            { "jwk", jwk },
+            { "typ", JwtClaimTypes.JwtTypes.DPoPProofToken },
+            { JwtClaimTypes.JsonWebKey, jwk },
         };
 
         var payload = new Dictionary<string, object>
