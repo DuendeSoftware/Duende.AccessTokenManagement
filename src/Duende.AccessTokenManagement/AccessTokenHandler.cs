@@ -5,6 +5,7 @@ using IdentityModel.Client;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using static IdentityModel.OidcConstants;
 
 namespace Duende.AccessTokenManagement;
 
@@ -78,7 +79,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
         
         if (!string.IsNullOrWhiteSpace(token?.AccessToken))
         {
-            var scheme = token.AccessTokenType ?? "Bearer";
+            var scheme = token.AccessTokenType ?? AuthenticationSchemes.AuthorizationHeaderBearer;
 
             if (!string.IsNullOrWhiteSpace(token.DPoPJsonWebKey))
             {
@@ -86,7 +87,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
                 if (!await SetDPoPProofTokenAsync(request, token, cancellationToken, dpopNonce))
                 {
                     // failed or opted out for this request, to fall back to Bearer 
-                    scheme = "Bearer";
+                    scheme = AuthenticationSchemes.AuthorizationHeaderBearer;
                 }
             }
 
