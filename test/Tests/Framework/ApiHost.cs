@@ -12,6 +12,7 @@ public class ApiHost : GenericHost
     public int? ApiStatusCodeToReturn { get; set; }
 
     private readonly IdentityServerHost _identityServerHost;
+    public event Action<Microsoft.AspNetCore.Http.HttpContext> ApiInvoked = ctx => { };
         
     public ApiHost(IdentityServerHost identityServerHost, string scope, string baseAddress = "https://api") 
         : base(baseAddress)
@@ -40,6 +41,19 @@ public class ApiHost : GenericHost
 
     private void Configure(IApplicationBuilder app)
     {
+        app.Use(async(context, next) => 
+        {
+            ApiInvoked.Invoke(context);
+            if (ApiStatusCodeToReturn != null)
+            {
+                context.Response.StatusCode = ApiStatusCodeToReturn.Value;
+                ApiStatusCodeToReturn = null;
+                return;
+            }
+
+            await next();
+        });
+
         app.UseRouting();
 
         app.UseAuthentication();
