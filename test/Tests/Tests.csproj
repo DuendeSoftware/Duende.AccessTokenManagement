@@ -15,7 +15,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.0" />
         
-        <PackageReference Include="Duende.IdentityServer" Version="6.1.0" />
+        <PackageReference Include="Duende.IdentityServer" Version="6.3.0-preview.1.1" />
         
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
         <PackageReference Include="xunit" Version="2.4.1" />
