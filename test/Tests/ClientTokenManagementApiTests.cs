@@ -1,7 +1,13 @@
 
 using Duende.IdentityServer.Configuration;
+using IdentityModel;
+using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 
 namespace Duende.AccessTokenManagement.Tests;
@@ -13,6 +19,7 @@ public class ClientTokenManagementApiTests : IntegrationTestBase
     private HttpClient _client;
     private IClientCredentialsTokenManagementService _tokenService;
     private IHttpClientFactory _clientFactory;
+    private ClientCredentialsClient _clientOptions;
 
     static ClientTokenManagementApiTests()
     {
@@ -47,6 +54,7 @@ public class ClientTokenManagementApiTests : IntegrationTestBase
         _client = provider.GetRequiredService<IHttpClientFactory>().CreateClient("test");
         _tokenService = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
         _clientFactory = provider.GetRequiredService<IHttpClientFactory>();
+        _clientOptions = provider.GetRequiredService<IOptionsMonitor<ClientCredentialsClient>>().Get("test");
     }
     public class ApiHandler : DelegatingHandler
     {
@@ -80,7 +88,64 @@ public class ClientTokenManagementApiTests : IntegrationTestBase
         var values = JsonSerializer.Deserialize<Dictionary<string, object>>(payload);
         values!.ShouldContainKey("cnf");
     }
-    
+
+    [Theory]
+    [InlineData("RS256")]
+    [InlineData("RS384")]
+    [InlineData("RS512")]
+    [InlineData("PS256")]
+    [InlineData("PS384")]
+    [InlineData("PS512")]
+    public async Task using_different_rsa_keys_GetAccessTokenAsync_should_obtain_token_with_cnf(string alg)
+    {
+        var key = CryptoHelper.CreateRsaSecurityKey();
+        var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(key);
+        jwk.Alg = alg;
+        var jwkJson = JsonSerializer.Serialize(jwk);
+        
+        _clientOptions.DPoPJsonWebKey = jwkJson;
+
+        var token = await _tokenService.GetAccessTokenAsync("test");
+
+        token.IsError.ShouldBeFalse();
+        token.DPoPJsonWebKey.ShouldNotBeNull();
+        token.AccessTokenType.ShouldBe("DPoP");
+        var payload = Base64UrlEncoder.Decode(token.AccessToken!.Split('.')[1]);
+        var values = JsonSerializer.Deserialize<Dictionary<string, object>>(payload);
+        values!.ShouldContainKey("cnf");
+
+        var json = JsonSerializer.Deserialize<JsonElement>(values!["cnf"].ToString()!);
+        var jkt = json.GetString("jkt");
+        jkt.ShouldBe(Base64Url.Encode(jwk.ComputeJwkThumbprint()));
+    }
+
+    [Theory]
+    [InlineData("ES256")]
+    [InlineData("ES384")]
+    [InlineData("ES512")]
+    public async Task using_different_ec_keys_GetAccessTokenAsync_should_obtain_token_with_cnf(string alg)
+    {
+        var key = CryptoHelper.CreateECDsaSecurityKey();
+        var jwk = JsonWebKeyConverter.ConvertFromECDsaSecurityKey(key);
+        jwk.Alg = alg;
+        var jwkJson = JsonSerializer.Serialize(jwk);
+
+        _clientOptions.DPoPJsonWebKey = jwkJson;
+
+        var token = await _tokenService.GetAccessTokenAsync("test");
+
+        token.IsError.ShouldBeFalse();
+        token.DPoPJsonWebKey.ShouldNotBeNull();
+        token.AccessTokenType.ShouldBe("DPoP");
+        var payload = Base64UrlEncoder.Decode(token.AccessToken!.Split('.')[1]);
+        var values = JsonSerializer.Deserialize<Dictionary<string, object>>(payload);
+        values!.ShouldContainKey("cnf");
+
+        var json = JsonSerializer.Deserialize<JsonElement>(values!["cnf"].ToString()!);
+        var jkt = json.GetString("jkt");
+        jkt.ShouldBe(Base64Url.Encode(jwk.ComputeJwkThumbprint()));
+    }
+
     [Fact]
     public async Task dpop_tokens_should_be_passed_to_api()
     {

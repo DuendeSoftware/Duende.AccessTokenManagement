@@ -528,7 +528,6 @@ public class ClientTokenManagementTests
         token.DPoPJsonWebKey.ShouldBe("key");
     }
 
-
     [Fact]
     public async Task client_should_use_nonce_when_sending_dpop_proof()
     {
