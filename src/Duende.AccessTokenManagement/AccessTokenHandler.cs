@@ -60,7 +60,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
             var force = !response.IsDPoPNonceError();
             if (!force && !string.IsNullOrEmpty(dPoPNonce))
             {
-                _logger.LogDebug("DPoP error invoking endpoint: {url}, retrying using new nonce", request.RequestUri?.AbsoluteUri.ToString());
+                _logger.LogDebug("DPoP nonce error invoking endpoint: {url}, retrying using new nonce", request.RequestUri?.AbsoluteUri.ToString());
             }
 
             await SetTokenAsync(request, forceRenewal: force, cancellationToken, dPoPNonce).ConfigureAwait(false);
