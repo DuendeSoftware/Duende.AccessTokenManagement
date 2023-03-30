@@ -117,6 +117,8 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         var key = await _dPoPKeyMaterialService.GetKeyAsync(clientName);
         if (key != null)
         {
+            _logger.LogDebug("Creating DPoP proof token for token request.");
+
             var proof = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
             {
                 Url = request.Address!,
@@ -145,6 +147,8 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
 
         if (response.IsError && response.Error == OidcConstants.TokenErrors.UseDPoPNonce && key != null && response.DPoPNonce != null)
         {
+            _logger.LogDebug("Token request failed with DPoP nonce error. Retrying with new nonce.");
+
             var proof = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
             {
                 Url = request.Address!,

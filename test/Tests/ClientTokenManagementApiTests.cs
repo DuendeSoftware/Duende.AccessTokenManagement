@@ -77,7 +77,33 @@ public class ClientTokenManagementApiTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task for_dpop_clients_GetAccessTokenAsync_should_obtain_token_with_cnf()
+    public async Task api_returning_401_should_send_new_access_token()
+    {
+        var count = 0;
+        string? accessToken = null;
+
+        ApiHost.ApiInvoked += ctx =>
+        {
+            var at = ctx.Request.Headers.Authorization.FirstOrDefault()?.Split(' ', StringSplitOptions.RemoveEmptyEntries)?[1].Trim();
+            if (accessToken == null)
+            {
+                ApiHost.ApiStatusCodeToReturn = 401;
+                accessToken = at;
+            }
+            else
+            {
+                accessToken.ShouldNotBe(at);
+            }
+            count++;
+        };
+        var client = _clientFactory.CreateClient("test");
+        var apiResult = await client.GetAsync(ApiHost.Url("/test"));
+
+        count.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task dpop_clients_GetAccessTokenAsync_should_obtain_token_with_cnf()
     {
         var token = await _tokenService.GetAccessTokenAsync("test");
 
@@ -96,7 +122,7 @@ public class ClientTokenManagementApiTests : IntegrationTestBase
     [InlineData("PS256")]
     [InlineData("PS384")]
     [InlineData("PS512")]
-    public async Task using_different_rsa_keys_GetAccessTokenAsync_should_obtain_token_with_cnf(string alg)
+    public async Task using_different_rsa_keys_for_dpop_should_obtain_token_with_cnf(string alg)
     {
         var key = CryptoHelper.CreateRsaSecurityKey();
         var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(key);
@@ -123,7 +149,7 @@ public class ClientTokenManagementApiTests : IntegrationTestBase
     [InlineData("ES256")]
     [InlineData("ES384")]
     [InlineData("ES512")]
-    public async Task using_different_ec_keys_GetAccessTokenAsync_should_obtain_token_with_cnf(string alg)
+    public async Task using_different_ec_keys_for_dpop_should_obtain_token_with_cnf(string alg)
     {
         var key = CryptoHelper.CreateECDsaSecurityKey();
         var jwk = JsonWebKeyConverter.ConvertFromECDsaSecurityKey(key);
@@ -165,18 +191,26 @@ public class ClientTokenManagementApiTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task api_issued_nonce_should_retry_with_new_nonce()
+    public async Task when_api_issues_nonce_api_request_should_be_retried_with_new_nonce()
     {
         string? proofToken = null;
 
         var count = 0;
+        string? accessToken = null;
 
         ApiHost.ApiInvoked += ctx =>
         {
+            var at = ctx.Request.Headers.Authorization.FirstOrDefault()?.Split(' ', StringSplitOptions.RemoveEmptyEntries)?[1].Trim();
             if (count == 0)
             {
                 ApiHost.ApiStatusCodeToReturn = 401;
+                ctx.Response.Headers["WWW-Authenticate"] = "DPoP error=\"use_dpop_nonce\"";
                 ctx.Response.Headers["DPoP-Nonce"] = "some-nonce";
+                accessToken = at;
+            }
+            else
+            {
+                accessToken.ShouldBe(at);
             }
             proofToken = ctx.Request.Headers["DPoP"].FirstOrDefault()?.ToString();
             count++;
