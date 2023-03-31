@@ -59,7 +59,7 @@ public static class DPoPExtensions
                     var parts = x.Split('=', StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 2 && parts[0] == OidcConstants.TokenResponse.Error)
                     {
-                        return parts[1];
+                        return parts[1].Trim('"');
                     }
                     return null;
                 }).Where(x => x != null).FirstOrDefault();

@@ -8,6 +8,7 @@ using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -143,8 +144,9 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
             var dpopService = provider.GetRequiredService<IDPoPProofService>();
             var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
             var contextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-
-            return new OpenIdConnectUserAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, parameters);
+            var logger = provider.GetRequiredService<ILogger<OpenIdConnectClientAccessTokenHandler>>();
+            
+            return new OpenIdConnectUserAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, logger, parameters);
         });
     }
     
@@ -163,8 +165,9 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
             var dpopService = provider.GetRequiredService<IDPoPProofService>();
             var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
             var contextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+            var logger = provider.GetRequiredService<ILogger<OpenIdConnectClientAccessTokenHandler>>();
 
-            return new OpenIdConnectClientAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, parameters);
+            return new OpenIdConnectClientAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, logger, parameters);
         });
     }
 }

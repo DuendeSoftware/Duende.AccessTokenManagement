@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using IdentityModel.Client;
+using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,18 +17,22 @@ public abstract class AccessTokenHandler : DelegatingHandler
 {
     private readonly IDPoPProofService _dPoPProofService;
     private readonly IDPoPNonceStore _dPoPNonceStore;
+    private readonly ILogger _logger;
 
     /// <summary>
     /// ctor
     /// </summary>
     /// <param name="dPoPProofService"></param>
     /// <param name="dPoPNonceStore"></param>
+    /// <param name="logger"></param>
     public AccessTokenHandler(
         IDPoPProofService dPoPProofService,
-        IDPoPNonceStore dPoPNonceStore)
+        IDPoPNonceStore dPoPNonceStore,
+        ILogger logger)
     {
         _dPoPProofService = dPoPProofService;
         _dPoPNonceStore = dPoPNonceStore;
+        _logger = logger;
     }
 
     /// <summary>
@@ -52,7 +57,11 @@ public abstract class AccessTokenHandler : DelegatingHandler
             response.Dispose();
 
             // if it's a DPoP nonce error, we don't need to obtain a new access token
-            var force = response.IsDPoPNonceError();
+            var force = !response.IsDPoPNonceError();
+            if (!force && !string.IsNullOrEmpty(dPoPNonce))
+            {
+                _logger.LogDebug("DPoP nonce error invoking endpoint: {url}, retrying using new nonce", request.RequestUri?.AbsoluteUri.ToString());
+            }
 
             await SetTokenAsync(request, forceRenewal: force, cancellationToken, dPoPNonce).ConfigureAwait(false);
             return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
@@ -79,6 +88,8 @@ public abstract class AccessTokenHandler : DelegatingHandler
         
         if (!string.IsNullOrWhiteSpace(token?.AccessToken))
         {
+            _logger.LogDebug("Sending access token in request to endpoint: {url}", request.RequestUri?.AbsoluteUri.ToString());
+
             var scheme = token.AccessTokenType ?? AuthenticationSchemes.AuthorizationHeaderBearer;
 
             if (!string.IsNullOrWhiteSpace(token.DPoPJsonWebKey))
@@ -119,8 +130,14 @@ public abstract class AccessTokenHandler : DelegatingHandler
 
             if (proofToken != null)
             {
+                _logger.LogDebug("Sending DPoP proof token in request to endpoint: {url}", request.RequestUri?.AbsoluteUri.ToString());
+
                 request.SetDPoPProofToken(proofToken.ProofToken);
                 return true;
+            }
+            else
+            {
+                _logger.LogDebug("No DPoP proof token in request to endpoint: {url}", request.RequestUri?.AbsoluteUri.ToString());
             }
         }
 

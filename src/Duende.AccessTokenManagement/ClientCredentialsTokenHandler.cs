@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,13 +21,15 @@ public class ClientCredentialsTokenHandler : AccessTokenHandler
     /// <param name="dPoPProofService"></param>
     /// <param name="dPoPNonceStore"></param>
     /// <param name="accessTokenManagementService">The Access Token Management Service</param>
+    /// <param name="logger"></param>
     /// <param name="tokenClientName">The name of the token client configuration</param>
     public ClientCredentialsTokenHandler(
         IDPoPProofService dPoPProofService,
         IDPoPNonceStore dPoPNonceStore,
         IClientCredentialsTokenManagementService accessTokenManagementService,
+        ILogger<ClientCredentialsTokenHandler> logger,
         string tokenClientName) 
-        : base(dPoPProofService, dPoPNonceStore)
+        : base(dPoPProofService, dPoPNonceStore, logger)
     {
         _accessTokenManagementService = accessTokenManagementService;
         _tokenClientName = tokenClientName;
