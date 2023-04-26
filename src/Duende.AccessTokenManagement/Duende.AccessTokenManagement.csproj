@@ -11,7 +11,7 @@
         
 
     <ItemGroup>
-        <PackageReference Include="IdentityModel" Version="6.1.0-preview.5" />
+        <PackageReference Include="IdentityModel" Version="6.1.0" />
         
         <PackageReference Include="MinVer" Version="4.0.0" PrivateAssets="All" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
