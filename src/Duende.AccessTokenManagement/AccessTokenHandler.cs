@@ -57,7 +57,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
             response.Dispose();
 
             // if it's a DPoP nonce error, we don't need to obtain a new access token
-            var force = !response.IsDPoPNonceError();
+            var force = !response.IsDPoPError();
             if (!force && !string.IsNullOrEmpty(dPoPNonce))
             {
                 _logger.LogDebug("DPoP nonce error invoking endpoint: {url}, retrying using new nonce", request.RequestUri?.AbsoluteUri.ToString());
@@ -70,7 +70,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
         {
             await _dPoPNonceStore.StoreNonceAsync(new DPoPNonceContext
             {
-                Url = request.RequestUri!.AbsoluteUri,
+                Url = request.GetDPoPUrl(),
                 Method = request.Method.ToString(),
             }, dPoPNonce);
         }
@@ -122,7 +122,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
             var proofToken = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
             {
                 AccessToken = token.AccessToken,
-                Url = request.RequestUri!.AbsoluteUri,
+                Url = request.GetDPoPUrl(),
                 Method = request.Method.ToString(),
                 DPoPJsonWebKey = token.DPoPJsonWebKey,
                 DPoPNonce = dpopNonce,

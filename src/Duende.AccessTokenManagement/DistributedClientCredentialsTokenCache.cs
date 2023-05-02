@@ -53,7 +53,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
             AbsoluteExpiration = cacheExpiration
         };
 
-        _logger.LogDebug("Caching access token for client: {clientName}. Expiration: {expiration}", clientName, cacheExpiration);
+        _logger.LogTrace("Caching access token for client: {clientName}. Expiration: {expiration}", clientName, cacheExpiration);
             
         var cacheKey = GenerateCacheKey(_options, clientName, requestParameters);
         await _cache.SetStringAsync(cacheKey, data, entryOptions, token: cancellationToken).ConfigureAwait(false);
@@ -84,7 +84,7 @@ public class DistributedClientCredentialsTokenCache : IClientCredentialsTokenCac
             }
         }
 
-        _logger.LogDebug("Cache miss for access token for client: {clientName}", clientName);
+        _logger.LogTrace("Cache miss for access token for client: {clientName}", clientName);
         return null;
     }
 

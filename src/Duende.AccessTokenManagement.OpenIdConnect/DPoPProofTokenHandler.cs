@@ -43,7 +43,7 @@ class DPoPProofTokenHandler : DelegatingHandler
         var dPoPNonce = response.GetDPoPNonce();
 
         // retry if 401
-        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && response.IsDPoPNonceError())
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && response.IsDPoPError())
         {
             response.Dispose();
 
@@ -54,7 +54,7 @@ class DPoPProofTokenHandler : DelegatingHandler
         {
             await _dPoPNonceStore.StoreNonceAsync(new DPoPNonceContext
             {
-                Url = request.RequestUri!.AbsoluteUri,
+                Url = request.GetDPoPUrl(),
                 Method = request.Method.ToString(),
             }, dPoPNonce);
         }
@@ -77,7 +77,7 @@ class DPoPProofTokenHandler : DelegatingHandler
             // create proof
             var proofToken = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
             {
-                Url = request.RequestUri!.AbsoluteUri,
+                Url = request.GetDPoPUrl(),
                 Method = request.Method.ToString(),
                 DPoPJsonWebKey = jwk,
                 DPoPNonce = dpopNonce,

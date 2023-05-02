@@ -105,7 +105,10 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         _logger.LogDebug("refresh token request to: {endpoint}", request.Address);
         var response = await oidc.HttpClient!.RequestRefreshTokenAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (response.IsError && response.Error == OidcConstants.TokenErrors.UseDPoPNonce && dPoPJsonWebKey != null && response.DPoPNonce != null)
+        if (response.IsError && 
+            (response.Error == OidcConstants.TokenErrors.UseDPoPNonce || response.Error == OidcConstants.TokenErrors.InvalidDPoPProof) && 
+            dPoPJsonWebKey != null && 
+            response.DPoPNonce != null)
         {
             var proof = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
             {

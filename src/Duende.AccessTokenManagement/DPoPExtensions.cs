@@ -43,9 +43,9 @@ public static class DPoPExtensions
     }
 
     /// <summary>
-    /// Reads the WWW-Authenticate response header to determine if the respone is in error due to an invalid DPoP nonce 
+    /// Reads the WWW-Authenticate response header to determine if the respone is in error due to DPoP
     /// </summary>
-    public static bool IsDPoPNonceError(this HttpResponseMessage response)
+    public static bool IsDPoPError(this HttpResponseMessage response)
     {
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
@@ -64,10 +64,21 @@ public static class DPoPExtensions
                     return null;
                 }).Where(x => x != null).FirstOrDefault();
 
-                return error == OidcConstants.TokenErrors.UseDPoPNonce;
+                return error == OidcConstants.TokenErrors.UseDPoPNonce || error == OidcConstants.TokenErrors.InvalidDPoPProof;
             }
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Returns the URL without any query params
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public static string GetDPoPUrl(this HttpRequestMessage request)
+    {
+        return request.RequestUri!.Scheme + "://" + request.RequestUri!.Authority + request.RequestUri!.LocalPath;
+        return request.RequestUri!.Scheme + "://" + request.RequestUri!.Authority + request.RequestUri!.AbsolutePath;
     }
 }

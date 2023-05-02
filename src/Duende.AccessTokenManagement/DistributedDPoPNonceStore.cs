@@ -47,7 +47,7 @@ public class DistributedDPoPNonceStore : IDPoPNonceStore
             return entry;
         }
 
-        _logger.LogDebug("Cache miss for DPoP nonce for URL: {url}, method: {method}", context.Url, context.Method);
+        _logger.LogTrace("Cache miss for DPoP nonce for URL: {url}, method: {method}", context.Url, context.Method);
         return null;
     }
 
@@ -64,7 +64,7 @@ public class DistributedDPoPNonceStore : IDPoPNonceStore
             AbsoluteExpiration = cacheExpiration
         };
 
-        _logger.LogDebug("Caching DPoP nonce for URL: {url}, method: {method}. Expiration: {expiration}", context.Url, context.Method, cacheExpiration);
+        _logger.LogTrace("Caching DPoP nonce for URL: {url}, method: {method}. Expiration: {expiration}", context.Url, context.Method, cacheExpiration);
 
         var cacheKey = GenerateCacheKey(context);
         await _cache.SetStringAsync(cacheKey, data, entryOptions, token: cancellationToken).ConfigureAwait(false);
