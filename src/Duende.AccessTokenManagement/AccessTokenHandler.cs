@@ -57,7 +57,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
             response.Dispose();
 
             // if it's a DPoP nonce error, we don't need to obtain a new access token
-            var force = !response.IsDPoPNonceError();
+            var force = !response.IsDPoPError();
             if (!force && !string.IsNullOrEmpty(dPoPNonce))
             {
                 _logger.LogDebug("DPoP nonce error invoking endpoint: {url}, retrying using new nonce", request.RequestUri?.AbsoluteUri.ToString());

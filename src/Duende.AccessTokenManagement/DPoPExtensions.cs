@@ -43,9 +43,9 @@ public static class DPoPExtensions
     }
 
     /// <summary>
-    /// Reads the WWW-Authenticate response header to determine if the respone is in error due to an invalid DPoP nonce 
+    /// Reads the WWW-Authenticate response header to determine if the respone is in error due to DPoP
     /// </summary>
-    public static bool IsDPoPNonceError(this HttpResponseMessage response)
+    public static bool IsDPoPError(this HttpResponseMessage response)
     {
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
@@ -64,7 +64,7 @@ public static class DPoPExtensions
                     return null;
                 }).Where(x => x != null).FirstOrDefault();
 
-                return error == OidcConstants.TokenErrors.UseDPoPNonce;
+                return error == OidcConstants.TokenErrors.UseDPoPNonce || error == OidcConstants.TokenErrors.InvalidDPoPProof;
             }
         }
 

@@ -145,7 +145,10 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         _logger.LogDebug("Requesting client credentials access token at endpoint: {endpoint}", request.Address);
         var response = await httpClient.RequestClientCredentialsTokenAsync(request, cancellationToken).ConfigureAwait(false);
 
-        if (response.IsError && response.Error == OidcConstants.TokenErrors.UseDPoPNonce && key != null && response.DPoPNonce != null)
+        if (response.IsError && 
+            (response.Error == OidcConstants.TokenErrors.UseDPoPNonce || response.Error == OidcConstants.TokenErrors.InvalidDPoPProof) && 
+            key != null && 
+            response.DPoPNonce != null)
         {
             _logger.LogDebug("Token request failed with DPoP nonce error. Retrying with new nonce.");
 

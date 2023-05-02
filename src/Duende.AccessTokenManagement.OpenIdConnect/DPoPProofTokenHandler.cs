@@ -43,7 +43,7 @@ class DPoPProofTokenHandler : DelegatingHandler
         var dPoPNonce = response.GetDPoPNonce();
 
         // retry if 401
-        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && response.IsDPoPNonceError())
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && response.IsDPoPError())
         {
             response.Dispose();
 

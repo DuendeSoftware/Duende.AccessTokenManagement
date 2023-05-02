@@ -47,6 +47,7 @@ public class Program
                         //client.TokenEndpoint = "https://localhost:5001/connect/token";
 
                         client.ClientId = "m2m.dpop";
+                        //client.ClientId = "m2m.dpop.nonce";
                         client.ClientSecret = "secret";
 
                         client.Scope = "api";
