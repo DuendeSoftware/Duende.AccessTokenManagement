@@ -70,7 +70,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
         {
             await _dPoPNonceStore.StoreNonceAsync(new DPoPNonceContext
             {
-                Url = request.RequestUri!.AbsoluteUri,
+                Url = request.GetDPoPUrl(),
                 Method = request.Method.ToString(),
             }, dPoPNonce);
         }
@@ -122,7 +122,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
             var proofToken = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
             {
                 AccessToken = token.AccessToken,
-                Url = request.RequestUri!.AbsoluteUri,
+                Url = request.GetDPoPUrl(),
                 Method = request.Method.ToString(),
                 DPoPJsonWebKey = token.DPoPJsonWebKey,
                 DPoPNonce = dpopNonce,

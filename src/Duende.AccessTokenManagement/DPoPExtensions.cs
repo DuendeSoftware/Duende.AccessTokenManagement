@@ -70,4 +70,15 @@ public static class DPoPExtensions
 
         return false;
     }
+
+    /// <summary>
+    /// Returns the URL without any query params
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public static string GetDPoPUrl(this HttpRequestMessage request)
+    {
+        return request.RequestUri!.Scheme + "://" + request.RequestUri!.Authority + request.RequestUri!.LocalPath;
+        return request.RequestUri!.Scheme + "://" + request.RequestUri!.Authority + request.RequestUri!.AbsolutePath;
+    }
 }

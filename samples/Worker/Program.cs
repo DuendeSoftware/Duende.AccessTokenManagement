@@ -67,7 +67,8 @@ public class Program
 
                 services.AddClientCredentialsHttpClient("client.dpop", "demo.dpop", client =>
                 {
-                    client.BaseAddress = new Uri("https://localhost:5001/api/dpop/");
+                    //client.BaseAddress = new Uri("https://localhost:5001/api/dpop/");
+                    client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/dpop/");
                 });
 
                 services.AddHttpClient<TypedClient>(client =>

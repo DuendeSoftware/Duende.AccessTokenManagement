@@ -31,7 +31,7 @@ public class WorkerDPoPHttpClient : BackgroundService
             _logger.LogInformation("WorkerHttpClient running at: {time}", DateTimeOffset.Now);
 
             var client = _clientFactory.CreateClient("client.dpop");
-            var response = await client.GetAsync("test", stoppingToken);
+            var response = await client.GetAsync("test?x=1", stoppingToken);
                 
             if (response.IsSuccessStatusCode)
             {
