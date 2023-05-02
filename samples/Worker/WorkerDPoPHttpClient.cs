@@ -12,10 +12,10 @@ namespace WorkerService;
 
 public class WorkerDPoPHttpClient : BackgroundService
 {
-    private readonly ILogger<WorkerHttpClient> _logger;
+    private readonly ILogger<WorkerDPoPHttpClient> _logger;
     private readonly IHttpClientFactory _clientFactory;
 
-    public WorkerDPoPHttpClient(ILogger<WorkerHttpClient> logger, IHttpClientFactory factory)
+    public WorkerDPoPHttpClient(ILogger<WorkerDPoPHttpClient> logger, IHttpClientFactory factory)
     {
         _logger = logger;
         _clientFactory = factory;
