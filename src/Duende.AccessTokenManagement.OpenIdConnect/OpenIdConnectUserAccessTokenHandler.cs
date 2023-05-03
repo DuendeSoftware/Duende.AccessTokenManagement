@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace Duende.AccessTokenManagement.OpenIdConnect;
 
@@ -23,15 +24,17 @@ public class OpenIdConnectUserAccessTokenHandler : AccessTokenHandler
     /// <param name="dPoPProofService"></param>
     /// <param name="dPoPNonceStore"></param>
     /// <param name="httpContextAccessor"></param>
+    /// <param name="options"></param>
     /// <param name="logger"></param>
     /// <param name="parameters"></param>
     public OpenIdConnectUserAccessTokenHandler(
         IDPoPProofService dPoPProofService,
         IDPoPNonceStore dPoPNonceStore,
         IHttpContextAccessor httpContextAccessor,
+        IOptions<ClientCredentialsTokenManagementOptions> options,
         ILogger<OpenIdConnectClientAccessTokenHandler> logger,
         UserTokenRequestParameters? parameters = null)
-        : base(dPoPProofService, dPoPNonceStore, logger)
+        : base(dPoPProofService, dPoPNonceStore, options, logger)
     {
         _httpContextAccessor = httpContextAccessor;
         _parameters = parameters ?? new UserTokenRequestParameters();

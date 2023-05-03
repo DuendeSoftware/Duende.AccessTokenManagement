@@ -17,4 +17,9 @@ public class ClientCredentialsTokenManagementOptions
     /// Value to subtract from token lifetime for the cache entry lifetime (defaults to 60 seconds)
     /// </summary>
     public int CacheLifetimeBuffer { get; set; } = 60;
+
+    /// <summary>
+    /// Flag indicates if it is required to retry request if response has status 401
+    /// </summary>
+    public bool RetryOn401 { get; set; } = true;
 }

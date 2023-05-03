@@ -58,7 +58,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
 
         return services.AddOpenIdConnectAccessTokenManagement();
     }
-    
+
     /// <summary>
     /// Adds a named HTTP client for the factory that automatically sends the current user access token
     /// </summary>
@@ -81,7 +81,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         return services.AddHttpClient(name)
             .AddUserAccessTokenHandler(parameters);
     }
-    
+
     /// <summary>
     /// Adds a named HTTP client for the factory that automatically sends the current user access token
     /// </summary>
@@ -104,7 +104,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         return services.AddHttpClient(name)
             .AddUserAccessTokenHandler(parameters);
     }
-    
+
     /// <summary>
     /// Adds a named HTTP client for the factory that automatically sends the current user access token
     /// </summary>
@@ -128,7 +128,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
             .AddClientAccessTokenHandler(parameters);
     }
 
-    
+
     /// <summary>
     /// Adds the user access token handler to an HttpClient
     /// </summary>
@@ -144,12 +144,13 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
             var dpopService = provider.GetRequiredService<IDPoPProofService>();
             var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
             var contextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+            var options = provider.GetRequiredService<IOptions<ClientCredentialsTokenManagementOptions>>();
             var logger = provider.GetRequiredService<ILogger<OpenIdConnectClientAccessTokenHandler>>();
-            
-            return new OpenIdConnectUserAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, logger, parameters);
+
+            return new OpenIdConnectUserAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, options, logger, parameters);
         });
     }
-    
+
     /// <summary>
     /// Adds the user access token handler to an HttpClient
     /// </summary>
@@ -165,9 +166,10 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
             var dpopService = provider.GetRequiredService<IDPoPProofService>();
             var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
             var contextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+            var options = provider.GetRequiredService<IOptions<ClientCredentialsTokenManagementOptions>>();
             var logger = provider.GetRequiredService<ILogger<OpenIdConnectClientAccessTokenHandler>>();
 
-            return new OpenIdConnectClientAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, logger, parameters);
+            return new OpenIdConnectClientAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, options, logger, parameters);
         });
     }
 }

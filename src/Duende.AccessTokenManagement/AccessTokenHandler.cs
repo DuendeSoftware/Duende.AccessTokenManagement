@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using static IdentityModel.OidcConstants;
 
 namespace Duende.AccessTokenManagement;
@@ -17,6 +18,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
 {
     private readonly IDPoPProofService _dPoPProofService;
     private readonly IDPoPNonceStore _dPoPNonceStore;
+    private readonly ClientCredentialsTokenManagementOptions _options;
     private readonly ILogger _logger;
 
     /// <summary>
@@ -24,14 +26,17 @@ public abstract class AccessTokenHandler : DelegatingHandler
     /// </summary>
     /// <param name="dPoPProofService"></param>
     /// <param name="dPoPNonceStore"></param>
+    /// <param name="options"></param>
     /// <param name="logger"></param>
-    public AccessTokenHandler(
+    protected AccessTokenHandler(
         IDPoPProofService dPoPProofService,
         IDPoPNonceStore dPoPNonceStore,
-        ILogger logger)
+        IOptions<ClientCredentialsTokenManagementOptions> options,
+        ILogger<AccessTokenHandler> logger)
     {
         _dPoPProofService = dPoPProofService;
         _dPoPNonceStore = dPoPNonceStore;
+        _options = options.Value;
         _logger = logger;
     }
 
@@ -52,7 +57,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
         var dPoPNonce = response.GetDPoPNonce();
 
         // retry if 401
-        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && _options.RetryOn401)
         {
             response.Dispose();
 
@@ -85,7 +90,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
     protected virtual async Task SetTokenAsync(HttpRequestMessage request, bool forceRenewal, CancellationToken cancellationToken, string? dpopNonce = null)
     {
         var token = await GetAccessTokenAsync(forceRenewal, cancellationToken).ConfigureAwait(false);
-        
+
         if (!string.IsNullOrWhiteSpace(token?.AccessToken))
         {
             _logger.LogDebug("Sending access token in request to endpoint: {url}", request.RequestUri?.AbsoluteUri.ToString());
@@ -97,7 +102,7 @@ public abstract class AccessTokenHandler : DelegatingHandler
                 // looks like this is a DPoP bound token, so try to generate the proof token
                 if (!await SetDPoPProofTokenAsync(request, token, cancellationToken, dpopNonce))
                 {
-                    // failed or opted out for this request, to fall back to Bearer 
+                    // failed or opted out for this request, to fall back to Bearer
                     scheme = AuthenticationSchemes.AuthorizationHeaderBearer;
                 }
             }

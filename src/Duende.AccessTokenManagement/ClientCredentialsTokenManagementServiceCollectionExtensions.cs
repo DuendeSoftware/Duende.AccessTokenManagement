@@ -6,6 +6,7 @@ using System.Net.Http;
 using Duende.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -140,8 +141,9 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
             var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
             var accessTokenManagementService = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
             var logger = provider.GetRequiredService<ILogger<ClientCredentialsTokenHandler>>();
+            var options = provider.GetRequiredService<IOptions<ClientCredentialsTokenManagementOptions>>();
 
-            return new ClientCredentialsTokenHandler(dpopService, dpopNonceStore, accessTokenManagementService, logger, tokenClientName);
+            return new ClientCredentialsTokenHandler(dpopService, dpopNonceStore, accessTokenManagementService, options, logger, tokenClientName);
         });
     }
 }

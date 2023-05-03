@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace Duende.AccessTokenManagement;
 
@@ -21,15 +22,17 @@ public class ClientCredentialsTokenHandler : AccessTokenHandler
     /// <param name="dPoPProofService"></param>
     /// <param name="dPoPNonceStore"></param>
     /// <param name="accessTokenManagementService">The Access Token Management Service</param>
+    /// <param name="options"></param>
     /// <param name="logger"></param>
     /// <param name="tokenClientName">The name of the token client configuration</param>
     public ClientCredentialsTokenHandler(
         IDPoPProofService dPoPProofService,
         IDPoPNonceStore dPoPNonceStore,
         IClientCredentialsTokenManagementService accessTokenManagementService,
+        IOptions<ClientCredentialsTokenManagementOptions> options,
         ILogger<ClientCredentialsTokenHandler> logger,
-        string tokenClientName) 
-        : base(dPoPProofService, dPoPNonceStore, logger)
+        string tokenClientName)
+        : base(dPoPProofService, dPoPNonceStore, options, logger)
     {
         _accessTokenManagementService = accessTokenManagementService;
         _tokenClientName = tokenClientName;
@@ -41,7 +44,7 @@ public class ClientCredentialsTokenHandler : AccessTokenHandler
         var parameters = new TokenRequestParameters
         {
             ForceRenewal = forceRenewal
-        }; 
+        };
         return _accessTokenManagementService.GetAccessTokenAsync(_tokenClientName, parameters, cancellationToken);
     }
 }
