@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using IdentityModel;
 using IdentityModel.Client;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using RichardSzalay.MockHttp;
 
@@ -428,6 +429,46 @@ public class ClientTokenManagementTests
         // 2nd request
         token = await sut.GetAccessTokenAsync("test");
 
+        token.IsError.ShouldBeFalse();
+        token.AccessToken.ShouldBe("access_token");
+        token.AccessTokenType.ShouldBe("token_type");
+        mockHttp.GetMatchCount(mockedRequest).ShouldBe(1);
+    }
+    
+    [Fact]
+    public async Task Service_should_hit_network_when_cache_throws_exception()
+    {
+        var services = new ServiceCollection();
+
+        services.AddTransient<IDistributedCache, TestDistributedCache>();
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.TokenEndpoint = "https://as/connect/token";
+                client.ClientId = "client_id";
+            });
+
+        var response = new
+        {
+            access_token = "access_token",
+            token_type = "token_type",
+            expires_in = 3600,
+            scope = "scope"
+        };
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Fallback.Throw(new InvalidOperationException("No matching mock handler"));
+
+        var mockedRequest = mockHttp.Expect("/connect/token")
+            .Respond("application/json", JsonSerializer.Serialize(response));
+
+        services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => mockHttp);
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var token = await sut.GetAccessTokenAsync("test");
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("access_token");
         token.AccessTokenType.ShouldBe("token_type");
