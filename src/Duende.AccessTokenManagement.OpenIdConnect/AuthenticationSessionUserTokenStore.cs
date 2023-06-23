@@ -102,13 +102,14 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 dpopKeyName += $"::{parameters.Resource}";
             }
-            var expiresName = $"{TokenPrefix}expires_at"; string? refreshToken = null;
+            var expiresName = $"{TokenPrefix}expires_at";
             if (!string.IsNullOrEmpty(parameters.Resource))
             {
                 expiresName += $"::{parameters.Resource}";
             }
             const string refreshTokenName = $"{TokenPrefix}{OpenIdConnectParameterNames.RefreshToken}";
 
+            string? refreshToken = null;
             string? accessToken = null;
             string? accessTokenType = null;
             string? dpopKey = null;
@@ -156,7 +157,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             UserToken token,
             UserTokenRequestParameters? parameters = null)
         {
-            parameters ??= new ();
+            parameters ??= new();
 
             // check the cache in case the cookie was re-issued via StoreTokenAsync
             // we use String.Empty as the key for a null SignInScheme
@@ -173,13 +174,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             // in case you want to filter certain claims before re-issuing the authentication session
             var transformedPrincipal = await FilterPrincipalAsync(result.Principal!).ConfigureAwait(false);
 
-            var expiresName = "expires_at";
-            if (!string.IsNullOrEmpty(parameters.Resource))
-            {
-                expiresName += $"::{parameters.Resource}";
-            }
-
-            var tokenName = OpenIdConnectParameterNames.AccessToken;
+            var tokenName = $"{TokenPrefix}{OpenIdConnectParameterNames.AccessToken}";
             if (!string.IsNullOrEmpty(parameters.Resource))
             {
                 tokenName += $"::{parameters.Resource}";
@@ -194,7 +189,11 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             {
                 dpopKeyName += $"::{parameters.Resource}";
             }
-
+            var expiresName = $"{TokenPrefix}expires_at";
+            if (!string.IsNullOrEmpty(parameters.Resource))
+            {
+                expiresName += $"::{parameters.Resource}";
+            }
             var refreshTokenName = $"{OpenIdConnectParameterNames.RefreshToken}";
 
             if (AppendChallengeSchemeToTokenNames(parameters))
@@ -206,13 +205,13 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 expiresName += $"||{parameters.ChallengeScheme}";
             }
 
-            result.Properties!.Items[$"{TokenPrefix}{tokenName}"] = token.AccessToken;
-            result.Properties!.Items[$"{TokenPrefix}{tokenTypeName}"] = token.AccessTokenType;
+            result.Properties!.Items[tokenName] = token.AccessToken;
+            result.Properties!.Items[tokenTypeName] = token.AccessTokenType;
             if (token.DPoPJsonWebKey != null)
             {
-                result.Properties!.Items[$"{TokenPrefix}{dpopKeyName}"] = token.DPoPJsonWebKey;
+                result.Properties!.Items[dpopKeyName] = token.DPoPJsonWebKey;
             }
-            result.Properties!.Items[$"{TokenPrefix}{expiresName}"] = token.Expiration.ToString("o", CultureInfo.InvariantCulture);
+            result.Properties!.Items[expiresName] = token.Expiration.ToString("o", CultureInfo.InvariantCulture);
 
             if (token.RefreshToken != null)
             {
