@@ -83,7 +83,8 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
             return userToken;
         }
 
-        if (userToken.AccessToken.IsMissing() && userToken.RefreshToken.IsPresent())
+        var needsRenewal = userToken.AccessToken.IsMissing() && userToken.RefreshToken.IsPresent();
+        if (needsRenewal)
         {
             _logger.LogDebug(
                 "No access token found in user token store for user {user} / resource {resource}. Trying to refresh.",
@@ -91,7 +92,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         }
 
         var dtRefresh = userToken.Expiration.Subtract(_options.RefreshBeforeExpiration);
-        if (dtRefresh < _clock.UtcNow || parameters.ForceRenewal)
+        if (dtRefresh < _clock.UtcNow || parameters.ForceRenewal || needsRenewal)
         {
             _logger.LogDebug("Token for user {user} needs refreshing.", userName);
 
