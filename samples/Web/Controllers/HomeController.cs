@@ -70,6 +70,20 @@ public class HomeController : Controller
     }
 
     [AllowAnonymous]
+    public async Task<IActionResult> CallApiAsUserResourceIndicator()
+    {
+        var token = await HttpContext.GetUserAccessTokenAsync(new UserTokenRequestParameters { Resource = "urn:resource1" });
+        var client = _httpClientFactory.CreateClient();
+        client.SetToken(token.AccessTokenType!, token.AccessToken!);
+
+        var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/test");
+
+        ViewBag.Json = PrettyPrint(response);
+        return View("CallApi");
+    }
+
+
+    [AllowAnonymous]
     public async Task<IActionResult> CallApiAsClientExtensionMethod()
     {
         var token = await HttpContext.GetClientAccessTokenAsync();
@@ -81,7 +95,21 @@ public class HomeController : Controller
         ViewBag.Json = PrettyPrint(response);
         return View("CallApi");
     }
+
+    [AllowAnonymous]
+    public async Task<IActionResult> CallApiAsClientResourceIndicator()
+    {
+        var token = await HttpContext.GetClientAccessTokenAsync(new UserTokenRequestParameters { Resource = "urn:resource1" });
+        var client = _httpClientFactory.CreateClient();
+        client.SetToken(token.AccessTokenType!, token.AccessToken!);
+
+        var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/test");
+
+        ViewBag.Json = PrettyPrint(response);
+        return View("CallApi");
+    }
     
+
     [AllowAnonymous]
     public async Task<IActionResult> CallApiAsClientFactory()
     {

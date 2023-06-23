@@ -4,6 +4,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,7 @@ public static class Startup
             .AddOpenIdConnect("oidc", options =>
             {
                 options.Authority = "https://demo.duendesoftware.com";
+                //options.Authority = "https://localhost:5001";
 
                 options.ClientId = "interactive.confidential.short";
                 options.ClientSecret = "secret";
@@ -46,6 +48,7 @@ public static class Startup
                 options.Scope.Add("email");
                 options.Scope.Add("offline_access");
                 options.Scope.Add("api");
+                options.Scope.Add("resource1.scope1");
 
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.SaveTokens = true;
@@ -55,6 +58,12 @@ public static class Startup
                 {
                     NameClaimType = "name",
                     RoleClaimType = "role"
+                };
+
+                options.Events.OnRedirectToIdentityProvider = ctx => 
+                {
+                    ctx.ProtocolMessage.Resource = "urn:resource1";
+                    return Task.CompletedTask;
                 };
             });
 
