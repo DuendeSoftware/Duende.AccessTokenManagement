@@ -262,7 +262,7 @@ public class UserTokenManagementTests : IntegrationTestBase
         token.ShouldNotBeNull();
         token.IsError.ShouldBeFalse();
         token.AccessToken.ShouldBe("refreshed2_access_token");
-        token.AccessTokenType.ShouldBe("token_type");
+        token.AccessTokenType.ShouldBe("token_type2");
         token.RefreshToken.ShouldBe("refreshed2_refresh_token");
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
     }
