@@ -151,7 +151,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
     }
     
     /// <summary>
-    /// Adds the user access token handler to an HttpClient
+    /// Adds the client access token handler to an HttpClient
     /// </summary>
     /// <param name="httpClientBuilder"></param>
     /// <param name="parameters"></param>
