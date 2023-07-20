@@ -102,6 +102,18 @@ public abstract class AccessTokenHandler : DelegatingHandler
                 }
             }
 
+            // since AccessTokenType above in the token endpoint response (the token_type value) could be case insensitive, but
+            // when we send it as an Authoriization header in the API request it must be case sensitive, we 
+            // are checking for that here and forcing it to the exact casing required.
+            if (scheme.Equals(AuthenticationSchemes.AuthorizationHeaderBearer, System.StringComparison.OrdinalIgnoreCase))
+            {
+                scheme = AuthenticationSchemes.AuthorizationHeaderBearer;
+            }
+            else if (scheme.Equals(AuthenticationSchemes.AuthorizationHeaderDPoP, System.StringComparison.OrdinalIgnoreCase))
+            {
+                scheme = AuthenticationSchemes.AuthorizationHeaderDPoP;
+            }
+
             // checking for null AccessTokenType and falling back to "Bearer" since this might be coming
             // from an old cache/store prior to adding the AccessTokenType property.
             request.SetToken(scheme, token.AccessToken);

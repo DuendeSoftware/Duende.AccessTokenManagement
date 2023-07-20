@@ -79,6 +79,5 @@ public static class DPoPExtensions
     public static string GetDPoPUrl(this HttpRequestMessage request)
     {
         return request.RequestUri!.Scheme + "://" + request.RequestUri!.Authority + request.RequestUri!.LocalPath;
-        return request.RequestUri!.Scheme + "://" + request.RequestUri!.Authority + request.RequestUri!.AbsolutePath;
     }
 }
