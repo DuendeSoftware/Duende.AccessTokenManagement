@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -46,10 +47,19 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
 
         if (parameters.ForceRenewal == false)
         {
-            var item = await _tokenCache.GetAsync(clientName, parameters, cancellationToken).ConfigureAwait(false);
-            if (item != null)
+            try
             {
-                return item;
+                var item = await _tokenCache.GetAsync(clientName, parameters, cancellationToken).ConfigureAwait(false);
+                if (item != null)
+                {
+                    return item;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e,
+                    "Error trying to obtain token from cache for client {clientName}. Error = {error}. Will obtain new token.", 
+                    clientName, e.Message);
             }
         }
 
@@ -65,7 +75,17 @@ public class ClientCredentialsTokenManagementService : IClientCredentialsTokenMa
                 return token;
             }
 
-            await _tokenCache.SetAsync(clientName, token, parameters, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await _tokenCache.SetAsync(clientName, token, parameters, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e,
+                    "Error trying to set token in cache for client {clientName}. Error = {error}", 
+                    clientName, e.Message);
+            }
+
             return token;
         }).ConfigureAwait(false);
     }
