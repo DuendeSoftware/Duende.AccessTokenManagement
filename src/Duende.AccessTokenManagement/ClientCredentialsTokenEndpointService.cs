@@ -63,14 +63,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
             throw new InvalidOperationException("unknown client");
         }
 
-        var request = new ClientCredentialsTokenRequest
-        {
-            Address = client.TokenEndpoint,
-            Scope = client.Scope,
-            ClientId = client.ClientId,
-            ClientSecret = client.ClientSecret,
-            ClientCredentialStyle = client.ClientCredentialStyle,
-        };
+        var request = CreateRequest(client);
 
         request.Parameters.AddRange(client.Parameters);
         
@@ -185,5 +178,18 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
                 : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
             Scope = response.Scope
         };
+    }
+
+    protected virtual ClientCredentialsTokenRequest CreateRequest(ClientCredentialsClient client)
+    {
+        var request = new ClientCredentialsTokenRequest
+        {
+            Address = client.TokenEndpoint,
+            Scope = client.Scope,
+            ClientId = client.ClientId,
+            ClientSecret = client.ClientSecret,
+            ClientCredentialStyle = client.ClientCredentialStyle,
+        };
+        return request;
     }
 }
