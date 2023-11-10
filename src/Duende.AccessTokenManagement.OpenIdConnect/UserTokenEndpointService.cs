@@ -69,7 +69,12 @@ public class UserTokenEndpointService : IUserTokenEndpointService
         };
         
         request.Options.TryAdd(ClientCredentialsTokenManagementDefaults.TokenRequestParametersOptionsName, parameters);
-        
+
+        if (!string.IsNullOrWhiteSpace(parameters.Scope))
+        {
+            request.Scope = parameters.Scope;
+        }
+
         if (!string.IsNullOrEmpty(parameters.Resource))
         {
             request.Resource.Add(parameters.Resource);
