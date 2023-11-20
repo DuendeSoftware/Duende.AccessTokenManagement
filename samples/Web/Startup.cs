@@ -76,30 +76,30 @@ public static class Startup
         {
             // if you uncomment this line, then be sure to change the URL for the "user_client"
             // to include "dpop/" at the end, since that's the DPoP enabled API path
-            //options.DPoPJsonWebKey = jwk;
+            options.DPoPJsonWebKey = jwk;
         });
 
         // registers HTTP client that uses the managed user access token
         builder.Services.AddUserAccessTokenHttpClient("user_client",
             configureClient: client => {
-                client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
-                //client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/dpop/");
+                //client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
+                client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/dpop/");
             });
 
         // registers HTTP client that uses the managed client access token
         builder.Services.AddClientAccessTokenHttpClient("client",
-            configureClient: client => { client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/"); });
+            configureClient: client => { client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/dpop/"); });
 
         // registers a typed HTTP client with token management support
         builder.Services.AddHttpClient<TypedUserClient>(client =>
             {
-                client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
+                client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/dpop/");
             })
             .AddUserAccessTokenHandler();
 
         builder.Services.AddHttpClient<TypedClientClient>(client =>
             {
-                client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
+                client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/dpop/");
             })
             .AddClientAccessTokenHandler();
 

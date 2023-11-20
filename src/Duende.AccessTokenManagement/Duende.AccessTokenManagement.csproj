@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net8.0</TargetFrameworks>
+        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
@@ -16,12 +16,11 @@
         <PackageReference Include="MinVer" Version="4.0.0" PrivateAssets="All" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 
-        <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Options" />
+        <PackageReference Include="Microsoft.Extensions.Http" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
     </ItemGroup>
-
 </Project>
