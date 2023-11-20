@@ -23,6 +23,7 @@ public class TestLoggerProvider : ILoggerProvider
         }
 
         public IDisposable BeginScope<TState>(TState state)
+            where TState : notnull
         {
             return this;
         }

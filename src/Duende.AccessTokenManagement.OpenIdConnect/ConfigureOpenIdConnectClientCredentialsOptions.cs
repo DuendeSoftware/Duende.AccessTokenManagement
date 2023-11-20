@@ -32,8 +32,9 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
     { }
 
     /// <inheritdoc />
-    public void Configure(string name, ClientCredentialsClient options)
+    public void Configure(string? name, ClientCredentialsClient options)
     {
+        if (name.IsMissing()) return;
         if (!name.StartsWith(OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix)) return;
         
         string? scheme = null;
