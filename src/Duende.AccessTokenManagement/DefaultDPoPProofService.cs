@@ -58,6 +58,15 @@ public class DefaultDPoPProofService : IDPoPProofService
                 y = jsonWebKey.Y,
                 crv = jsonWebKey.Crv
             };
+
+
+            //             jwk = new()
+            // {
+            //     { "kty", jsonWebKey.Kty },
+            //     { "x", jsonWebKey.X },
+            //     { "y", jsonWebKey.Y },
+            //     { "crv", jsonWebKey.Crv }
+            // };
         }
         else if (string.Equals(jsonWebKey.Kty, JsonWebAlgorithmsKeyTypes.RSA))
         {
