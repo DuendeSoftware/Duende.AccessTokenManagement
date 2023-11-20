@@ -33,7 +33,7 @@ public class HomeController : Controller
         var client = _httpClientFactory.CreateClient();
         client.SetToken(token.AccessTokenType!, token.AccessToken!);
 
-        var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/dpop/test");
+        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}/test");
         ViewBag.Json = PrettyPrint(response);
 
         return View("CallApi");
@@ -45,7 +45,7 @@ public class HomeController : Controller
         var client = _httpClientFactory.CreateClient();
         client.SetToken(token.AccessTokenType!, token.AccessToken!);
             
-        var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/dpop/test");
+        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}/test");
         ViewBag.Json = PrettyPrint(response);
 
         return View("CallApi");
@@ -76,7 +76,7 @@ public class HomeController : Controller
         var client = _httpClientFactory.CreateClient();
         client.SetToken(token.AccessTokenType!, token.AccessToken!);
 
-        var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/dpop/test");
+        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}/test");
 
         ViewBag.Json = PrettyPrint(response);
         return View("CallApi");
@@ -90,7 +90,7 @@ public class HomeController : Controller
         var client = _httpClientFactory.CreateClient();
         client.SetToken(token.AccessTokenType!, token.AccessToken!);
 
-        var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/dpop/test");
+        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}/test");
         
         ViewBag.Json = PrettyPrint(response);
         return View("CallApi");
@@ -103,7 +103,7 @@ public class HomeController : Controller
         var client = _httpClientFactory.CreateClient();
         client.SetToken(token.AccessTokenType!, token.AccessToken!);
 
-        var response = await client.GetStringAsync("https://demo.duendesoftware.com/api/dpop/test");
+        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}/test");
 
         ViewBag.Json = PrettyPrint(response);
         return View("CallApi");
