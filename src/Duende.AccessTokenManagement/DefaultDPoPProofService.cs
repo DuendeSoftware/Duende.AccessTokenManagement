@@ -48,33 +48,24 @@ public class DefaultDPoPProofService : IDPoPProofService
 
         // jwk: representing the public key chosen by the client, in JSON Web Key (JWK) [RFC7517] format,
         // as defined in Section 4.1.3 of [RFC7515]. MUST NOT contain a private key.
-        object jwk;
+        Dictionary<string, string> jwk;
         if (string.Equals(jsonWebKey.Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve))
         {
-            jwk = new
+            jwk = new()
             {
-                kty = jsonWebKey.Kty,
-                x = jsonWebKey.X,
-                y = jsonWebKey.Y,
-                crv = jsonWebKey.Crv
+                { "kty", jsonWebKey.Kty },
+                { "x", jsonWebKey.X },
+                { "y", jsonWebKey.Y },
+                { "crv", jsonWebKey.Crv }
             };
-
-
-            //             jwk = new()
-            // {
-            //     { "kty", jsonWebKey.Kty },
-            //     { "x", jsonWebKey.X },
-            //     { "y", jsonWebKey.Y },
-            //     { "crv", jsonWebKey.Crv }
-            // };
         }
         else if (string.Equals(jsonWebKey.Kty, JsonWebAlgorithmsKeyTypes.RSA))
         {
-            jwk = new
+            jwk = new()
             {
-                kty = jsonWebKey.Kty,
-                e = jsonWebKey.E,
-                n = jsonWebKey.N
+                { "kty", jsonWebKey.Kty },
+                { "e", jsonWebKey.E },
+                { "n", jsonWebKey.N }
             };
         }
         else
