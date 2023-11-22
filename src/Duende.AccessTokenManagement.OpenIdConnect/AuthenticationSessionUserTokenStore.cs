@@ -1,4 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Microsoft.AspNetCore.Authentication;
@@ -235,7 +235,10 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             }
 
             result.Properties.Items.Remove(TokenNamesKey);
-            result.Properties.Items.Add(new KeyValuePair<string, string?>(TokenNamesKey, string.Join(";", result.Properties.Items.Select(t => t.Key).ToList())));
+            var tokenNames = result.Properties.Items
+                .Where(item => item.Key.StartsWith(TokenPrefix))
+                .Select(item => item.Key.Substring(TokenPrefix.Length));
+            result.Properties.Items.Add(new KeyValuePair<string, string?>(TokenNamesKey, string.Join(";", tokenNames)));
 
             await _contextAccessor.HttpContext.SignInAsync(parameters.SignInScheme, transformedPrincipal, result.Properties).ConfigureAwait(false);
 
