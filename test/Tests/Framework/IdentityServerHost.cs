@@ -31,6 +31,11 @@ public class IdentityServerHost : GenericHost
     };
     
     public List<ApiScope> ApiScopes { get; set; } = new();
+    public List<ApiResource> ApiResources { get; set; } = new()
+    {
+        new ApiResource("urn:api1"),
+        new ApiResource("urn:api2")
+    };
 
     private void ConfigureServices(IServiceCollection services)
     {
@@ -47,6 +52,7 @@ public class IdentityServerHost : GenericHost
             })
             .AddInMemoryClients(Clients)
             .AddInMemoryIdentityResources(IdentityResources)
+            .AddInMemoryApiResources(ApiResources)
             .AddInMemoryApiScopes(ApiScopes);
     }
 

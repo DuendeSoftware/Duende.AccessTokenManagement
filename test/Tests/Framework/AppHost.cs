@@ -7,6 +7,8 @@ using System.Net;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using RichardSzalay.MockHttp;
+using Duende.AccessTokenManagement.OpenIdConnect;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Duende.AccessTokenManagement.Tests;
 
@@ -92,7 +94,10 @@ public class AppHost : GenericHost
             });
 
         services.AddDistributedMemoryCache();
-        services.AddOpenIdConnectAccessTokenManagement();
+        services.AddOpenIdConnectAccessTokenManagement(opt =>
+        {
+            opt.UseChallengeSchemeScopedTokens = true;
+        });
 
     }
 
@@ -120,6 +125,15 @@ public class AppHost : GenericHost
             endpoints.MapGet("/user_token", async context =>
             {
                 var token = await context.GetUserAccessTokenAsync();
+                await context.Response.WriteAsJsonAsync(token);
+            });
+
+            endpoints.MapGet("/user_token_with_resource/{resource}", async (string resource, HttpContext context) =>
+            {
+                var token = await context.GetUserAccessTokenAsync(new UserTokenRequestParameters
+                {
+                    Resource = resource
+                });
                 await context.Response.WriteAsJsonAsync(token);
             });
             

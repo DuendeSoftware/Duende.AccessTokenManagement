@@ -14,11 +14,12 @@ public class ApiHost : GenericHost
     private readonly IdentityServerHost _identityServerHost;
     public event Action<Microsoft.AspNetCore.Http.HttpContext> ApiInvoked = ctx => { };
         
-    public ApiHost(IdentityServerHost identityServerHost, string scope, string baseAddress = "https://api") 
+    public ApiHost(IdentityServerHost identityServerHost, string scope, string baseAddress = "https://api", string resource = "urn:api") 
         : base(baseAddress)
     {
         _identityServerHost = identityServerHost;
         _identityServerHost.ApiScopes.Add(new ApiScope(scope));
+        _identityServerHost.ApiResources.Add(new ApiResource(resource));
 
         OnConfigureServices += ConfigureServices;
         OnConfigure += Configure;
