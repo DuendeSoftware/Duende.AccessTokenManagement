@@ -192,7 +192,8 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             var dpopKeyName = NamePrefixAndResourceSuffix(DPoPKeyName, parameters);
             var expiresName = NamePrefixAndResourceSuffix("expires_at", parameters);
             
-            // Note that we are not including the the resource suffix because there is no per-resource refresh token
+            // Note that we are not including the resource suffix because there
+            // is no per-resource refresh token
             var refreshTokenName = NamePrefix(OpenIdConnectParameterNames.RefreshToken);
             
             if (AppendChallengeSchemeToTokenNames(parameters))
@@ -215,10 +216,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
             if (token.RefreshToken != null)
             {
-                if (!result.Properties.UpdateTokenValue(refreshTokenName, token.RefreshToken))
-                {
-                    result.Properties.Items[$"{TokenPrefix}{refreshTokenName}"] = token.RefreshToken;
-                }
+                result.Properties.Items[refreshTokenName] = token.RefreshToken;
             }
 
             var options = _contextAccessor!.HttpContext!.RequestServices.GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>();
