@@ -78,6 +78,8 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
             ClientId = options.ClientId,
             ClientSecret = options.ClientSecret,
             HttpClient = options.Backchannel,
+
+            Scope = options.Scope
         };
     }
 }
