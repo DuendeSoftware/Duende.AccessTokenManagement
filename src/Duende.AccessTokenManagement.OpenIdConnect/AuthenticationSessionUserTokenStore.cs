@@ -1,4 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Microsoft.AspNetCore.Authentication;
@@ -87,53 +87,21 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 return new UserToken() { Error = "No tokens in properties" };
             }
 
-            var tokenName = $"{TokenPrefix}{OpenIdConnectParameterNames.AccessToken}";
-            if (!string.IsNullOrEmpty(parameters.Resource))
-            {
-                tokenName += $"::{parameters.Resource}";
-            }
-            var tokenTypeName = $"{TokenPrefix}{OpenIdConnectParameterNames.TokenType}";
-            if (!string.IsNullOrEmpty(parameters.Resource))
-            {
-                tokenTypeName += $"::{parameters.Resource}";
-            }
-            var dpopKeyName = $"{TokenPrefix}{DPoPKeyName}";
-            if (!string.IsNullOrEmpty(parameters.Resource))
-            {
-                dpopKeyName += $"::{parameters.Resource}";
-            }
-            var expiresName = $"{TokenPrefix}expires_at";
-            if (!string.IsNullOrEmpty(parameters.Resource))
-            {
-                expiresName += $"::{parameters.Resource}";
-            }
-            const string refreshTokenName = $"{TokenPrefix}{OpenIdConnectParameterNames.RefreshToken}";
+            var tokenName = NamePrefixAndResourceSuffix(OpenIdConnectParameterNames.AccessToken, parameters);
+            var tokenTypeName = NamePrefixAndResourceSuffix(OpenIdConnectParameterNames.TokenType, parameters);
+            var dpopKeyName = NamePrefixAndResourceSuffix(DPoPKeyName, parameters);
+            var expiresName = NamePrefixAndResourceSuffix("expires_at", parameters);
+            
+            // Note that we are not including the the resource suffix because there is no per-resource refresh token
+            var refreshTokenName = NamePrefix(OpenIdConnectParameterNames.RefreshToken);
 
-            string? refreshToken = null;
-            string? accessToken = null;
-            string? accessTokenType = null;
-            string? dpopKey = null;
-            string? expiresAt = null;
+            var appendChallengeScheme = AppendChallengeSchemeToTokenNames(parameters);
 
-            if (AppendChallengeSchemeToTokenNames(parameters))
-            {
-                refreshToken = tokens
-                        .SingleOrDefault(t => t.Key == $"{refreshTokenName}||{parameters.ChallengeScheme}").Value;
-                accessToken = tokens.SingleOrDefault(t => t.Key == $"{tokenName}||{parameters.ChallengeScheme}")
-                    .Value;
-                accessTokenType = tokens.SingleOrDefault(t => t.Key == $"{tokenTypeName}||{parameters.ChallengeScheme}")
-                    .Value;
-                dpopKey = tokens.SingleOrDefault(t => t.Key == $"{dpopKeyName}||{parameters.ChallengeScheme}")
-                    .Value;
-                expiresAt = tokens.SingleOrDefault(t => t.Key == $"{expiresName}||{parameters.ChallengeScheme}")
-                    .Value;
-            }
-
-            refreshToken ??= tokens.SingleOrDefault(t => t.Key == $"{refreshTokenName}").Value;
-            accessToken ??= tokens.SingleOrDefault(t => t.Key == $"{tokenName}").Value;
-            accessTokenType ??= tokens.SingleOrDefault(t => t.Key == $"{tokenTypeName}").Value;
-            dpopKey ??= tokens.SingleOrDefault(t => t.Key == $"{dpopKeyName}").Value;
-            expiresAt ??= tokens.SingleOrDefault(t => t.Key == $"{expiresName}").Value;
+            var accessToken = GetTokenValue(tokens, tokenName, appendChallengeScheme, parameters);
+            var accessTokenType = GetTokenValue(tokens, tokenTypeName, appendChallengeScheme, parameters);
+            var dpopKey = GetTokenValue(tokens, dpopKeyName, appendChallengeScheme, parameters);
+            var expiresAt = GetTokenValue(tokens, expiresName, appendChallengeScheme, parameters);
+            var refreshToken = GetTokenValue(tokens, refreshTokenName, appendChallengeScheme, parameters);
 
             DateTimeOffset dtExpires = DateTimeOffset.MaxValue;
             if (expiresAt != null)
@@ -150,6 +118,51 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 Expiration = dtExpires
             };
         }
+
+        // If we are using the challenge scheme, we try to get the token 2 ways
+        // (with and without the suffix). This is necessary because ASP.NET
+        // itself does not set the suffix, so we might not have one at all.
+        private static string? GetTokenValue(List<KeyValuePair<string, string?>> tokens, string key, bool appendChallengeScheme, UserTokenRequestParameters parameters)
+        {
+            string? token = null;
+
+            if(appendChallengeScheme)
+            {
+                var scheme = parameters.ChallengeScheme;
+                token = GetTokenValue(tokens, ChallengeSuffix(key, scheme!));
+            }
+
+            if (token.IsMissing())
+            {
+                token = GetTokenValue(tokens, key);
+            }
+            return token;
+        }
+        
+        private static string? GetTokenValue(List<KeyValuePair<string, string?>> tokens, string key)
+        {
+            return tokens.SingleOrDefault(t => t.Key == key).Value;
+        }
+
+        /// Adds the .Token. prefix to the token name and, if the resource
+        /// parameter was included, the suffix marking this token as
+        /// per-resource.
+        private static string NamePrefixAndResourceSuffix(string type, UserTokenRequestParameters parameters) 
+        {
+            var result = NamePrefix(type);
+            if(!string.IsNullOrEmpty(parameters.Resource))
+            {
+                result = ResourceSuffix(result, parameters.Resource);
+            }
+            return result;
+        }
+
+        private static string NamePrefix(string name) => $"{TokenPrefix}{name}";
+
+        private static string ResourceSuffix(string name, string resource) => $"{name}::{resource}";
+
+        private static string ChallengeSuffix(string name, string challengeScheme) => $"{name}||{challengeScheme}";
+
 
         /// <inheritdoc/>
         public async Task StoreTokenAsync(
@@ -174,35 +187,23 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             // in case you want to filter certain claims before re-issuing the authentication session
             var transformedPrincipal = await FilterPrincipalAsync(result.Principal!).ConfigureAwait(false);
 
-            var tokenName = $"{TokenPrefix}{OpenIdConnectParameterNames.AccessToken}";
-            if (!string.IsNullOrEmpty(parameters.Resource))
-            {
-                tokenName += $"::{parameters.Resource}";
-            }
-            var tokenTypeName = $"{TokenPrefix}{OpenIdConnectParameterNames.TokenType}";
-            if (!string.IsNullOrEmpty(parameters.Resource))
-            {
-                tokenTypeName += $"::{parameters.Resource}";
-            }
-            var dpopKeyName = $"{TokenPrefix}{DPoPKeyName}";
-            if (!string.IsNullOrEmpty(parameters.Resource))
-            {
-                dpopKeyName += $"::{parameters.Resource}";
-            }
-            var expiresName = $"{TokenPrefix}expires_at";
-            if (!string.IsNullOrEmpty(parameters.Resource))
-            {
-                expiresName += $"::{parameters.Resource}";
-            }
-            var refreshTokenName = $"{OpenIdConnectParameterNames.RefreshToken}";
-
+            var tokenName = NamePrefixAndResourceSuffix(OpenIdConnectParameterNames.AccessToken, parameters);
+            var tokenTypeName = NamePrefixAndResourceSuffix(OpenIdConnectParameterNames.TokenType, parameters);
+            var dpopKeyName = NamePrefixAndResourceSuffix(DPoPKeyName, parameters);
+            var expiresName = NamePrefixAndResourceSuffix("expires_at", parameters);
+            
+            // Note that we are not including the resource suffix because there
+            // is no per-resource refresh token
+            var refreshTokenName = NamePrefix(OpenIdConnectParameterNames.RefreshToken);
+            
             if (AppendChallengeSchemeToTokenNames(parameters))
             {
-                refreshTokenName += $"||{parameters.ChallengeScheme}";
-                tokenName += $"||{parameters.ChallengeScheme}";
-                tokenTypeName += $"||{parameters.ChallengeScheme}";
-                dpopKeyName += $"||{parameters.ChallengeScheme}";
-                expiresName += $"||{parameters.ChallengeScheme}";
+                string challengeScheme = parameters.ChallengeScheme!;
+                tokenName = ChallengeSuffix(tokenName, challengeScheme);
+                tokenTypeName = ChallengeSuffix(tokenTypeName, challengeScheme);
+                dpopKeyName = ChallengeSuffix(dpopKeyName, challengeScheme);
+                expiresName = ChallengeSuffix(expiresName, challengeScheme);
+                refreshTokenName = ChallengeSuffix(refreshTokenName, challengeScheme);
             }
 
             result.Properties!.Items[tokenName] = token.AccessToken;
@@ -215,10 +216,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
             if (token.RefreshToken != null)
             {
-                if (!result.Properties.UpdateTokenValue(refreshTokenName, token.RefreshToken))
-                {
-                    result.Properties.Items[$"{TokenPrefix}{refreshTokenName}"] = token.RefreshToken;
-                }
+                result.Properties.Items[refreshTokenName] = token.RefreshToken;
             }
 
             var options = _contextAccessor!.HttpContext!.RequestServices.GetRequiredService<IOptionsMonitor<CookieAuthenticationOptions>>();
@@ -235,7 +233,10 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             }
 
             result.Properties.Items.Remove(TokenNamesKey);
-            result.Properties.Items.Add(new KeyValuePair<string, string?>(TokenNamesKey, string.Join(";", result.Properties.Items.Select(t => t.Key).ToList())));
+            var tokenNames = result.Properties.Items
+                .Where(item => item.Key.StartsWith(TokenPrefix))
+                .Select(item => item.Key.Substring(TokenPrefix.Length));
+            result.Properties.Items.Add(new KeyValuePair<string, string?>(TokenNamesKey, string.Join(";", tokenNames)));
 
             await _contextAccessor.HttpContext.SignInAsync(parameters.SignInScheme, transformedPrincipal, result.Properties).ConfigureAwait(false);
 
@@ -270,7 +271,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         /// <returns></returns>
         protected virtual bool AppendChallengeSchemeToTokenNames(UserTokenRequestParameters parameters)
         {
-            return _options.UseChallengeSchemeScopedTokens && !string.IsNullOrEmpty(parameters!.ChallengeScheme);
+            return _options.UseChallengeSchemeScopedTokens && !string.IsNullOrEmpty(parameters.ChallengeScheme);
         }
     }
 }

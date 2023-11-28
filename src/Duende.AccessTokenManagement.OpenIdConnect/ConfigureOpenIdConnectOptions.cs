@@ -63,7 +63,7 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
     }
 
     /// <inheritdoc/>
-    public void Configure(string name, OpenIdConnectOptions options)
+    public void Configure(string? name, OpenIdConnectOptions options)
     {
         if (_configScheme == name)
         {

@@ -1,0 +1,34 @@
+<Project>
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
+        <FrameworkVersion>8.0.0</FrameworkVersion>
+        <ExtensionsVersion>8.0.0</ExtensionsVersion>
+        <WilsonVersion>7.0.3</WilsonVersion>
+        <IdentityServerVersion>7.0.0-preview.2</IdentityServerVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0'">
+        <FrameworkVersion>6.0.0</FrameworkVersion>
+        <ExtensionsVersion>6.0.0</ExtensionsVersion>
+        <WilsonVersion>6.15.0</WilsonVersion>
+        <IdentityServerVersion>6.3.6</IdentityServerVersion>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <!-- ASP.NET -->
+        <PackageReference Update="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="$(FrameworkVersion)" />
+        <PackageReference Update="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(FrameworkVersion)" />
+        <PackageReference Update="Microsoft.AspNetCore.TestHost" Version="$(FrameworkVersion)" />
+
+        <!-- Microsoft Extensions -->
+        <PackageReference Update="Microsoft.Extensions.Caching.Abstractions" Version="$(ExtensionsVersion)" />
+        <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="$(ExtensionsVersion)" />
+        <PackageReference Update="Microsoft.Extensions.Options" Version="$(ExtensionsVersion)" />
+        <PackageReference Update="Microsoft.Extensions.Http" Version="$(ExtensionsVersion)" />
+        <PackageReference Update="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(ExtensionsVersion)" />
+
+        <!-- Wilson -->
+        <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="$(WilsonVersion)" />
+
+    </ItemGroup>
+</Project>

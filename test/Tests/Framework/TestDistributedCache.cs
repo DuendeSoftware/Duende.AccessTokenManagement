@@ -4,14 +4,14 @@ namespace Duende.AccessTokenManagement.Tests;
 
 internal class TestDistributedCache : IDistributedCache
 {
-    private readonly Dictionary<string, byte[]> _cache = new();
+    private readonly Dictionary<string, byte[]?> _cache = new();
     
-    public byte[] Get(string key)
+    public byte[]? Get(string key)
     {
         return _cache[key];
     }
 
-    public Task<byte[]> GetAsync(string key, CancellationToken token = new CancellationToken())
+    public Task<byte[]?> GetAsync(string key, CancellationToken token = new CancellationToken())
     {
         return Task.FromResult(_cache[key]);
     }

@@ -61,7 +61,7 @@ public class GenericHost
                 {
                     if (HostAssembly is not null)
                     {
-                        context.HostingEnvironment.ApplicationName = HostAssembly.GetName().Name;
+                        context.HostingEnvironment.ApplicationName = HostAssembly.GetName().Name!;
                     }
                 });
 
