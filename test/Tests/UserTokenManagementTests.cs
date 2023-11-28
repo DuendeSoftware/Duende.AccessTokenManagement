@@ -25,6 +25,8 @@ public class UserTokenManagementTests : IntegrationTestBase
     [Fact]
     public async Task Anonymous_user_should_return_client_token()
     {
+        AppHost.IdentityServerHttpHandler = new MockHttpMessageHandler();
+
         var response = await AppHost.BrowserClient!.GetAsync(AppHost.Url("/client_token"));
         var token = await response.Content.ReadFromJsonAsync<ClientCredentialsToken>();
 

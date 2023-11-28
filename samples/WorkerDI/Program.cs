@@ -37,7 +37,8 @@ public class Program
                 // alternative way to add a client
                 services.Configure<ClientCredentialsClient>("demo", client =>
                 {
-                    client.TokenEndpoint = "https://demo.duendesoftware.com/connect/token";
+                    client.Authority = "https://demo.duendesoftware.com/";
+                    // client.TokenEndpoint = "https://demo.duendesoftware.com/connect/token";
 
                     client.ClientId = "m2m.short";
                     client.ClientSecret = "secret";

@@ -6,6 +6,7 @@ using System.Net.Http;
 using Duende.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -49,6 +50,9 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
         services.TryAddTransient<IDPoPNonceStore, DistributedDPoPNonceStore>();
 
         services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName);
+
+        services.AddSingleton<IPostConfigureOptions<ClientCredentialsClient>, ConfigureDiscoveryCache>();
+        services.AddSingleton<DiscoveryCaches>();
 
         return new ClientCredentialsTokenManagementBuilder(services);
     }

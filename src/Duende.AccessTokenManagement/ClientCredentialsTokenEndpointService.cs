@@ -23,6 +23,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     private readonly IClientAssertionService _clientAssertionService;
     private readonly IDPoPKeyStore _dPoPKeyMaterialService;
     private readonly IDPoPProofService _dPoPProofService;
+    private readonly DiscoveryCaches _discoveryCaches;
     private readonly ILogger<ClientCredentialsTokenEndpointService> _logger;
 
     /// <summary>
@@ -32,6 +33,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     /// <param name="clientAssertionService"></param>
     /// <param name="dPoPKeyMaterialService"></param>
     /// <param name="dPoPProofService"></param>
+    /// <param name="discoveryCaches"></param>
     /// <param name="logger"></param>
     /// <param name="options"></param>
     public ClientCredentialsTokenEndpointService(
@@ -40,6 +42,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         IClientAssertionService clientAssertionService,
         IDPoPKeyStore dPoPKeyMaterialService,
         IDPoPProofService dPoPProofService,
+        DiscoveryCaches discoveryCaches,
         ILogger<ClientCredentialsTokenEndpointService> logger)
     {
         _httpClientFactory = httpClientFactory;
@@ -47,6 +50,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         _clientAssertionService = clientAssertionService;
         _dPoPKeyMaterialService = dPoPKeyMaterialService;
         _dPoPProofService = dPoPProofService;
+        _discoveryCaches = discoveryCaches;
         _logger = logger;
     }
 
@@ -58,14 +62,29 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     {
         var client = _options.Get(clientName);
 
-        if (string.IsNullOrWhiteSpace(client.TokenEndpoint) || string.IsNullOrEmpty(client.ClientId))
+        if ((string.IsNullOrWhiteSpace(client.TokenEndpoint) && string.IsNullOrWhiteSpace(client.Authority))|| string.IsNullOrEmpty(client.ClientId))
         {
             throw new InvalidOperationException("unknown client");
         }
 
+        var tokenEndpoint = client.TokenEndpoint;
+        var cache = _discoveryCaches.Get(clientName);
+        if(cache != null)
+        {
+            var disco = await cache.GetAsync();
+            if(disco.IsError)
+            {
+                _logger.LogError(
+                    "Error retrieving discovery document from {authority} for client {clientName}. Error = {error}.",
+                    client.Authority, clientName, disco.Error);
+                throw new InvalidOperationException("Failed to retrieve discovery document");
+            }
+            tokenEndpoint = disco.TokenEndpoint;
+        }
+
         var request = new ClientCredentialsTokenRequest
         {
-            Address = client.TokenEndpoint,
+            Address = tokenEndpoint,
             Scope = client.Scope,
             ClientId = client.ClientId,
             ClientSecret = client.ClientSecret,

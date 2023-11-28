@@ -23,9 +23,10 @@ public class ClientCredentialsClientConfigureOptions : IConfigureNamedOptions<Cl
     {
         if (name == "demo.jwt")
         {
-            var disco = _cache.GetAsync().GetAwaiter().GetResult();
+            //var disco = _cache.GetAsync().GetAwaiter().GetResult();
 
-            options.TokenEndpoint = disco.TokenEndpoint;
+            //options.TokenEndpoint = disco.TokenEndpoint;
+            options.Authority = "https://demo.duendesoftware.com";
             options.ClientId = "m2m.short.jwt";
             options.Scope = "api";
         }

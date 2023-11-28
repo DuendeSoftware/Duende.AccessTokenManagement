@@ -1,8 +1,12 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net.Http;
 using IdentityModel.Client;
+using Microsoft.Extensions.Options;
 
 namespace Duende.AccessTokenManagement;
 
@@ -11,6 +15,12 @@ namespace Duende.AccessTokenManagement;
 /// </summary>
 public class ClientCredentialsClient
 {
+    /// <summary>
+    /// The address of the OAuth authority. If this is set, the TokenEndpoint
+    /// will be set using discovery.
+    /// </summary>
+    public string? Authority { get; set; }
+
     /// <summary>
     /// The address of the token endpoint
     /// </summary>
@@ -61,3 +71,37 @@ public class ClientCredentialsClient
     /// </summary>
     public string? DPoPJsonWebKey { get; set; }
 }
+
+
+public class ConfigureDiscoveryCache : IPostConfigureOptions<ClientCredentialsClient>
+{
+    private readonly DiscoveryCaches _discos;
+    private readonly HttpClient _httpClient;
+
+    public ConfigureDiscoveryCache(DiscoveryCaches discos, HttpClient httpClient)
+    {
+        _discos = discos;
+        _httpClient = httpClient;
+    }
+
+
+    public void PostConfigure(string name, ClientCredentialsClient options)
+    {
+        if (options.Authority != null)
+        {
+            _discos.Set(name, new DiscoveryCache(options.Authority, () => _httpClient)
+            {
+                CacheDuration = TimeSpan.FromSeconds(10) // FOR TESTING ONLY!
+            });
+        }
+    }
+}
+
+public class DiscoveryCaches
+{
+    private readonly ConcurrentDictionary<string, DiscoveryCache> _discos = new();
+    public DiscoveryCache? Get(string name) => _discos.GetValueOrDefault(name);
+
+    internal void Set(string name, DiscoveryCache cache) => _discos[name] = cache;
+}
+

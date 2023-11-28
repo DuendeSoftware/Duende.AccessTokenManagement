@@ -7,7 +7,7 @@ using System;
 namespace Duende.AccessTokenManagement.OpenIdConnect;
 
 /// <summary>
-/// Named options to synthetize client credentials based on OIDC handler configuration
+/// Named options to synthesize client credentials based on OIDC handler configuration
 /// </summary>
 public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOptions<ClientCredentialsClient>
 {
@@ -48,7 +48,8 @@ public class ConfigureOpenIdConnectClientCredentialsOptions : IConfigureNamedOpt
         }
         
         var oidc = _configurationService.GetOpenIdConnectConfigurationAsync(scheme).GetAwaiter().GetResult();
-            
+
+        options.Authority = oidc.Authority;
         options.TokenEndpoint = oidc.TokenEndpoint;
         options.ClientId = oidc.ClientId;
         options.ClientSecret = oidc.ClientSecret;

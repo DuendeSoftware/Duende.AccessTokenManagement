@@ -7,6 +7,7 @@ using System.Net;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using RichardSzalay.MockHttp;
+using Microsoft.Extensions.Options;
 
 namespace Duende.AccessTokenManagement.Tests;
 
@@ -82,6 +83,23 @@ public class AppHost : GenericHost
                         .Respond(identityServerHandler);
                     
                     options.BackchannelHttpHandler = IdentityServerHttpHandler;
+
+                    // *** WIP ***
+                    //
+                    // This technique doesn't work as is, because the http
+                    // client is created after the post configure options runs.
+                    // We might be able to refactor the discovery caches to
+                    // initialize themselves on demand, rather than as part of a
+                    // post configure. We should also think about how to make
+                    // the testing easier, because right now we have to specify
+                    // an IdentityServeHttpHandler in the test
+                    // Anonymous_user_should_return_client_token, even though we
+                    // don't need that handler in the test (otherwise we don't
+                    // get into this branch of code). That makes it weird to
+                    // understand the test, because it depends on the
+                    // implementation details of the host so closely.
+                    services.AddHttpClient<ConfigureDiscoveryCache>(h => 
+                        h = new HttpClient(IdentityServerHttpHandler));
                 }
                 else
                 {
@@ -90,6 +108,8 @@ public class AppHost : GenericHost
 
                 options.ProtocolValidator.RequireNonce = false;
             });
+
+        services.AddSingleton<IPostConfigureOptions<ClientCredentialsClient>, ConfigureDiscoveryCache>();
 
         services.AddDistributedMemoryCache();
         services.AddOpenIdConnectAccessTokenManagement();

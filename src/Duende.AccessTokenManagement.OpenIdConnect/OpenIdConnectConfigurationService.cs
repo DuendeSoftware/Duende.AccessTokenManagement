@@ -71,6 +71,10 @@ public class OpenIdConnectConfigurationService : IOpenIdConnectConfigurationServ
         {
             Scheme = configScheme,
             
+            // TODO - Need to think about this a bit more. If we have an
+            // Authority on both oidc client configuration and oauth client
+            // configuration, but they behave differently, is that confusing?
+            // Probably the two different behaviors are what most people want?
             Authority = options.Authority,
             TokenEndpoint = configuration.TokenEndpoint,
             RevocationEndpoint = configuration.AdditionalData.TryGetValue(OidcConstants.Discovery.RevocationEndpoint, out var value) ? value?.ToString() : null,
