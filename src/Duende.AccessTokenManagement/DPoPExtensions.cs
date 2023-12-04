@@ -49,22 +49,47 @@ public static class DPoPExtensions
     {
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            var header = response.Headers.WwwAuthenticate.Where(x => x.Scheme == OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP).FirstOrDefault();
-            if (header != null && header.Parameter != null)
+            foreach (var header in response.Headers.WwwAuthenticate)
             {
-                // WWW-Authenticate: DPoP error="use_dpop_nonce"
-                var values = header.Parameter.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                var error = values.Select(x =>
+                if (header.Scheme == OidcConstants.AuthenticationSchemes.AuthorizationHeaderDPoP
+                    && header.Parameter is not null)
                 {
-                    var parts = x.Split('=', StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2 && parts[0] == OidcConstants.TokenResponse.Error)
-                    {
-                        return parts[1].Trim('"');
-                    }
-                    return null;
-                }).Where(x => x != null).FirstOrDefault();
+                    // WWW-Authenticate: DPoP error="use_dpop_nonce"
+                    var remaining = header.Parameter.AsSpan();
 
-                return error == OidcConstants.TokenErrors.UseDPoPNonce || error == OidcConstants.TokenErrors.InvalidDPoPProof;
+                    while (!remaining.IsEmpty)
+                    {
+                        ReadOnlySpan<char> parameter;
+
+                        var separatorIndex = remaining.IndexOf(',');
+                        if (separatorIndex == -1)
+                        {
+                            parameter = remaining;
+                            remaining = ReadOnlySpan<char>.Empty;
+                        }
+                        else
+                        {
+                            parameter = remaining.Slice(0, separatorIndex);
+                            remaining = remaining.Slice(separatorIndex + 1).Trim(' ');
+                        }
+
+                        if (!parameter.IsEmpty)
+                        {
+                            var equalsIndex = parameter.IndexOf("=");
+                            if (equalsIndex != -1)
+                            {
+                                var name = parameter.Slice(0, equalsIndex).Trim(' ');
+                                var value = parameter.Slice(equalsIndex + 1).Trim(' ').Trim('"');
+
+                                if (name.SequenceEqual(OidcConstants.TokenResponse.Error.AsSpan()))
+                                {
+                                    return value.SequenceEqual(OidcConstants.TokenErrors.UseDPoPNonce.AsSpan())
+                                        || value.SequenceEqual(OidcConstants.TokenErrors.InvalidDPoPProof.AsSpan());
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
