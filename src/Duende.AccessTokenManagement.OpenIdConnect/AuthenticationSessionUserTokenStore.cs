@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Text;
 
 namespace Duende.AccessTokenManagement.OpenIdConnect
 {
@@ -232,11 +233,27 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 result.Properties.ExpiresUtc = null;
             }
 
-            result.Properties.Items.Remove(TokenNamesKey);
-            var tokenNames = result.Properties.Items
-                .Where(item => item.Key.StartsWith(TokenPrefix))
-                .Select(item => item.Key.Substring(TokenPrefix.Length));
-            result.Properties.Items.Add(new KeyValuePair<string, string?>(TokenNamesKey, string.Join(";", tokenNames)));
+            StringBuilder? tokenNameKeyBuilder = null;
+
+            foreach (var item in result.Properties.Items)
+            {
+                if (item.Key == TokenNamesKey)
+                {
+                    continue;
+                }
+
+                if (item.Key.StartsWith(TokenPrefix, StringComparison.Ordinal))
+                {
+                    (tokenNameKeyBuilder ??= new StringBuilder())
+                        .Append(item.Key, TokenPrefix.Length, item.Key.Length - TokenPrefix.Length)
+                        .Append(';');
+                }
+            }
+
+            if (tokenNameKeyBuilder != null)
+            {
+                result.Properties.Items[TokenNamesKey] = tokenNameKeyBuilder.ToString(0, tokenNameKeyBuilder.Length - 1);
+            }
 
             await _contextAccessor.HttpContext.SignInAsync(parameters.SignInScheme, transformedPrincipal, result.Properties).ConfigureAwait(false);
 
