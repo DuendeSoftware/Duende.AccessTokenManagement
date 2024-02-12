@@ -16,19 +16,18 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <summary>
 /// Configures OpenIdConnectOptions for user token management
 /// </summary>
-public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnectOptions>
+public class PostConfigureOpenIdConnectOptions : IPostConfigureOptions<OpenIdConnectOptions>
 {
     private readonly IDPoPNonceStore _dPoPNonceStore;
     private readonly IDPoPProofService _dPoPProofService;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IOptions<UserTokenManagementOptions> _userAccessTokenManagementOptions;
     private readonly string? _configScheme;
-    private readonly string _clientName;
 
     /// <summary>
     /// ctor
     /// </summary>
-    public ConfigureOpenIdConnectOptions(
+    public PostConfigureOpenIdConnectOptions(
         IDPoPNonceStore dPoPNonceStore,
         IDPoPProofService dPoPProofService,
         IHttpContextAccessor httpContextAccessor,
@@ -39,38 +38,24 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
         _dPoPProofService = dPoPProofService;
         _httpContextAccessor = httpContextAccessor;
         _userAccessTokenManagementOptions = userAccessTokenManagementOptions;
-        
+
         _configScheme = _userAccessTokenManagementOptions.Value.ChallengeScheme;
-        if (string.IsNullOrWhiteSpace(_configScheme))
+    }
+
+    /// <inheritdoc/>
+    public void PostConfigure(string name, OpenIdConnectOptions options)
+    {
+        // if name is not equal to configured name do nothing
+        if (!string.IsNullOrWhiteSpace(_configScheme) && _configScheme != name)
         {
-            var defaultScheme = schemeProvider.GetDefaultChallengeSchemeAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-
-            if (defaultScheme is null)
-            {
-                throw new InvalidOperationException(
-                    "No OpenID Connect authentication scheme configured for getting client configuration. Either set the scheme name explicitly or set the default challenge scheme");
-            }
-
-            _configScheme = defaultScheme.Name;
+            return;
         }
-
-        _clientName = OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + _configScheme;
-    }
-
-    /// <inheritdoc/>
-    public void Configure(OpenIdConnectOptions options)
-    {
-    }
-
-    /// <inheritdoc/>
-    public void Configure(string? name, OpenIdConnectOptions options)
-    {
-        if (_configScheme == name)
+        if (!string.IsNullOrWhiteSpace(name))
         {
             // add the event handling to enable DPoP for this OIDC client
-            options.Events.OnRedirectToIdentityProvider = CreateCallback(options.Events.OnRedirectToIdentityProvider);
-            options.Events.OnAuthorizationCodeReceived = CreateCallback(options.Events.OnAuthorizationCodeReceived);
-            options.Events.OnTokenValidated = CreateCallback(options.Events.OnTokenValidated);
+            options.Events.OnRedirectToIdentityProvider = CreateCallback(options.Events.OnRedirectToIdentityProvider, name);
+            options.Events.OnAuthorizationCodeReceived = CreateCallback(options.Events.OnAuthorizationCodeReceived, name);
+            options.Events.OnTokenValidated = CreateCallback(options.Events.OnTokenValidated, name);
 
             options.BackchannelHttpHandler = new DPoPProofTokenHandler(_dPoPProofService, _dPoPNonceStore, _httpContextAccessor)
             {
@@ -79,10 +64,11 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
         }
     }
 
-    private Func<RedirectContext, Task> CreateCallback(Func<RedirectContext, Task> inner)
+    private Func<RedirectContext, Task> CreateCallback(Func<RedirectContext, Task> inner, string scheme)
     {
         async Task Callback(RedirectContext context)
         {
+            var clientName = OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + scheme;
             if (inner != null)
             {
                 await inner.Invoke(context);
@@ -90,7 +76,7 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
 
             var dPoPKeyStore = context.HttpContext.RequestServices.GetRequiredService<IDPoPKeyStore>();
 
-            var key = await dPoPKeyStore.GetKeyAsync(_clientName);
+            var key = await dPoPKeyStore.GetKeyAsync(clientName);
             if (key != null)
             {
                 var jkt = _dPoPProofService.GetProofKeyThumbprint(new DPoPProofRequest
@@ -115,7 +101,7 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
         return Callback;
     }
 
-    private Func<AuthorizationCodeReceivedContext, Task> CreateCallback(Func<AuthorizationCodeReceivedContext, Task> inner)
+    private Func<AuthorizationCodeReceivedContext, Task> CreateCallback(Func<AuthorizationCodeReceivedContext, Task> inner, string scheme)
     {
         Task Callback(AuthorizationCodeReceivedContext context)
         {
@@ -135,7 +121,7 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
         return Callback;
     }
 
-    private Func<TokenValidatedContext, Task> CreateCallback(Func<TokenValidatedContext, Task> inner)
+    private Func<TokenValidatedContext, Task> CreateCallback(Func<TokenValidatedContext, Task> inner, string scheme)
     {
         Task Callback(TokenValidatedContext context)
         {
