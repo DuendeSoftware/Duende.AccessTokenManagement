@@ -143,7 +143,7 @@ public class UserTokenEndpointService : IUserTokenEndpointService
             token.Expiration = response.ExpiresIn == 0
                 ? DateTimeOffset.MaxValue
                 : DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn);
-            token.RefreshToken = response.RefreshToken;
+            token.RefreshToken = response.RefreshToken ?? userToken.RefreshToken;
             token.Scope = response.Scope;    
         }
 
