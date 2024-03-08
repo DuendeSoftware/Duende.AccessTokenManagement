@@ -1,6 +1,7 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Duende.AccessTokenManagement.OpenIdConnect;
@@ -44,4 +45,9 @@ public class OpenIdConnectClientConfiguration
     /// The scheme name of the OIDC handler
     /// </summary>
     public string? Scheme { get; set; }
+
+    /// <summary>
+    /// Gets the list of permissions to request.
+    /// </summary>
+    public ICollection<string> Scope { get; set; } = new HashSet<string>();
 }

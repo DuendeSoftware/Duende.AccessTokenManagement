@@ -64,7 +64,8 @@ public class UserTokenEndpointService : IUserTokenEndpointService
             ClientId = oidc.ClientId!,
             ClientSecret = oidc.ClientSecret,
             ClientCredentialStyle = _options.ClientCredentialStyle,
-            
+            Scope = string.Join(" ", oidc.Scope),
+
             RefreshToken = refreshToken
         };
         
