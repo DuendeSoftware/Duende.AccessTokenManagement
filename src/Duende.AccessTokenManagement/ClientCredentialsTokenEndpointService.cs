@@ -58,7 +58,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     {
         var client = _options.Get(clientName);
 
-        if (string.IsNullOrWhiteSpace(client.TokenEndpoint) || string.IsNullOrEmpty(client.ClientId))
+        if (string.IsNullOrWhiteSpace(client.TokenEndpoint))
         {
             throw new InvalidOperationException("unknown client");
         }
