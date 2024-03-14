@@ -32,6 +32,35 @@ public class ClientTokenManagementTests
         await Should.ThrowAsync<InvalidOperationException>(action);
     }
 
+    [Fact]
+    public async Task Missing_client_id_throw_exception()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDistributedMemoryCache();
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.TokenEndpoint = "https://as/connect/token";
+                client.ClientId = null;
+                client.ClientSecret = "client_secret";
+
+                client.Scope = "scope";
+                client.Resource = "resource";
+                client.Parameters.Add("audience", "audience");
+            });
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        async Task action()
+        {
+            var token = await sut.GetAccessTokenAsync("test");
+        }
+
+        await Should.ThrowAsync<InvalidOperationException>(action, "ClientId must not be empty");
+    }
+
     [Theory]
     [InlineData(ClientCredentialStyle.AuthorizationHeader)]
     [InlineData(ClientCredentialStyle.PostBody)]
