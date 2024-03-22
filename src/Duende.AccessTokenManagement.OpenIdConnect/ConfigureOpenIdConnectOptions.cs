@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Net.Http;
@@ -22,6 +23,9 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
     private readonly IDPoPProofService _dPoPProofService;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IOptions<UserTokenManagementOptions> _userAccessTokenManagementOptions;
+
+    private readonly ILoggerFactory _loggerFactory;
+
     private readonly string? _configScheme;
     private readonly string _clientName;
 
@@ -33,13 +37,14 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
         IDPoPProofService dPoPProofService,
         IHttpContextAccessor httpContextAccessor,
         IOptions<UserTokenManagementOptions> userAccessTokenManagementOptions,
-        IAuthenticationSchemeProvider schemeProvider)
+        IAuthenticationSchemeProvider schemeProvider,
+        ILoggerFactory loggerFactory)
     {
         _dPoPNonceStore = dPoPNonceStore;
         _dPoPProofService = dPoPProofService;
         _httpContextAccessor = httpContextAccessor;
         _userAccessTokenManagementOptions = userAccessTokenManagementOptions;
-        
+
         _configScheme = _userAccessTokenManagementOptions.Value.ChallengeScheme;
         if (string.IsNullOrWhiteSpace(_configScheme))
         {
@@ -55,6 +60,7 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
         }
 
         _clientName = OpenIdConnectTokenManagementDefaults.ClientCredentialsClientNamePrefix + _configScheme;
+        _loggerFactory = loggerFactory;
     }
 
     /// <inheritdoc/>
@@ -72,7 +78,9 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
             options.Events.OnAuthorizationCodeReceived = CreateCallback(options.Events.OnAuthorizationCodeReceived);
             options.Events.OnTokenValidated = CreateCallback(options.Events.OnTokenValidated);
 
-            options.BackchannelHttpHandler = new DPoPProofTokenHandler(_dPoPProofService, _dPoPNonceStore, _httpContextAccessor)
+            var logger = _loggerFactory.CreateLogger<DPoPProofTokenHandler>();
+
+            options.BackchannelHttpHandler = new DPoPProofTokenHandler(_dPoPProofService, _dPoPNonceStore, _httpContextAccessor, logger)
             {
                 InnerHandler = options.BackchannelHttpHandler ?? new HttpClientHandler()
             };

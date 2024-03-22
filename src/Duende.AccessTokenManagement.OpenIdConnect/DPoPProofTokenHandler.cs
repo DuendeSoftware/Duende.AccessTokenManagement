@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,28 +11,26 @@ using System.Threading.Tasks;
 namespace Duende.AccessTokenManagement.OpenIdConnect;
 
 /// <summary>
-/// Delegating handler that injects the DPoP proof token from the OIDC handler workflow
+/// Delegating handler that injects the DPoP proof token. This is intended to be
+/// used on the OIDC authentication handler's backchannel http client.
 /// </summary>
-class DPoPProofTokenHandler : DelegatingHandler
+public class DPoPProofTokenHandler : DelegatingHandler
 {
     private readonly IDPoPProofService _dPoPProofService;
     private readonly IDPoPNonceStore _dPoPNonceStore;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<DPoPProofTokenHandler> _logger;
 
-    /// <summary>
-    /// ctor
-    /// </summary>
-    /// <param name="dPoPProofService"></param>
-    /// <param name="dPoPNonceStore"></param>
-    /// <param name="httpContextAccessor"></param>
-    public DPoPProofTokenHandler(
+    internal DPoPProofTokenHandler(
         IDPoPProofService dPoPProofService,
         IDPoPNonceStore dPoPNonceStore,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        ILogger<DPoPProofTokenHandler> logger)
     {
         _dPoPProofService = dPoPProofService;
         _dPoPNonceStore = dPoPNonceStore;
         _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
     }
 
     /// <inheritdoc/>
@@ -40,23 +39,33 @@ class DPoPProofTokenHandler : DelegatingHandler
         await SetDPoPProofTokenAsync(request, cancellationToken).ConfigureAwait(false);
         var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
+        // The authorization server might send us a new nonce in a successful
+        // request, indicating that we should use the new nonce in future.
         var dPoPNonce = response.GetDPoPNonce();
 
-        // retry if 401
-        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized && response.IsDPoPError())
+        if (dPoPNonce != null)
         {
-            response.Dispose();
+            _logger.LogDebug("The authorization server has supplied a new nonce");
 
-            await SetDPoPProofTokenAsync(request, cancellationToken, dPoPNonce).ConfigureAwait(false);
-            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        }
-        else if (dPoPNonce != null)
-        {
             await _dPoPNonceStore.StoreNonceAsync(new DPoPNonceContext
             {
                 Url = request.GetDPoPUrl(),
                 Method = request.Method.ToString(),
             }, dPoPNonce);
+
+            // But the authorization server might also send a failure response, and expect us to retry 
+            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+
+                // REVIEW: Is it good enough to check the status code and
+                // existence of the new nonce? Should we parse the response, and
+                // look for the "use_dpop_nonce" value in the error property?
+
+                _logger.LogDebug("Request failed (bad request). Retrying request with new DPoP proof token that includes the new nonce");
+                response.Dispose();
+                await SetDPoPProofTokenAsync(request, cancellationToken, dPoPNonce).ConfigureAwait(false);
+                return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            }
         }
 
         return response;
@@ -85,7 +94,14 @@ class DPoPProofTokenHandler : DelegatingHandler
 
             if (proofToken != null)
             {
+                _logger.LogDebug("Sending DPoP proof token in request to endpoint: {url}", 
+                    request.RequestUri?.GetLeftPart(System.UriPartial.Path));
                 request.SetDPoPProofToken(proofToken.ProofToken);
+            }
+            else
+            {
+                _logger.LogDebug("No DPoP proof token in request to endpoint: {url}", 
+                    request.RequestUri?.GetLeftPart(System.UriPartial.Path));
             }
         }
     }
