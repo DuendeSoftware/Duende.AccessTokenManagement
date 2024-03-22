@@ -43,7 +43,7 @@ public static class DPoPExtensions
     }
 
     /// <summary>
-    /// Reads the WWW-Authenticate response header to determine if the respone is in error due to DPoP
+    /// Reads the WWW-Authenticate response header to determine if the response is in error due to DPoP
     /// </summary>
     public static bool IsDPoPError(this HttpResponseMessage response)
     {
