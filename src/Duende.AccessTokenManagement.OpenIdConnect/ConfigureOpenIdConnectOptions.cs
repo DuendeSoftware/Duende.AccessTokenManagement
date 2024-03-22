@@ -78,9 +78,7 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
             options.Events.OnAuthorizationCodeReceived = CreateCallback(options.Events.OnAuthorizationCodeReceived);
             options.Events.OnTokenValidated = CreateCallback(options.Events.OnTokenValidated);
 
-            var logger = _loggerFactory.CreateLogger<DPoPProofTokenHandler>();
-
-            options.BackchannelHttpHandler = new DPoPProofTokenHandler(_dPoPProofService, _dPoPNonceStore, _httpContextAccessor, logger)
+            options.BackchannelHttpHandler = new AuthorizationServerDPoPHandler(_dPoPProofService, _dPoPNonceStore, _httpContextAccessor, _loggerFactory)
             {
                 InnerHandler = options.BackchannelHttpHandler ?? new HttpClientHandler()
             };
