@@ -109,7 +109,10 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
                 // checking for null allows for opt-out from using DPoP
                 if (jkt != null)
                 {
-                    // we store the proof key here to associate it with the access token returned
+                    // we store the proof key here to associate it with the
+                    // authorization code that will be returned. Ultimately we
+                    // use this to provide proof of possession during code
+                    // exchange.
                     context.Properties.SetProofKey(key.JsonWebKey);
 
                     // pass jkt to authorize endpoint
@@ -132,7 +135,7 @@ public class ConfigureOpenIdConnectOptions : IConfigureNamedOptions<OpenIdConnec
             if (jwk != null)
             {
                 // set it so the OIDC message handler can find it
-                context.HttpContext.SetOutboundProofKey(jwk);
+                context.HttpContext.SetCodeExchangeDPoPKey(jwk);
             }
 
             return result;

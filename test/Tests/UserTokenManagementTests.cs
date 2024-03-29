@@ -216,7 +216,7 @@ public class UserTokenManagementTests : IntegrationTestBase
             .WithFormData("refresh_token", "initial_refresh_token")
             .Respond("application/json", JsonSerializer.Serialize(refreshTokenResponse));
         
-        // short token lifetime should trigger refresh on 2st use
+        // short token lifetime should trigger refresh on 2nd use
         var refreshTokenResponse2 = new
         {
             access_token = "refreshed2_access_token",
