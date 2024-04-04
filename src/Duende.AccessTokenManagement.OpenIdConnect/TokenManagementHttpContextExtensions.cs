@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Authentication;
 
@@ -105,11 +106,11 @@ public static class TokenManagementHttpContextExtensions
     }
 
     const string HttpContextDPoPKey = "dpop_proof_key";
-    internal static void SetOutboundProofKey(this HttpContext context, string key)
+    internal static void SetCodeExchangeDPoPKey(this HttpContext context, string key)
     {
         context.Items[HttpContextDPoPKey] = key;
     }
-    internal static string? GetOutboundProofKey(this HttpContext context)
+    internal static string? GetCodeExchangeDPoPKey(this HttpContext context)
     {
         if (context.Items.ContainsKey(HttpContextDPoPKey))
         {
