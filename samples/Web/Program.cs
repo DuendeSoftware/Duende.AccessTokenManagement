@@ -14,6 +14,8 @@ Log.Logger = new LoggerConfiguration()
 
 Log.Information("Host.Main Starting up");
 
+Console.Title = "Web (Sample)";
+
 try
 {
     var builder = WebApplication.CreateBuilder(args);

@@ -115,6 +115,8 @@ public class UserTokenEndpointService : IUserTokenEndpointService
             dPoPJsonWebKey != null && 
             response.DPoPNonce != null)
         {
+            _logger.LogDebug("DPoP error during token refresh. Retrying with server nonce");
+
             var proof = await _dPoPProofService.CreateProofTokenAsync(new DPoPProofRequest
             {
                 Url = request.Address!,
