@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Authentication;
 
