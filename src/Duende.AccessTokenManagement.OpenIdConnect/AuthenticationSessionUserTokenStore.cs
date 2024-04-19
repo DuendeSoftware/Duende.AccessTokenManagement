@@ -89,11 +89,12 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
             var tokenName = NamePrefixAndResourceSuffix(OpenIdConnectParameterNames.AccessToken, parameters);
             var tokenTypeName = NamePrefixAndResourceSuffix(OpenIdConnectParameterNames.TokenType, parameters);
-            var dpopKeyName = NamePrefixAndResourceSuffix(DPoPKeyName, parameters);
             var expiresName = NamePrefixAndResourceSuffix("expires_at", parameters);
             
-            // Note that we are not including the the resource suffix because there is no per-resource refresh token
+            // Note that we are not including the the resource suffix because
+            // there is no per-resource refresh token or dpop key
             var refreshTokenName = NamePrefix(OpenIdConnectParameterNames.RefreshToken);
+            var dpopKeyName = NamePrefix(DPoPKeyName);
 
             var appendChallengeScheme = AppendChallengeSchemeToTokenNames(parameters);
 
@@ -189,12 +190,12 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
             var tokenName = NamePrefixAndResourceSuffix(OpenIdConnectParameterNames.AccessToken, parameters);
             var tokenTypeName = NamePrefixAndResourceSuffix(OpenIdConnectParameterNames.TokenType, parameters);
-            var dpopKeyName = NamePrefixAndResourceSuffix(DPoPKeyName, parameters);
             var expiresName = NamePrefixAndResourceSuffix("expires_at", parameters);
             
             // Note that we are not including the resource suffix because there
-            // is no per-resource refresh token
+            // is no per-resource refresh token or dpop key
             var refreshTokenName = NamePrefix(OpenIdConnectParameterNames.RefreshToken);
+            var dpopKeyName = NamePrefix(DPoPKeyName);
             
             if (AppendChallengeSchemeToTokenNames(parameters))
             {
