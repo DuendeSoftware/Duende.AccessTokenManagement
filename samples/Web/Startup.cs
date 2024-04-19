@@ -4,7 +4,6 @@
 using System;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -19,8 +18,8 @@ public static class Startup
 {
     public const bool UseDPoP = true;
 
-    public const string BaseUrl = "https://localhost:5001";
-    //public const string BaseUrl = "https://demo.duendesoftware.com";
+    // public const string BaseUrl = "https://localhost:5001";
+    public const string BaseUrl = "https://demo.duendesoftware.com";
 
     public const string ApiBaseUrl = UseDPoP ? 
         $"{BaseUrl}/api/dpop/" :

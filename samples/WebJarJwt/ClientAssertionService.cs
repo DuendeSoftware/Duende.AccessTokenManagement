@@ -17,7 +17,6 @@ namespace WebJarJwt;
 
 public class ClientAssertionService : IClientAssertionService
 {
-    private readonly IOptionsSnapshot<ClientCredentialsClient> _options;
     private readonly IOpenIdConnectConfigurationService _configurationService;
 
     private static string RsaKey =
@@ -39,10 +38,8 @@ public class ClientAssertionService : IClientAssertionService
     private static SigningCredentials Credential = new(new JsonWebKey(RsaKey), "RS256");
 
     public ClientAssertionService(
-        IOptionsSnapshot<ClientCredentialsClient> options,
         IOpenIdConnectConfigurationService configurationService)
     {
-        _options = options;
         _configurationService = configurationService;
     }
 
