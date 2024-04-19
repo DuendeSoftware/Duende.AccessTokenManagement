@@ -15,7 +15,7 @@ namespace WorkerService;
 
 public class ClientAssertionService : IClientAssertionService
 {
-    private readonly IOptionsSnapshot<ClientCredentialsClient> _options;
+    private readonly IOptionsMonitor<ClientCredentialsClient> _options;
 
     private static string RsaKey =
         """
@@ -35,7 +35,7 @@ public class ClientAssertionService : IClientAssertionService
 
     private static SigningCredentials Credential = new (new JsonWebKey(RsaKey), "RS256");
 
-    public ClientAssertionService(IOptionsSnapshot<ClientCredentialsClient> options)
+    public ClientAssertionService(IOptionsMonitor<ClientCredentialsClient> options)
     {
         _options = options;
     }
