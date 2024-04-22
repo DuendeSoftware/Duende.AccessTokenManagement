@@ -4,7 +4,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Duende.AccessTokenManagement.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,11 +16,14 @@ namespace Web;
 
 public static class Startup
 {
-    public const bool UseDPoP = false;
+    public const bool UseDPoP = true;
+
+    // public const string BaseUrl = "https://localhost:5001";
+    public const string BaseUrl = "https://demo.duendesoftware.com";
 
     public const string ApiBaseUrl = UseDPoP ? 
-        "https://demo.duendesoftware.com/api/dpop/" :
-        "https://demo.duendesoftware.com/api/";
+        $"{BaseUrl}/api/dpop/" :
+        $"{BaseUrl}/api/";
 
     internal static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
@@ -39,8 +42,7 @@ public static class Startup
             })
             .AddOpenIdConnect("oidc", options =>
             {
-                options.Authority = "https://demo.duendesoftware.com";
-                //options.Authority = "https://localhost:5001";
+                options.Authority = BaseUrl;
 
                 options.ClientId = "interactive.confidential.short";
                 options.ClientSecret = "secret";
@@ -56,6 +58,8 @@ public static class Startup
                 options.Scope.Add("api");
                 options.Scope.Add("resource1.scope1");
 
+                options.Resource = "urn:resource1";
+
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.SaveTokens = true;
                 options.MapInboundClaims = false;
@@ -64,12 +68,6 @@ public static class Startup
                 {
                     NameClaimType = "name",
                     RoleClaimType = "role"
-                };
-
-                options.Events.OnRedirectToIdentityProvider = ctx => 
-                {
-                    ctx.ProtocolMessage.Resource = "urn:resource1";
-                    return Task.CompletedTask;
                 };
             });
 
@@ -80,17 +78,37 @@ public static class Startup
         
         builder.Services.AddOpenIdConnectAccessTokenManagement(options => 
         {
-            options.DPoPJsonWebKey = UseDPoP ? jwk : null; ;
+            options.DPoPJsonWebKey = UseDPoP ? jwk : null;
         });
 
         // registers HTTP client that uses the managed user access token
-        builder.Services.AddUserAccessTokenHttpClient("user_client",
+        builder.Services.AddUserAccessTokenHttpClient("user",
+            configureClient: client => {
+                client.BaseAddress = new Uri(ApiBaseUrl);
+            });
+
+        // registers HTTP client that uses the managed user access token and
+        // includes a resource indicator
+        builder.Services.AddUserAccessTokenHttpClient("user-resource",
+            new UserTokenRequestParameters
+            {
+                Resource = "urn:resource1"
+            },
             configureClient: client => {
                 client.BaseAddress = new Uri(ApiBaseUrl);
             });
 
         // registers HTTP client that uses the managed client access token
         builder.Services.AddClientAccessTokenHttpClient("client",
+            configureClient: client => { client.BaseAddress = new Uri(ApiBaseUrl); });
+
+        // registers HTTP client that uses the managed client access token and
+        // includes a resource indicator
+        builder.Services.AddClientAccessTokenHttpClient("client-resource",
+            new UserTokenRequestParameters
+            {
+                Resource = "urn:resource1"
+            },
             configureClient: client => { client.BaseAddress = new Uri(ApiBaseUrl); });
 
         // registers a typed HTTP client with token management support

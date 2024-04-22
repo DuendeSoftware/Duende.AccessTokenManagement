@@ -12,8 +12,5 @@
 <a asp-controller="Home" asp-action="CallApiAsClientFactory">HTTP client factory</a> 
 @("|")
 <a asp-controller="Home" asp-action="CallApiAsClientFactoryTyped">HTTP client factory (typed)</a>
-@if (!Startup.UseDPoP)
-{
-    @("|")
-    <a asp-controller="Home" asp-action="CallApiAsClientResourceIndicator">Use resource indicator</a>
-}
+@("|")
+<a asp-controller="Home" asp-action="CallApiAsClientResourceIndicator">Use resource indicator</a>

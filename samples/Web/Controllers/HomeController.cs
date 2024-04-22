@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Duende.AccessTokenManagement.OpenIdConnect;
 using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication;
+using Duende.AccessTokenManagement.OpenIdConnect;
 
 namespace Web.Controllers;
 
@@ -33,7 +33,7 @@ public class HomeController : Controller
         var client = _httpClientFactory.CreateClient();
         client.SetToken(token.AccessTokenType!, token.AccessToken!);
 
-        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}/test");
+        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}test");
         ViewBag.Json = PrettyPrint(response);
 
         return View("CallApi");
@@ -45,7 +45,7 @@ public class HomeController : Controller
         var client = _httpClientFactory.CreateClient();
         client.SetToken(token.AccessTokenType!, token.AccessToken!);
             
-        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}/test");
+        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}test");
         ViewBag.Json = PrettyPrint(response);
 
         return View("CallApi");
@@ -53,7 +53,7 @@ public class HomeController : Controller
         
     public async Task<IActionResult> CallApiAsUserFactory()
     {
-        var client = _httpClientFactory.CreateClient("user_client");
+        var client = _httpClientFactory.CreateClient("user");
 
         var response = await client.GetStringAsync("test");
         ViewBag.Json = PrettyPrint(response);
@@ -72,11 +72,8 @@ public class HomeController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> CallApiAsUserResourceIndicator()
     {
-        var token = await HttpContext.GetUserAccessTokenAsync(new UserTokenRequestParameters { Resource = "urn:resource1" });
-        var client = _httpClientFactory.CreateClient();
-        client.SetToken(token.AccessTokenType!, token.AccessToken!);
-
-        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}/test");
+        var client = _httpClientFactory.CreateClient("user-resource");
+        var response = await client.GetStringAsync("test");
 
         ViewBag.Json = PrettyPrint(response);
         return View("CallApi");
@@ -90,7 +87,7 @@ public class HomeController : Controller
         var client = _httpClientFactory.CreateClient();
         client.SetToken(token.AccessTokenType!, token.AccessToken!);
 
-        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}/test");
+        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}test");
         
         ViewBag.Json = PrettyPrint(response);
         return View("CallApi");
@@ -99,11 +96,8 @@ public class HomeController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> CallApiAsClientResourceIndicator()
     {
-        var token = await HttpContext.GetClientAccessTokenAsync(new UserTokenRequestParameters { Resource = "urn:resource1" });
-        var client = _httpClientFactory.CreateClient();
-        client.SetToken(token.AccessTokenType!, token.AccessToken!);
-
-        var response = await client.GetStringAsync($"{Startup.ApiBaseUrl}/test");
+        var client = _httpClientFactory.CreateClient("client-resource");
+        var response = await client.GetStringAsync("test");
 
         ViewBag.Json = PrettyPrint(response);
         return View("CallApi");

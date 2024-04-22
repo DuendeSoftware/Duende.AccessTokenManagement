@@ -14,21 +14,18 @@ Log.Logger = new LoggerConfiguration()
 
 Log.Information("Host.Main Starting up");
 
+Console.Title = "WebJarJwt (Sample)";
+
 try
 {
     var builder = WebApplication.CreateBuilder(args);
 
     builder.Host.UseSerilog((ctx, lc) => lc
         .WriteTo.Console(
-            outputTemplate:
-            "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
+            outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
             theme: AnsiConsoleTheme.Code)
-        .MinimumLevel.Debug()
+        .MinimumLevel.Information()
         .MinimumLevel.Override("Duende", LogEventLevel.Verbose)
-        .MinimumLevel.Override("System", LogEventLevel.Error)
-        .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-        .MinimumLevel.Override("System.Net.Http", LogEventLevel.Information)
-        .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Information)
         .Enrich.FromLogContext());
 
     var app = builder

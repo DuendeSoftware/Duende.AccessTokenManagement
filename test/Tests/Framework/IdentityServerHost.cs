@@ -49,6 +49,10 @@ public class IdentityServerHost : GenericHost
         services.AddIdentityServer(options=> 
             {
                 options.EmitStaticAudienceClaim = true;
+                
+                // Artificially low durations to force retries
+                options.DPoP.ServerClockSkew = TimeSpan.Zero;
+                options.DPoP.ProofTokenValidityDuration = TimeSpan.FromSeconds(1);
             })
             .AddInMemoryClients(Clients)
             .AddInMemoryIdentityResources(IdentityResources)
