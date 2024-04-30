@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +12,8 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// </summary>
 public class OpenIdConnectUserAccessTokenHandler : AccessTokenHandler
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IPrincipalAccessor _userAccessor;
+    private readonly IUserTokenManagementService _userTokenManagement;
     private readonly UserTokenRequestParameters _parameters;
 
     /// <summary>
@@ -22,18 +21,21 @@ public class OpenIdConnectUserAccessTokenHandler : AccessTokenHandler
     /// </summary>
     /// <param name="dPoPProofService"></param>
     /// <param name="dPoPNonceStore"></param>
-    /// <param name="httpContextAccessor"></param>
+    /// <param name="userAccessor"></param>
+    /// <param name="userTokenManagement"></param>
     /// <param name="logger"></param>
     /// <param name="parameters"></param>
     public OpenIdConnectUserAccessTokenHandler(
         IDPoPProofService dPoPProofService,
         IDPoPNonceStore dPoPNonceStore,
-        IHttpContextAccessor httpContextAccessor,
+        IPrincipalAccessor userAccessor,
+        IUserTokenManagementService userTokenManagement,
         ILogger<OpenIdConnectClientAccessTokenHandler> logger,
         UserTokenRequestParameters? parameters = null)
         : base(dPoPProofService, dPoPNonceStore, logger)
     {
-        _httpContextAccessor = httpContextAccessor;
+        _userAccessor = userAccessor;
+        _userTokenManagement = userTokenManagement;
         _parameters = parameters ?? new UserTokenRequestParameters();
     }
 
@@ -49,6 +51,8 @@ public class OpenIdConnectUserAccessTokenHandler : AccessTokenHandler
             ForceRenewal = forceRenewal,
         };
 
-        return await _httpContextAccessor.HttpContext!.GetUserAccessTokenAsync(parameters).ConfigureAwait(false);
+        var user = await _userAccessor.GetCurrentUserAsync();
+
+        return await _userTokenManagement.GetAccessTokenAsync(user, parameters, cancellationToken).ConfigureAwait(false);
     }
 }

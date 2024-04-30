@@ -5,7 +5,6 @@ using System;
 using System.Net.Http;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -35,12 +34,29 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
 
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
         services.TryAddTransient<IOpenIdConnectConfigurationService, OpenIdConnectConfigurationService>();
-        // scoped since it will be caching per-request authentication results
-        services.TryAddScoped<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
         services.TryAddSingleton<IUserTokenRequestSynchronization, UserTokenRequestSynchronization>();
         services.TryAddTransient<IUserTokenEndpointService, UserTokenEndpointService>();
 
         services.ConfigureOptions<ConfigureOpenIdConnectOptions>();
+
+        // By default, we assume that we are in a traditional web application
+        // where we can use the http context. The services below depend on http
+        // context, and we register different ones in blazor
+        
+        services.TryAddScoped<IPrincipalAccessor, HttpContextPrincipalAccessor>();
+        // scoped since it will be caching per-request authentication results
+        services.TryAddScoped<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddBlazorServerAccessTokenManagement<T>(this IServiceCollection services)
+        where T : class, IUserTokenStore
+    {
+        services.AddSingleton<IUserTokenStore, T>();
+        services.AddScoped<IPrincipalAccessor, BlazorServerPrincipalAccessor>();
+        services.AddCircuitServicesAccessor();
+        services.AddHttpContextAccessor(); // For SSR
 
         return services;
     }
@@ -143,10 +159,12 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         {
             var dpopService = provider.GetRequiredService<IDPoPProofService>();
             var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
-            var contextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+            var userTokenManagement = provider.GetRequiredService<IUserTokenManagementService>();
             var logger = provider.GetRequiredService<ILogger<OpenIdConnectClientAccessTokenHandler>>();
+            var principalAccessor = provider.GetRequiredService<IPrincipalAccessor>();
             
-            return new OpenIdConnectUserAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, logger, parameters);
+            return new OpenIdConnectUserAccessTokenHandler(
+                dpopService, dpopNonceStore, principalAccessor, userTokenManagement, logger, parameters);
         });
     }
     
