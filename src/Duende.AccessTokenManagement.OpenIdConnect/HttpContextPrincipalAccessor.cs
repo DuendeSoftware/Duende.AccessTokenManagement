@@ -10,14 +10,14 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <summary>
 /// Accesses the current principal based on the HttpContext.User.
 /// </summary>
-public class HttpContextPrincipalAccessor : IPrincipalAccessor
+public class HttpContextUserAccessor : IUserAccessor
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
     /// ctor
     /// </summary>
-    public HttpContextPrincipalAccessor(IHttpContextAccessor httpContextAccessor)
+    public HttpContextUserAccessor(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
     }

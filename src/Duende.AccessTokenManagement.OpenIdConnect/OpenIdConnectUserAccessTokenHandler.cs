@@ -12,7 +12,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// </summary>
 public class OpenIdConnectUserAccessTokenHandler : AccessTokenHandler
 {
-    private readonly IPrincipalAccessor _userAccessor;
+    private readonly IUserAccessor _userAccessor;
     private readonly IUserTokenManagementService _userTokenManagement;
     private readonly UserTokenRequestParameters _parameters;
 
@@ -28,7 +28,7 @@ public class OpenIdConnectUserAccessTokenHandler : AccessTokenHandler
     public OpenIdConnectUserAccessTokenHandler(
         IDPoPProofService dPoPProofService,
         IDPoPNonceStore dPoPNonceStore,
-        IPrincipalAccessor userAccessor,
+        IUserAccessor userAccessor,
         IUserTokenManagementService userTokenManagement,
         ILogger<OpenIdConnectClientAccessTokenHandler> logger,
         UserTokenRequestParameters? parameters = null)

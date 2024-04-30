@@ -9,7 +9,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <summary>
 /// Service that retrieves the current principal.
 /// </summary>
-public interface IPrincipalAccessor
+public interface IUserAccessor
 {
     /// <summary>
     /// Gets the current user.

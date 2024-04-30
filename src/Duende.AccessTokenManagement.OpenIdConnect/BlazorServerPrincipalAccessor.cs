@@ -16,14 +16,14 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <remarks>
 /// ctor
 /// </remarks>
-public class BlazorServerPrincipalAccessor(
+public class BlazorServerUserAccessor(
     // We use the CircuitServicesAccessor to resolve the
     // AuthenticationStateProvider, rather than injecting it. Injecting the
     // state provider directly doesn't work here, because this service might be
     // called in a non-blazor DI scope.
     CircuitServicesAccessor circuitServicesAccessor, 
     IHttpContextAccessor? httpContextAccessor,
-    ILogger<BlazorServerPrincipalAccessor> logger) : IPrincipalAccessor
+    ILogger<BlazorServerUserAccessor> logger) : IUserAccessor
 {
 
     /// <inheritdoc/>

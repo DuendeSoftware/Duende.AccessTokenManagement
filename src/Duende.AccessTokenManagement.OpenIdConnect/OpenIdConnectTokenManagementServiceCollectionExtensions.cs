@@ -43,7 +43,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         // where we can use the http context. The services below depend on http
         // context, and we register different ones in blazor
         
-        services.TryAddScoped<IPrincipalAccessor, HttpContextPrincipalAccessor>();
+        services.TryAddScoped<IUserAccessor, HttpContextUserAccessor>();
         // scoped since it will be caching per-request authentication results
         services.TryAddScoped<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
 
@@ -54,7 +54,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         where T : class, IUserTokenStore
     {
         services.AddSingleton<IUserTokenStore, T>();
-        services.AddScoped<IPrincipalAccessor, BlazorServerPrincipalAccessor>();
+        services.AddScoped<IUserAccessor, BlazorServerUserAccessor>();
         services.AddCircuitServicesAccessor();
         services.AddHttpContextAccessor(); // For SSR
 
@@ -161,7 +161,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
             var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
             var userTokenManagement = provider.GetRequiredService<IUserTokenManagementService>();
             var logger = provider.GetRequiredService<ILogger<OpenIdConnectClientAccessTokenHandler>>();
-            var principalAccessor = provider.GetRequiredService<IPrincipalAccessor>();
+            var principalAccessor = provider.GetRequiredService<IUserAccessor>();
             
             return new OpenIdConnectUserAccessTokenHandler(
                 dpopService, dpopNonceStore, principalAccessor, userTokenManagement, logger, parameters);
