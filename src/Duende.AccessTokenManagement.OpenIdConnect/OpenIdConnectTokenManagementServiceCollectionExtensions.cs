@@ -50,10 +50,18 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddBlazorServerAccessTokenManagement<T>(this IServiceCollection services)
-        where T : class, IUserTokenStore
+    /// <summary>
+    /// Adds implementations of services that enable access token management in
+    /// Blazor Server.
+    /// </summary>
+    /// <typeparam name="TTokenStore">An IUserTokenStore implementation. Blazor
+    /// Server requires an IUserTokenStore because the default token store
+    /// relies on cookies, which are not present when streaming updates over a
+    /// blazor circuit. </typeparam>
+    public static IServiceCollection AddBlazorServerAccessTokenManagement<TTokenStore>(this IServiceCollection services)
+        where TTokenStore : class, IUserTokenStore
     {
-        services.AddSingleton<IUserTokenStore, T>();
+        services.AddSingleton<IUserTokenStore, TTokenStore>();
         services.AddScoped<IUserAccessor, BlazorServerUserAccessor>();
         services.AddCircuitServicesAccessor();
         services.AddHttpContextAccessor(); // For SSR
