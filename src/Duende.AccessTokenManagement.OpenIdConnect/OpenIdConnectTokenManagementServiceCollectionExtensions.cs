@@ -40,6 +40,8 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         services.TryAddSingleton<IUserTokenRequestSynchronization, UserTokenRequestSynchronization>();
         services.TryAddTransient<IUserTokenEndpointService, UserTokenEndpointService>();
 
+        services.TryAddSingleton<IStoreTokensInAuthenticationProperties, StoreTokensInAuthenticationProperties>();
+
         services.ConfigureOptions<ConfigureOpenIdConnectOptions>();
 
         return services;
