@@ -5,7 +5,6 @@ using System;
 using System.Net.Http;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -35,12 +34,37 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
 
         services.TryAddTransient<IUserTokenManagementService, UserAccessAccessTokenManagementService>();
         services.TryAddTransient<IOpenIdConnectConfigurationService, OpenIdConnectConfigurationService>();
-        // scoped since it will be caching per-request authentication results
-        services.TryAddScoped<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
         services.TryAddSingleton<IUserTokenRequestSynchronization, UserTokenRequestSynchronization>();
         services.TryAddTransient<IUserTokenEndpointService, UserTokenEndpointService>();
 
         services.ConfigureOptions<ConfigureOpenIdConnectOptions>();
+
+        // By default, we assume that we are in a traditional web application
+        // where we can use the http context. The services below depend on http
+        // context, and we register different ones in blazor
+        
+        services.TryAddScoped<IUserAccessor, HttpContextUserAccessor>();
+        // scoped since it will be caching per-request authentication results
+        services.TryAddScoped<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Adds implementations of services that enable access token management in
+    /// Blazor Server.
+    /// </summary>
+    /// <typeparam name="TTokenStore">An IUserTokenStore implementation. Blazor
+    /// Server requires an IUserTokenStore because the default token store
+    /// relies on cookies, which are not present when streaming updates over a
+    /// blazor circuit. </typeparam>
+    public static IServiceCollection AddBlazorServerAccessTokenManagement<TTokenStore>(this IServiceCollection services)
+        where TTokenStore : class, IUserTokenStore
+    {
+        services.AddSingleton<IUserTokenStore, TTokenStore>();
+        services.AddScoped<IUserAccessor, BlazorServerUserAccessor>();
+        services.AddCircuitServicesAccessor();
+        services.AddHttpContextAccessor(); // For SSR
 
         return services;
     }
@@ -143,10 +167,12 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         {
             var dpopService = provider.GetRequiredService<IDPoPProofService>();
             var dpopNonceStore = provider.GetRequiredService<IDPoPNonceStore>();
-            var contextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+            var userTokenManagement = provider.GetRequiredService<IUserTokenManagementService>();
             var logger = provider.GetRequiredService<ILogger<OpenIdConnectClientAccessTokenHandler>>();
+            var principalAccessor = provider.GetRequiredService<IUserAccessor>();
             
-            return new OpenIdConnectUserAccessTokenHandler(dpopService, dpopNonceStore, contextAccessor, logger, parameters);
+            return new OpenIdConnectUserAccessTokenHandler(
+                dpopService, dpopNonceStore, principalAccessor, userTokenManagement, logger, parameters);
         });
     }
     
