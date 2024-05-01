@@ -16,7 +16,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 
 /// <inheritdoc/>
 public class StoreTokensInAuthenticationProperties(
-    IOptions<UserTokenManagementOptions> tokenManagementOptions, // TODO - Consider option lifetime
+    IOptionsMonitor<UserTokenManagementOptions> tokenManagementOptionsMonitor,
     IAuthenticationSchemeProvider schemeProvider,
     ILogger<StoreTokensInAuthenticationProperties> logger,
     IOptionsMonitor<CookieAuthenticationOptions> cookieOptionsMonitor) : IStoreTokensInAuthenticationProperties
@@ -149,7 +149,7 @@ public class StoreTokensInAuthenticationProperties(
     /// <returns></returns>
     protected virtual bool AppendChallengeSchemeToTokenNames(UserTokenRequestParameters? parameters)
     {
-        return tokenManagementOptions.Value.UseChallengeSchemeScopedTokens && !string.IsNullOrEmpty(parameters?.ChallengeScheme);
+        return tokenManagementOptionsMonitor.CurrentValue.UseChallengeSchemeScopedTokens && !string.IsNullOrEmpty(parameters?.ChallengeScheme);
     }
 
     /// <inheritdoc/>
