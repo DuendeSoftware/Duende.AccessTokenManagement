@@ -9,7 +9,7 @@ namespace BlazorServer.Plumbing;
 
 /// <summary>
 /// Simplified implementation of a server-side token store.
-/// Probably want somehting more robust IRL
+/// Probably want something more robust IRL
 /// </summary>
 public class ServerSideTokenStore : IUserTokenStore
 {

@@ -23,9 +23,7 @@ public class TestLoggerProvider : ILoggerProvider
         }
 
         public IDisposable BeginScope<TState>(TState state)
-#if NET8_0_OR_GREATER
             where TState : notnull
-#endif
         {
             return this;
         }

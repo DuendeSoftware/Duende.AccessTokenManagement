@@ -1,6 +1,5 @@
 using BlazorServer.Plumbing;
 using BlazorServer.Services;
-using Duende.AccessTokenManagement.OpenIdConnect;
 using Serilog;
 
 namespace BlazorServer;
@@ -50,19 +49,16 @@ public static class HostingExtensions
             });
 
         // adds access token management
-        builder.Services.AddOpenIdConnectAccessTokenManagement();
+        builder.Services.AddOpenIdConnectAccessTokenManagement()
+            .AddBlazorServerAccessTokenManagement<ServerSideTokenStore>();
         
         // register events to customize authentication handlers
         builder.Services.AddTransient<CookieEvents>();
         builder.Services.AddTransient<OidcEvents>();
 
-        // not allowed to programmatically use HttpContext in Blazor Server.
-        // that's why tokens cannot be managed in the login session
-        builder.Services.AddSingleton<IUserTokenStore, ServerSideTokenStore>();
-
         // registers HTTP client that uses the managed user access token
         builder.Services.AddTransient<RemoteApiService>();
-        builder.Services.AddHttpClient<RemoteApiService>(client =>
+        builder.Services.AddUserAccessTokenHttpClient("demoApiClient", configureClient: client =>
         {
             client.BaseAddress = new Uri("https://demo.duendesoftware.com/api/");
         });
@@ -70,7 +66,7 @@ public static class HostingExtensions
         builder.Services.AddControllersWithViews();
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();
-        
+
         builder.Services.AddSingleton<WeatherForecastService>();
         
         return builder.Build();

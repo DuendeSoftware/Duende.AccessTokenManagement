@@ -39,14 +39,14 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     {
         services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
 
-        services.TryAddSingleton<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
-        services.TryAddSingleton<IClientCredentialsTokenCache, DistributedClientCredentialsTokenCache>();
-        services.TryAddSingleton<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
-        services.TryAddSingleton<IClientAssertionService, DefaultClientAssertionService>();
+        services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
+        services.TryAddTransient<IClientCredentialsTokenCache, DistributedClientCredentialsTokenCache>();
+        services.TryAddTransient<IClientCredentialsTokenEndpointService, ClientCredentialsTokenEndpointService>();
+        services.TryAddTransient<IClientAssertionService, DefaultClientAssertionService>();
 
-        services.TryAddSingleton<IDPoPProofService, DefaultDPoPProofService>();
-        services.TryAddSingleton<IDPoPKeyStore, DefaultDPoPKeyStore>();
-        services.TryAddSingleton<IDPoPNonceStore, DistributedDPoPNonceStore>();
+        services.TryAddTransient<IDPoPProofService, DefaultDPoPProofService>();
+        services.TryAddTransient<IDPoPKeyStore, DefaultDPoPKeyStore>();
+        services.TryAddTransient<IDPoPNonceStore, DistributedDPoPNonceStore>();
 
         services.AddHttpClient(ClientCredentialsTokenManagementDefaults.BackChannelHttpClientName);
 
