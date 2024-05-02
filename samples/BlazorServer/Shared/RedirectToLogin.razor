@@ -1,9 +1,12 @@
 @inject NavigationManager Navigation
 
 @code {
-    protected override void OnInitialized()
+    // Using the async method prevents NavigationExceptions, even though this method is synchronous
+    #pragma warning disable CS1998 
+    protected override async Task OnInitializedAsync()
     {
         var returnUrl = Uri.EscapeDataString("/" + Navigation.ToBaseRelativePath(Navigation.Uri));
         Navigation.NavigateTo($"account/login?returnUrl={returnUrl}", forceLoad: true);
     }
+    #pragma warning restore CS1998
 }

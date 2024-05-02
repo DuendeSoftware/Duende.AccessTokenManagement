@@ -19,7 +19,7 @@ public class ClientCredentialsClientConfigureOptions : IConfigureNamedOptions<Cl
         throw new System.NotImplementedException();
     }
 
-    public void Configure(string name, ClientCredentialsClient options)
+    public void Configure(string? name, ClientCredentialsClient options)
     {
         if (name == "demo.jwt")
         {

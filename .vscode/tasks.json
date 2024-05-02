@@ -1,0 +1,77 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+          "label": "build",
+          "type": "process",
+          "command": "dotnet",
+          "args": [
+              "build",
+              "${workspaceFolder}",
+              "/property:GenerateFullPaths=true",
+              "/consoleloggerparameters:NoSummary"
+          ],
+          "problemMatcher": "$msCompile"
+        },
+        {
+          "label": "build-web",
+          "type": "process",
+          "command": "dotnet",
+          "args": [
+              "build",
+              "${workspaceFolder}/samples/Web/Web.csproj",
+              "/property:GenerateFullPaths=true",
+              "/consoleloggerparameters:NoSummary"
+          ],
+          "problemMatcher": "$msCompile"
+        },
+        {
+          "label": "build-blazorServer",
+          "type": "process",
+          "command": "dotnet",
+          "args": [
+              "build",
+              "${workspaceFolder}/samples/BlazorServer/BlazorServer.csproj",
+              "/property:GenerateFullPaths=true",
+              "/consoleloggerparameters:NoSummary"
+          ],
+          "problemMatcher": "$msCompile"
+        },
+        {
+          "label": "build-webJarJwt",
+          "type": "process",
+          "command": "dotnet",
+          "args": [
+              "build",
+              "${workspaceFolder}/samples/WebJarJwt/WebJarJwt.csproj",
+              "/property:GenerateFullPaths=true",
+              "/consoleloggerparameters:NoSummary"
+          ],
+          "problemMatcher": "$msCompile"
+        },
+        {
+          "label": "build-worker",
+          "type": "process",
+          "command": "dotnet",
+          "args": [
+              "build",
+              "${workspaceFolder}/samples/Worker/Worker.csproj",
+              "/property:GenerateFullPaths=true",
+              "/consoleloggerparameters:NoSummary"
+          ],
+          "problemMatcher": "$msCompile"
+        },
+        {
+          "label": "build-workerDI",
+          "type": "process",
+          "command": "dotnet",
+          "args": [
+              "build",
+              "${workspaceFolder}/samples/WorkerDI/WorkerDI.csproj",
+              "/property:GenerateFullPaths=true",
+              "/consoleloggerparameters:NoSummary"
+          ],
+          "problemMatcher": "$msCompile"
+        }
+    ]
+}

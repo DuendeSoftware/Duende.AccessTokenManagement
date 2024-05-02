@@ -3,12 +3,10 @@
 
 using Duende.IdentityServer.Configuration;
 using IdentityModel;
-using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 

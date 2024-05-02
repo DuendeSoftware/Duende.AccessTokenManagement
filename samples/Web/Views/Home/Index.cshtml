@@ -4,12 +4,13 @@
 
 <h3>Call API as Client</h3>
 
-<a href="./home/CallApiAsClientExtensionMethod">Extension method</a>
-|
-<a href="./home/CallApiAsClientFactory">HTTP client factory</a>
-|
-<a href="./home/CallApiAsClientFactoryTyped">HTTP client factory (typed)</a>
-|
-<a href="./home/CallApiAsClientResourceIndicator">Use resource indicator</a>
-
-
+@if (!Startup.UseDPoP)
+{
+    <a asp-controller="Home" asp-action = "CallApiAsClientExtensionMethod" > Extension method </a> 
+    @("|")
+}
+<a asp-controller="Home" asp-action="CallApiAsClientFactory">HTTP client factory</a> 
+@("|")
+<a asp-controller="Home" asp-action="CallApiAsClientFactoryTyped">HTTP client factory (typed)</a>
+@("|")
+<a asp-controller="Home" asp-action="CallApiAsClientResourceIndicator">Use resource indicator</a>

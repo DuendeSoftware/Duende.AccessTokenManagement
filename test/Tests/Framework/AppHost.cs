@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Duende Software. All rights reserved.
 // See LICENSE in the project root for license information.
 
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
+using System.Web;
+using IdentityModel;
+using Duende.AccessTokenManagement.OpenIdConnect;
 using RichardSzalay.MockHttp;
 
 namespace Duende.AccessTokenManagement.Tests;
@@ -15,18 +18,20 @@ public class AppHost : GenericHost
     private readonly IdentityServerHost _identityServerHost;
     private readonly ApiHost _apiHost;
     private readonly string _clientId;
-        
+    private readonly Action<UserTokenManagementOptions>? _configureUserTokenManagementOptions;
+
     public AppHost(
         IdentityServerHost identityServerHost, 
         ApiHost apiHost, 
         string clientId,
-        string baseAddress = "https://app")
+        string baseAddress = "https://app",
+        Action<UserTokenManagementOptions>? configureUserTokenManagementOptions = default)
         : base(baseAddress)
     {
         _identityServerHost = identityServerHost;
         _apiHost = apiHost;
         _clientId = clientId;
-
+        _configureUserTokenManagementOptions = configureUserTokenManagementOptions;
         OnConfigureServices += ConfigureServices;
         OnConfigure += Configure;
     }
@@ -92,7 +97,15 @@ public class AppHost : GenericHost
             });
 
         services.AddDistributedMemoryCache();
-        services.AddOpenIdConnectAccessTokenManagement();
+        services.AddOpenIdConnectAccessTokenManagement(opt =>
+        {
+            opt.UseChallengeSchemeScopedTokens = true;
+
+            if (_configureUserTokenManagementOptions != null)
+            {
+                _configureUserTokenManagementOptions(opt);
+            }
+        });
 
     }
 
@@ -122,6 +135,15 @@ public class AppHost : GenericHost
                 var token = await context.GetUserAccessTokenAsync();
                 await context.Response.WriteAsJsonAsync(token);
             });
+
+            endpoints.MapGet("/user_token_with_resource/{resource}", async (string resource, HttpContext context) =>
+            {
+                var token = await context.GetUserAccessTokenAsync(new UserTokenRequestParameters
+                {
+                    Resource = resource
+                });
+                await context.Response.WriteAsJsonAsync(token);
+            });
             
             endpoints.MapGet("/client_token", async context =>
             {
@@ -131,17 +153,23 @@ public class AppHost : GenericHost
         });
     }
 
-    public async Task<HttpResponseMessage> LoginAsync(string sub, string? sid = null)
+    public async Task<HttpResponseMessage> LoginAsync(string sub, string? sid = null, bool verifyDpopThumbprintSent = false)
     {
         await _identityServerHost.CreateIdentityServerSessionCookieAsync(sub, sid);
-        return await OidcLoginAsync();
+        return await OidcLoginAsync(verifyDpopThumbprintSent);
     }
 
-    public async Task<HttpResponseMessage> OidcLoginAsync()
+    public async Task<HttpResponseMessage> OidcLoginAsync(bool verifyDpopThumbprintSent)
     {
         var response = await BrowserClient.GetAsync(Url("/login"));
         response.StatusCode.ShouldBe((HttpStatusCode)302); // authorize
         response.Headers.Location!.ToString().ToLowerInvariant().ShouldStartWith(_identityServerHost.Url("/connect/authorize"));
+
+        if (verifyDpopThumbprintSent)
+        {
+            var queryParams = HttpUtility.ParseQueryString(response.Headers.Location.Query);
+            queryParams.AllKeys.ShouldContain(OidcConstants.AuthorizeRequest.DPoPKeyThumbprint);
+        }
 
         response = await _identityServerHost.BrowserClient.GetAsync(response.Headers.Location.ToString());
         response.StatusCode.ShouldBe((HttpStatusCode)302); // client callback

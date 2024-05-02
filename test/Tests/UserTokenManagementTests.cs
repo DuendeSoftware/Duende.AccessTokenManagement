@@ -216,7 +216,7 @@ public class UserTokenManagementTests : IntegrationTestBase
             .WithFormData("refresh_token", "initial_refresh_token")
             .Respond("application/json", JsonSerializer.Serialize(refreshTokenResponse));
         
-        // short token lifetime should trigger refresh on 2st use
+        // short token lifetime should trigger refresh on 2nd use
         var refreshTokenResponse2 = new
         {
             access_token = "refreshed2_access_token",
@@ -267,6 +267,86 @@ public class UserTokenManagementTests : IntegrationTestBase
         token.AccessToken.ShouldBe("refreshed2_access_token");
         token.AccessTokenType.ShouldBe("token_type2");
         token.RefreshToken.ShouldBe("refreshed2_refresh_token");
+        token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
+    }
+
+    [Fact]
+    public async Task Resources_get_distinct_tokens()
+    {
+        var mockHttp = new MockHttpMessageHandler();
+        AppHost.IdentityServerHttpHandler = mockHttp;
+        
+        // no resource specified
+        var initialTokenResponse = new
+        {
+            id_token = IdentityServerHost.CreateIdToken("1", "web"),
+            access_token = "access_token_without_resource",
+            token_type = "token_type",
+            expires_in = 3600,
+            refresh_token = "initial_refresh_token",
+        };
+        mockHttp.When("/connect/token")
+            .WithFormData("grant_type", "authorization_code")
+            .Respond("application/json", JsonSerializer.Serialize(initialTokenResponse));
+        
+        // resource 1 specified 
+        var resource1TokenResponse = new
+        {
+            access_token = "urn:api1_access_token",
+            token_type = "token_type1",
+            expires_in = 3600,
+            refresh_token = "initial_refresh_token",
+        };
+        mockHttp.When("/connect/token")
+            .WithFormData("grant_type", "refresh_token")
+            .WithFormData("resource", "urn:api1")
+            .Respond("application/json", JsonSerializer.Serialize(resource1TokenResponse));
+        
+        // resource 2 specified 
+        var resource2TokenResponse = new
+        {
+            access_token = "urn:api2_access_token",
+            token_type = "token_type1",
+            expires_in = 3600,
+            refresh_token = "initial_refresh_token",
+        };
+        mockHttp.When("/connect/token")
+            .WithFormData("grant_type", "refresh_token")
+            .WithFormData("resource", "urn:api2")
+            .Respond("application/json", JsonSerializer.Serialize(resource2TokenResponse));
+        
+        // setup host
+        await AppHost.InitializeAsync();
+        await AppHost.LoginAsync("alice");
+        
+        // first request - no resource
+        var response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token"));
+        var token = await response.Content.ReadFromJsonAsync<UserToken>();
+
+        token.ShouldNotBeNull();
+        token.IsError.ShouldBeFalse();
+        token.AccessToken.ShouldBe("access_token_without_resource");
+        token.RefreshToken.ShouldBe("initial_refresh_token");
+        token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
+        
+        // second request - with resource api1
+        response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token_with_resource/urn:api1"));
+        token = await response.Content.ReadFromJsonAsync<UserToken>();
+
+        token.ShouldNotBeNull();
+        token.IsError.ShouldBeFalse();
+        token.AccessToken.ShouldBe("urn:api1_access_token");
+        token.RefreshToken.ShouldBe("initial_refresh_token"); // This doesn't change with resources!
+        token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
+
+        // third request - with resource api2
+        response = await AppHost.BrowserClient.GetAsync(AppHost.Url("/user_token_with_resource/urn:api2"));
+        token = await response.Content.ReadFromJsonAsync<UserToken>();
+
+        token.ShouldNotBeNull();
+        token.IsError.ShouldBeFalse();
+        token.AccessToken.ShouldBe("urn:api2_access_token");
+        token.RefreshToken.ShouldBe("initial_refresh_token"); 
         token.Expiration.ShouldNotBe(DateTimeOffset.MaxValue);
     }
 }

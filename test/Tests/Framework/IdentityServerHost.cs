@@ -31,6 +31,11 @@ public class IdentityServerHost : GenericHost
     };
     
     public List<ApiScope> ApiScopes { get; set; } = new();
+    public List<ApiResource> ApiResources { get; set; } = new()
+    {
+        new ApiResource("urn:api1"),
+        new ApiResource("urn:api2")
+    };
 
     private void ConfigureServices(IServiceCollection services)
     {
@@ -44,9 +49,14 @@ public class IdentityServerHost : GenericHost
         services.AddIdentityServer(options=> 
             {
                 options.EmitStaticAudienceClaim = true;
+                
+                // Artificially low durations to force retries
+                options.DPoP.ServerClockSkew = TimeSpan.Zero;
+                options.DPoP.ProofTokenValidityDuration = TimeSpan.FromSeconds(1);
             })
             .AddInMemoryClients(Clients)
             .AddInMemoryIdentityResources(IdentityResources)
+            .AddInMemoryApiResources(ApiResources)
             .AddInMemoryApiScopes(ApiScopes);
     }
 
@@ -74,7 +84,7 @@ public class IdentityServerHost : GenericHost
 
                 var signOutContext = await interaction.GetLogoutContextAsync(logoutId);
                     
-                context.Response.Redirect(signOutContext.PostLogoutRedirectUri);
+                context.Response.Redirect(signOutContext.PostLogoutRedirectUri ?? "/");
             });
         });
     }

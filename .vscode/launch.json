@@ -1,0 +1,74 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "BlazorServer",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-blazorServer",
+            "program": "${workspaceFolder}/samples/BlazorServer/bin/Debug/net8.0/BlazorServer.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/BlazorServer",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "console": "externalTerminal"
+          },
+          {
+            "name": "Web",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-web",
+            "program": "${workspaceFolder}/samples/Web/bin/Debug/net8.0/Web.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/Web",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "console": "externalTerminal"
+        },
+        {
+            "name": "WebJarJwt",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-webJarJwt",
+            "program": "${workspaceFolder}/samples/WebJarJwt/bin/Debug/net8.0/WebJarJwt.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/WebJarJwt",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "console": "externalTerminal"
+        },
+        {
+            "name": "Worker",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-worker",
+            "program": "${workspaceFolder}/samples/Worker/bin/Debug/net8.0/Worker.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/Worker",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "console": "externalTerminal"
+        },
+        {
+            "name": "WorkerDI",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-workerDI",
+            "program": "${workspaceFolder}/samples/WorkerDI/bin/Debug/net8.0/WorkerDI.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/WorkerDI",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "console": "externalTerminal"
+        }
+
+    ]
+}

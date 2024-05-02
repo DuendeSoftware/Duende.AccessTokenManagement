@@ -19,7 +19,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
 {
     private readonly IUserTokenRequestSynchronization _sync;
     private readonly IUserTokenStore _userAccessTokenStore;
-    private readonly ISystemClock _clock;
+    private readonly TimeProvider _clock;
     private readonly UserTokenManagementOptions _options;
     private readonly IUserTokenEndpointService _tokenEndpointService;
     private readonly ILogger<UserAccessAccessTokenManagementService> _logger;
@@ -36,7 +36,7 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
     public UserAccessAccessTokenManagementService(
         IUserTokenRequestSynchronization sync,
         IUserTokenStore userAccessTokenStore,
-        ISystemClock clock,
+        TimeProvider clock,
         IOptions<UserTokenManagementOptions> options,
         IUserTokenEndpointService tokenEndpointService,
         ILogger<UserAccessAccessTokenManagementService> logger)
@@ -92,7 +92,8 @@ public class UserAccessAccessTokenManagementService : IUserTokenManagementServic
         }
 
         var dtRefresh = userToken.Expiration.Subtract(_options.RefreshBeforeExpiration);
-        if (dtRefresh < _clock.UtcNow || parameters.ForceRenewal || needsRenewal)
+        var utcNow = _clock.GetUtcNow();
+        if (dtRefresh < utcNow || parameters.ForceRenewal || needsRenewal)
         {
             _logger.LogDebug("Token for user {user} needs refreshing.", userName);
 
