@@ -18,7 +18,6 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
     {
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IStoreTokensInAuthenticationProperties _tokensInProps;
-        private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly ILogger<AuthenticationSessionUserAccessTokenStore> _logger;
 
         // per-request cache so that if SignInAsync is used, we won't re-read the old/cached AuthenticateResult from the handler
@@ -35,13 +34,11 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         public AuthenticationSessionUserAccessTokenStore(
             IHttpContextAccessor contextAccessor,
             IStoreTokensInAuthenticationProperties tokensInProps,
-            IAuthenticationSchemeProvider schemeProvider,
             ILogger<AuthenticationSessionUserAccessTokenStore> logger)
         {
             _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
             _logger = logger;
             _tokensInProps = tokensInProps;
-            _schemeProvider = schemeProvider;
         }
 
         /// <inheritdoc/>

@@ -17,9 +17,10 @@ namespace Duende.AccessTokenManagement.OpenIdConnect;
 /// <inheritdoc/>
 public class StoreTokensInAuthenticationProperties(
     IOptionsMonitor<UserTokenManagementOptions> tokenManagementOptionsMonitor,
+    IOptionsMonitor<CookieAuthenticationOptions> cookieOptionsMonitor,
     IAuthenticationSchemeProvider schemeProvider,
-    ILogger<StoreTokensInAuthenticationProperties> logger,
-    IOptionsMonitor<CookieAuthenticationOptions> cookieOptionsMonitor) : IStoreTokensInAuthenticationProperties
+    ILogger<StoreTokensInAuthenticationProperties> logger
+) : IStoreTokensInAuthenticationProperties
 {
     private const string TokenPrefix = ".Token.";
     private const string TokenNamesKey = ".TokenNames";
@@ -166,9 +167,34 @@ public class StoreTokensInAuthenticationProperties(
         var names = GetTokenNamesWithScheme(parameters);
         authenticationProperties.Items.Remove(names.Token);
         authenticationProperties.Items.Remove(names.TokenType);
-        authenticationProperties.Items.Remove(names.DPoPKey);
         authenticationProperties.Items.Remove(names.Expires);
-        authenticationProperties.Items.Remove(names.RefreshToken);
+
+        // The DPoP key and refresh token are shared with all resources, so we
+        // can only delete them if no other tokens with a different resource
+        // exist. The key and refresh token are shared for all resources within
+        // a challenge scheme if we are using a challenge scheme.
+
+        var keys = authenticationProperties.Items.Keys.Where(k =>
+            k.StartsWith(NamePrefix(OpenIdConnectParameterNames.AccessToken)));
+
+        var usingChallengeSuffix = AppendChallengeSchemeToTokenNames(parameters);
+        if (usingChallengeSuffix)
+        {
+            var challengeScheme = parameters?.ChallengeScheme ?? throw new InvalidOperationException("Attempt to use challenge scheme in token names, but no challenge scheme specified in UserTokenRequestParameters");
+            var challengeSuffix = $"||{challengeScheme}";
+            keys = keys.Where(k => k.EndsWith(challengeSuffix));
+        }
+
+        // If we see a resource separator now, we know there are other resources
+        // using the refresh token and/or dpop key and so we shouldn't delete
+        // them
+        var otherResourcesExist = keys.Any(k => k.Contains("::"));
+
+        if(!otherResourcesExist)
+        {
+            authenticationProperties.Items.Remove(names.DPoPKey);
+            authenticationProperties.Items.Remove(names.RefreshToken);
+        }
     }
 
     private TokenNames GetTokenNamesWithoutScheme(UserTokenRequestParameters? parameters = null)
