@@ -29,7 +29,6 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         /// </summary>
         /// <param name="contextAccessor"></param>
         /// <param name="tokensInProps"></param>
-        /// <param name="schemeProvider"></param>
         /// <param name="logger"></param>
         public AuthenticationSessionUserAccessTokenStore(
             IHttpContextAccessor contextAccessor,
