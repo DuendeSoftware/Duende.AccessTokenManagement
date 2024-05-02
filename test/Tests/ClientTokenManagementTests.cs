@@ -29,8 +29,8 @@ public class ClientTokenManagementTests
             var token = await sut.GetAccessTokenAsync("unknown");
         }
 
-        var exception = await Should.ThrowAsync<InvalidOperationException>(action);
-        Should.Equals("unknown client", exception.Message);
+        (await Should.ThrowAsync<InvalidOperationException>(action))
+            .Message.ShouldBe("unknown client");
     }
 
     [Fact]
@@ -59,8 +59,8 @@ public class ClientTokenManagementTests
             var token = await sut.GetAccessTokenAsync("test");
         }
 
-        var exception = await Should.ThrowAsync<InvalidOperationException>(action);
-        Should.Equals("ClientId must not be empty", exception.Message);
+        (await Should.ThrowAsync<InvalidOperationException>(action))
+            .Message.ShouldBe("ClientId must not be empty");
     }
 
     [Theory]
