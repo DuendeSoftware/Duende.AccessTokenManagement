@@ -6,6 +6,7 @@ using System.Net.Http;
 using Duende.AccessTokenManagement;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -38,6 +39,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     public static ClientCredentialsTokenManagementBuilder AddClientCredentialsTokenManagement(this IServiceCollection services)
     {
         services.TryAddSingleton<ITokenRequestSynchronization, TokenRequestSynchronization>();
+        services.TryAddSingleton<ITokenEndpointRetriever, TokenEndpointRetriever>();
 
         services.TryAddTransient<IClientCredentialsTokenManagementService, ClientCredentialsTokenManagementService>();
         services.TryAddTransient<IClientCredentialsTokenCache, DistributedClientCredentialsTokenCache>();

@@ -23,23 +23,19 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     private readonly IClientAssertionService _clientAssertionService;
     private readonly IDPoPKeyStore _dPoPKeyMaterialService;
     private readonly IDPoPProofService _dPoPProofService;
+    private readonly ITokenEndpointRetriever _tokenEndpointRetriever;
     private readonly ILogger<ClientCredentialsTokenEndpointService> _logger;
 
     /// <summary>
     /// ctor
     /// </summary>
-    /// <param name="httpClientFactory"></param>
-    /// <param name="clientAssertionService"></param>
-    /// <param name="dPoPKeyMaterialService"></param>
-    /// <param name="dPoPProofService"></param>
-    /// <param name="logger"></param>
-    /// <param name="options"></param>
     public ClientCredentialsTokenEndpointService(
         IHttpClientFactory httpClientFactory,
         IOptionsMonitor<ClientCredentialsClient> options,
         IClientAssertionService clientAssertionService,
         IDPoPKeyStore dPoPKeyMaterialService,
         IDPoPProofService dPoPProofService,
+        ITokenEndpointRetriever tokenEndpointRetriever,
         ILogger<ClientCredentialsTokenEndpointService> logger)
     {
         _httpClientFactory = httpClientFactory;
@@ -47,6 +43,7 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
         _clientAssertionService = clientAssertionService;
         _dPoPKeyMaterialService = dPoPKeyMaterialService;
         _dPoPProofService = dPoPProofService;
+        _tokenEndpointRetriever = tokenEndpointRetriever;
         _logger = logger;
     }
 
@@ -58,14 +55,14 @@ public class ClientCredentialsTokenEndpointService : IClientCredentialsTokenEndp
     {
         var client = _options.Get(clientName);
 
-        if (string.IsNullOrWhiteSpace(client.TokenEndpoint) || string.IsNullOrEmpty(client.ClientId))
+        if ((string.IsNullOrWhiteSpace(client.TokenEndpoint) && string.IsNullOrWhiteSpace(client.Authority))|| string.IsNullOrEmpty(client.ClientId))
         {
             throw new InvalidOperationException("unknown client");
         }
 
         var request = new ClientCredentialsTokenRequest
         {
-            Address = client.TokenEndpoint,
+            Address = await _tokenEndpointRetriever.GetAsync(client),
             Scope = client.Scope,
             ClientId = client.ClientId,
             ClientSecret = client.ClientSecret,

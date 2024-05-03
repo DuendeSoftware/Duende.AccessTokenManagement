@@ -4,10 +4,10 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Duende.AccessTokenManagement.OpenIdConnect;
+namespace Duende.AccessTokenManagement;
 
-// Note that this is duplicated in Duende.AccessTokenManagement, but we can't
-// share the code because it is internal.
+// Note that this is duplicated in Duende.AccessTokenManagement.OpenIdConnect,
+// but we can't share the code because it is internal.
 internal static class StringExtensions
 {
     [DebuggerStepThrough]
