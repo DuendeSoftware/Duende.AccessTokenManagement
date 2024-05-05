@@ -107,6 +107,7 @@ public class AppHost : GenericHost
             }
         });
 
+        services.AddSingleton<ITokenEndpointRetriever>(new TestTokenEndpointRetriever(_identityServerHost.Url("/connect/token")));
     }
 
     private void Configure(IApplicationBuilder app)

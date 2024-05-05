@@ -15,6 +15,7 @@ namespace WorkerService;
 
 public class ClientAssertionService : IClientAssertionService
 {
+    private readonly ITokenEndpointRetriever _tokenEndpoint;
     private readonly IOptionsMonitor<ClientCredentialsClient> _options;
 
     private static string RsaKey =
@@ -35,21 +36,22 @@ public class ClientAssertionService : IClientAssertionService
 
     private static SigningCredentials Credential = new (new JsonWebKey(RsaKey), "RS256");
 
-    public ClientAssertionService(IOptionsMonitor<ClientCredentialsClient> options)
+    public ClientAssertionService(ITokenEndpointRetriever tokenEndpoint, IOptionsMonitor<ClientCredentialsClient> options)
     {
+        _tokenEndpoint = tokenEndpoint;
         _options = options;
     }
 
-    public Task<ClientAssertion?> GetClientAssertionAsync(string? clientName = null, TokenRequestParameters? parameters = null)
+    public async Task<ClientAssertion?> GetClientAssertionAsync(string? clientName = null, TokenRequestParameters? parameters = null)
     {
         if (clientName == "demo.jwt")
         {
             var options = _options.Get(clientName);
-            
+
             var descriptor = new SecurityTokenDescriptor
             {
                 Issuer = options.ClientId,
-                Audience = options.TokenEndpoint,
+                Audience = await _tokenEndpoint.GetAsync(options),
                 Expires = DateTime.UtcNow.AddMinutes(1),
                 SigningCredentials = Credential,
 
@@ -64,13 +66,13 @@ public class ClientAssertionService : IClientAssertionService
             var handler = new JsonWebTokenHandler();
             var jwt = handler.CreateToken(descriptor);
 
-            return Task.FromResult<ClientAssertion?>(new ClientAssertion
+            return new ClientAssertion
             {
                 Type = OidcConstants.ClientAssertionTypes.JwtBearer,
                 Value = jwt
-            });
+            };
         }
 
-        return Task.FromResult<ClientAssertion?>(null);
+        return null;
     }
 }

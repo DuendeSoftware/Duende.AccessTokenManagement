@@ -1,8 +1,12 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net.Http;
 using IdentityModel.Client;
+using Microsoft.Extensions.Options;
 
 namespace Duende.AccessTokenManagement;
 
@@ -11,6 +15,12 @@ namespace Duende.AccessTokenManagement;
 /// </summary>
 public class ClientCredentialsClient
 {
+    /// <summary>
+    /// The address of the OAuth authority. If this is set, the TokenEndpoint
+    /// will be set using discovery.
+    /// </summary>
+    public string? Authority { get; set; }
+
     /// <summary>
     /// The address of the token endpoint
     /// </summary>
