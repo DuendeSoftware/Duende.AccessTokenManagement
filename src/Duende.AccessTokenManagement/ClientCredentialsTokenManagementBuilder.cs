@@ -31,13 +31,6 @@ public class ClientCredentialsTokenManagementBuilder
     public ClientCredentialsTokenManagementBuilder AddClient(string name, Action<ClientCredentialsClient> configureOptions)
     {
         _services.Configure(name, configureOptions);
-        _services.PostConfigure<ClientCredentialsClient>(name, client =>
-        {
-            if (string.IsNullOrEmpty(client.ClientId))
-            {
-                throw new InvalidOperationException("ClientId must not be empty");
-            }
-        });
         return this;
     }
 }

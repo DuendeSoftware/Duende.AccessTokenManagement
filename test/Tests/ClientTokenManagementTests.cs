@@ -24,13 +24,10 @@ public class ClientTokenManagementTests
         var provider = services.BuildServiceProvider();
         var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
 
-        async Task action()
-        {
-            var token = await sut.GetAccessTokenAsync("unknown");
-        }
+        var action = async () => await sut.GetAccessTokenAsync("unknown");
 
         (await Should.ThrowAsync<InvalidOperationException>(action))
-            .Message.ShouldBe("unknown client");
+            .Message.ShouldBe("Unknown client unknown");
     }
 
     [Fact]
@@ -44,23 +41,38 @@ public class ClientTokenManagementTests
             {
                 client.TokenEndpoint = "https://as/connect/token";
                 client.ClientId = null;
-                client.ClientSecret = "client_secret";
-
-                client.Scope = "scope";
-                client.Resource = "resource";
-                client.Parameters.Add("audience", "audience");
             });
 
         var provider = services.BuildServiceProvider();
         var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
 
-        async Task action()
-        {
-            var token = await sut.GetAccessTokenAsync("test");
-        }
+        var action = async () => await sut.GetAccessTokenAsync("test");
 
         (await Should.ThrowAsync<InvalidOperationException>(action))
-            .Message.ShouldBe("ClientId must not be empty");
+            .Message.ShouldBe("No ClientId configured for client test");
+    }
+
+
+    [Fact]
+    public async Task Missing_tokenEndpoint_throw_exception()
+    {
+        var services = new ServiceCollection();
+
+        services.AddDistributedMemoryCache();
+        services.AddClientCredentialsTokenManagement()
+            .AddClient("test", client =>
+            {
+                client.TokenEndpoint = null;
+                client.ClientId = "test";
+            });
+
+        var provider = services.BuildServiceProvider();
+        var sut = provider.GetRequiredService<IClientCredentialsTokenManagementService>();
+
+        var action = async () => await sut.GetAccessTokenAsync("test");
+
+        (await Should.ThrowAsync<InvalidOperationException>(action))
+            .Message.ShouldBe("No TokenEndpoint configured for client test");
     }
 
     [Theory]
