@@ -32,7 +32,7 @@ internal class ServicesAccessorCircuitHandler : CircuitHandler
     readonly IServiceProvider services;
     readonly CircuitServicesAccessor circuitServicesAccessor;
 
-    internal ServicesAccessorCircuitHandler(IServiceProvider services, 
+    public ServicesAccessorCircuitHandler(IServiceProvider services, 
         CircuitServicesAccessor servicesAccessor)
     {
         this.services = services;
