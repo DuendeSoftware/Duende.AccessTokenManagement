@@ -1,6 +1,7 @@
 using BlazorServer.Plumbing;
 using BlazorServer.Services;
 using Serilog;
+using BlazorServer;
 
 namespace BlazorServer;
 
@@ -65,7 +66,8 @@ public static class HostingExtensions
 
         builder.Services.AddControllersWithViews();
         builder.Services.AddRazorPages();
-        builder.Services.AddServerSideBlazor();
+        builder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents();
 
         builder.Services.AddSingleton<WeatherForecastService>();
         
@@ -79,13 +81,14 @@ public static class HostingExtensions
         app.UseStaticFiles();
 
         app.UseRouting();
+        app.UseAntiforgery();
 
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapDefaultControllerRoute();
-        app.MapBlazorHub();
-        app.MapFallbackToPage("/_Host");
+        app.MapRazorComponents<App>()
+            .AddInteractiveServerRenderMode();
         
         return app;
     }
