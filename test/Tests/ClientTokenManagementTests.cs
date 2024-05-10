@@ -27,7 +27,7 @@ public class ClientTokenManagementTests
         var action = async () => await sut.GetAccessTokenAsync("unknown");
 
         (await Should.ThrowAsync<InvalidOperationException>(action))
-            .Message.ShouldBe("Unknown client unknown");
+            .Message.ShouldBe("No ClientId configured for client unknown");
     }
 
     [Fact]
