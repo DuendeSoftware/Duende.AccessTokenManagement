@@ -54,7 +54,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a named HTTP client for the factory that automatically sends the a client access token
+    /// Adds a named HTTP client for the factory that automatically sends a client access token
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/>.</param>
     /// <param name="httpClientName">The name of the client.</param>
@@ -69,7 +69,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a named HTTP client for the factory that automatically sends the a client access token
+    /// Adds a named HTTP client for the factory that automatically sends a client access token
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/>.</param>
     /// <param name="httpClientName">The name of the client.</param>
@@ -96,7 +96,7 @@ public static class ClientCredentialsTokenManagementServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a named HTTP client for the factory that automatically sends the a client access token
+    /// Adds a named HTTP client for the factory that automatically sends a client access token
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/>.</param>
     /// <param name="httpClientName">The name of the client.</param>
