@@ -1,9 +1,30 @@
 @page "/"
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Index</PageTitle>
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+@if (User != null && User.Identity.IsAuthenticated)
+{
+    <p>Welcome, @User.Identity.Name!</p>
+}
+else
+{
+    <p>Welcome to our app!</p>
+    <p>You are not authenticated.</p>
+    <p>Please <NavLink href="/account/login">log in</NavLink> to continue.</p>
+}
 
 <SurveyPrompt Title="How is Blazor working for you?"/>
+
+@code {
+    private ClaimsPrincipal User { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        User = authState.User;
+    }
+}
