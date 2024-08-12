@@ -4,12 +4,15 @@
         <TargetFrameworks>net8.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageId>Duende.AccessTokenManagement</PackageId>
         <Description>Automatic access token management for OAuth client credential flows</Description>
     </PropertyGroup>
         
-
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
+    
     <ItemGroup>
         <PackageReference Include="IdentityModel" Version="7.0.0" />
         
