@@ -4,11 +4,15 @@
         <TargetFrameworks>net8.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageId>Duende.AccessTokenManagement.OpenIdConnect</PackageId>
         <Description>Automatic access token management for interactive OpenIdConnect-based ASP.NET Core applications</Description>
     </PropertyGroup>
 
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath=""/>
+    </ItemGroup>
+    
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
 
