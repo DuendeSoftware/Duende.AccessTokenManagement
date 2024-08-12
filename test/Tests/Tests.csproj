@@ -29,7 +29,18 @@
         
         <PackageReference Include="RichardSzalay.MockHttp" Version="7.0.0" />
         <PackageReference Include="Shouldly" Version="4.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- TODO - Replace CsQuery with AngleSharp -->
         <PackageReference Include="CsQuery.NETStandard" Version="1.3.6.1" />
+
+        <!-- TODO - The rest of the packages in this group are transitive
+        dependencies of CsQuery. We should remove them when we replace CsQuery
+        with AngleSharp. -->
+        <PackageReference Include="Microsoft.NETCore.Jit" Version="1.1.13" />
+        <PackageReference Include="System.Net.Http" Version="4.3.4" />
+        <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2"/>
     </ItemGroup>
 
     <ItemGroup>
