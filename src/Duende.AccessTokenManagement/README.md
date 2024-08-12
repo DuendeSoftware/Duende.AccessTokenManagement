@@ -1,6 +1,7 @@
 ## About Duende.AccessTokenManagement
 Duende.AccessTokenManagement is a .NET library that manages OAuth
-access tokens in [.NET workers](https://learn.microsoft.com/en-us/dotnet/core/extensions/workers). 
+access tokens in [.NET workers](https://learn.microsoft.com/en-us/dotnet/core/extensions/workers) 
+and [ASP.NET worker services](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services).
 It will acquire new tokens when old tokens are about to expire and provides conveniences to 
 automatically use the current token with HTTP clients.
 

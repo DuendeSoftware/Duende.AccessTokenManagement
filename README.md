@@ -8,7 +8,7 @@ with HTTP clients, and can revoke tokens that are no longer needed.
 The libraries in this repository are distributed as NuGet packages.
 
 - [Duende.AccessTokenManagement](https://www.nuget.org/packages/Duende.AccessTokenManagement) manages tokens acquired in machine-to-machine flows in 
-[.NET workers](https://learn.microsoft.com/en-us/dotnet/core/extensions/workers).
+[.NET workers](https://learn.microsoft.com/en-us/dotnet/core/extensions/workers) and [ASP.NET worker services](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services).
 - [Duende.AccessTokenManagement.OpenIdConnect](https://www.nuget.org/packages/Duende.AccessTokenManagement.OpenIdConnect)
 manages tokens acquired in user-centric flows in [ASP.NET Core](https://dotnet.microsoft.com/en-us/apps/aspnet)
 applications.
