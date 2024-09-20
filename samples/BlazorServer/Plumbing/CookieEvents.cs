@@ -9,16 +9,17 @@ namespace BlazorServer.Plumbing;
 
 public class CookieEvents : CookieAuthenticationEvents
 {
-    private readonly IUserTokenStore _store;
+    private readonly IUserTokenManagementService _userTokenManagementService;
 
-    public CookieEvents(IUserTokenStore store)
+    public CookieEvents(IUserTokenManagementService userTokenManagementService)
     {
-        _store = store;
+        _userTokenManagementService = userTokenManagementService;
     }
     
     public override async Task ValidatePrincipal(CookieValidatePrincipalContext context)
     {
-        var token = await _store.GetTokenAsync(context.Principal!);
+        var token = await _userTokenManagementService.GetAccessTokenAsync(context.Principal!);
+        
         if (token.IsError)
         {
             context.RejectPrincipal();

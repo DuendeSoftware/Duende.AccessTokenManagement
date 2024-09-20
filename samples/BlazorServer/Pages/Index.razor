@@ -1,9 +1,62 @@
 @page "/"
 
+@using Duende.AccessTokenManagement.OpenIdConnect
+@using System.Security.Claims
+
+@inject NavigationManager navigationManager;
+@inject IUserTokenStore tokenStorage;
+
 <PageTitle>Index</PageTitle>
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?"/>
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+@if (tokens != null)
+{
+    <h2>Access Token</h2>
+    <div><b>Access Token Expiration</b> @tokens.Expiration</div>
+    <div><b>Is Access Token Present</b> @(tokens.AccessToken != null)</div>
+    <div><b>Is Refresh Token Present</b> @(tokens.RefreshToken != null)</div>
+
+    @if (tokens.Expiration < DateTimeOffset.Now)
+    {
+        <h3>I am still authenticated, but Access Token is expired!</h3>
+    }
+
+    <button class="btn btn-primary" @onclick="Refresh">Refresh</button>
+}
+
+
+@code {
+
+    [CascadingParameter]
+    Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private bool IsAuthenticated;
+
+    private ClaimsPrincipal? User;
+
+    private UserToken? tokens;
+
+    protected override async Task OnInitializedAsync()
+    {
+        User = (await authenticationStateTask).User;
+
+        IsAuthenticated = User.Identity.IsAuthenticated;
+
+        if (IsAuthenticated)
+            tokens = await tokenStorage.GetTokenAsync(User);
+        else
+            tokens = null;
+
+        await base.OnInitializedAsync();
+    }
+
+    private void Refresh()
+    {
+        navigationManager.NavigateTo("/", true);
+    }
+}
