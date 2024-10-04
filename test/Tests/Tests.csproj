@@ -38,7 +38,7 @@
         <!-- TODO - The rest of the packages in this group are transitive
         dependencies of CsQuery. We should remove them when we replace CsQuery
         with AngleSharp. -->
-        <PackageReference Include="Microsoft.NETCore.Jit" Version="1.1.13" />
+        <PackageReference Include="Microsoft.NETCore.Jit" Version="2.0.8" />
         <PackageReference Include="System.Net.Http" Version="4.3.4" />
         <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2"/>
     </ItemGroup>
