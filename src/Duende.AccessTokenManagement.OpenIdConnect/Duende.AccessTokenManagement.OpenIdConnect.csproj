@@ -18,7 +18,7 @@
 
         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
 
-        <PackageReference Include="MinVer" Version="5.0.0" PrivateAssets="All" />
+        <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="All" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 
         <ProjectReference Include="..\Duende.AccessTokenManagement\Duende.AccessTokenManagement.csproj" />
