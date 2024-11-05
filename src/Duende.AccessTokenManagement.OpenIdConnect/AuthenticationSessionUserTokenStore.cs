@@ -20,10 +20,6 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         private readonly IStoreTokensInAuthenticationProperties _tokensInProps;
         private readonly ILogger<AuthenticationSessionUserAccessTokenStore> _logger;
 
-        // per-request cache so that if SignInAsync is used, we won't re-read the old/cached AuthenticateResult from the handler
-        // this requires this service to be added as scoped to the DI system
-        private readonly Dictionary<string, AuthenticateResult> _cache = new Dictionary<string, AuthenticateResult>();
-
         /// <summary>
         /// ctor
         /// </summary>
@@ -46,10 +42,15 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             UserTokenRequestParameters? parameters = null)
         {
             parameters ??= new();
+            var cache = _contextAccessor.HttpContext?.RequestServices.GetService(typeof(Dictionary<string, AuthenticateResult>)) as Dictionary<string, AuthenticateResult>;
+            if (cache == null)
+            {
+                throw new InvalidOperationException("Failed to resolve authenticate result cache");
+            }
 
             // check the cache in case the cookie was re-issued via StoreTokenAsync
             // we use String.Empty as the key for a null SignInScheme
-            if (!_cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
+            if (!cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
             {
                 result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme).ConfigureAwait(false);
             }
@@ -69,6 +70,13 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 return new UserToken() { Error = "No properties on authentication result" };
             }
 
+
+            // This "can't happen", but if it ever did, we would have a security problem
+            if (result.Principal.Identity?.Name != user.Identity?.Name)
+            {
+                throw new InvalidOperationException("Mismatch between expected user identity and cached authenticate result");
+            }
+
             return _tokensInProps.GetUserToken(result.Properties, parameters);
         }
 
@@ -80,9 +88,16 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         {
             parameters ??= new();
 
+
+            var cache = _contextAccessor.HttpContext?.RequestServices.GetService(typeof(Dictionary<string, AuthenticateResult>)) as Dictionary<string, AuthenticateResult>;
+            if (cache == null)
+            {
+                throw new InvalidOperationException("Failed to resolve authenticate result cache");
+            }
+
             // check the cache in case the cookie was re-issued via StoreTokenAsync
             // we use String.Empty as the key for a null SignInScheme
-            if (!_cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
+            if (!cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
             {
                 result = await _contextAccessor.HttpContext!.AuthenticateAsync(parameters.SignInScheme)!.ConfigureAwait(false);
             }
@@ -103,7 +118,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
             // add to the cache so if GetTokenAsync is called again, we will use the updated property values
             // we use String.Empty as the key for a null SignInScheme
-            _cache[parameters.SignInScheme ?? String.Empty] = AuthenticateResult.Success(new AuthenticationTicket(transformedPrincipal, result.Properties, scheme!));
+            cache[parameters.SignInScheme ?? String.Empty] = AuthenticateResult.Success(new AuthenticationTicket(transformedPrincipal, result.Properties, scheme!));
         }
 
         /// <inheritdoc/>
