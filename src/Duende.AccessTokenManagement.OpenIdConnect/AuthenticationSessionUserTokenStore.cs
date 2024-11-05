@@ -4,10 +4,10 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Duende.AccessTokenManagement.OpenIdConnect
 {
@@ -42,15 +42,14 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             UserTokenRequestParameters? parameters = null)
         {
             parameters ??= new();
-            var cache = _contextAccessor.HttpContext?.RequestServices.GetService(typeof(Dictionary<string, AuthenticateResult>)) as Dictionary<string, AuthenticateResult>;
-            if (cache == null)
-            {
-                throw new InvalidOperationException("Failed to resolve authenticate result cache");
-            }
-
+            // Resolve the cache here because it needs to have a per-request
+            // lifetime. Sometimes the store itself is captured for longer than
+            // that inside an HttpClient.
+            var cache = _contextAccessor.HttpContext?.RequestServices.GetRequiredService<AuthenticateResultCache>();
+         
             // check the cache in case the cookie was re-issued via StoreTokenAsync
             // we use String.Empty as the key for a null SignInScheme
-            if (!cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
+            if (!cache!.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
             {
                 result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme).ConfigureAwait(false);
             }
@@ -88,22 +87,21 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         {
             parameters ??= new();
 
-
-            var cache = _contextAccessor.HttpContext?.RequestServices.GetService(typeof(Dictionary<string, AuthenticateResult>)) as Dictionary<string, AuthenticateResult>;
-            if (cache == null)
-            {
-                throw new InvalidOperationException("Failed to resolve authenticate result cache");
-            }
+            // Resolve the cache here because it needs to have a per-request
+            // lifetime. Sometimes the store itself is captured for longer than
+            // that inside an HttpClient.
+            var cache = _contextAccessor.HttpContext?.RequestServices.GetRequiredService<AuthenticateResultCache>();
 
             // check the cache in case the cookie was re-issued via StoreTokenAsync
             // we use String.Empty as the key for a null SignInScheme
-            if (!cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
+            if (!cache!.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
             {
                 result = await _contextAccessor.HttpContext!.AuthenticateAsync(parameters.SignInScheme)!.ConfigureAwait(false);
             }
 
             if (result is not { Succeeded: true })
             {
+                // TODO - Test coverage of this case
                 throw new Exception("Can't store tokens. User is anonymous");
             }
 

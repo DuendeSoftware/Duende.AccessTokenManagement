@@ -400,7 +400,6 @@ public class UserTokenManagementTests : IntegrationTestBase
         token.RefreshToken.ShouldBe("initial_refresh_token");
     }
 
-
     [Fact]
     public async Task Multiple_users_have_distinct_tokens_across_refreshes()
     {

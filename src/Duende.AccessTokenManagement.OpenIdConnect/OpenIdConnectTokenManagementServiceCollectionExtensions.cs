@@ -51,7 +51,7 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         services.TryAddScoped<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
         
         // scoped since it will be caching per-request authentication results
-        services.TryAddScoped<Dictionary<string, AuthenticateResult>>();
+        services.AddScoped<AuthenticateResultCache>();
 
         return services;
     }
