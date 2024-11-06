@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using IdentityModel;
 
 namespace Duende.AccessTokenManagement.OpenIdConnect
 {
@@ -71,7 +72,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
 
             // This "can't happen", but if it ever did, we would have a security problem
-            if (result.Principal.Identity?.Name != user.Identity?.Name)
+            if (result.Principal.FindFirstValue(JwtClaimTypes.Subject) != user.FindFirstValue(JwtClaimTypes.Subject))
             {
                 throw new InvalidOperationException("Mismatch between expected user identity and cached authenticate result");
             }
@@ -101,7 +102,6 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
             if (result is not { Succeeded: true })
             {
-                // TODO - Test coverage of this case
                 throw new Exception("Can't store tokens. User is anonymous");
             }
 
