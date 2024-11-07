@@ -70,13 +70,6 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
                 return new UserToken() { Error = "No properties on authentication result" };
             }
 
-
-            // This "can't happen", but if it ever did, we would have a security problem
-            if (result.Principal.FindFirstValue(JwtClaimTypes.Subject) != user.FindFirstValue(JwtClaimTypes.Subject))
-            {
-                throw new InvalidOperationException("Mismatch between expected user identity and cached authenticate result");
-            }
-
             return _tokensInProps.GetUserToken(result.Properties, parameters);
         }
 
