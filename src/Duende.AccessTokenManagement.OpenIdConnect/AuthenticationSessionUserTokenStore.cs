@@ -4,10 +4,11 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
+using IdentityModel;
 
 namespace Duende.AccessTokenManagement.OpenIdConnect
 {
@@ -19,10 +20,6 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly IStoreTokensInAuthenticationProperties _tokensInProps;
         private readonly ILogger<AuthenticationSessionUserAccessTokenStore> _logger;
-
-        // per-request cache so that if SignInAsync is used, we won't re-read the old/cached AuthenticateResult from the handler
-        // this requires this service to be added as scoped to the DI system
-        private readonly Dictionary<string, AuthenticateResult> _cache = new Dictionary<string, AuthenticateResult>();
 
         /// <summary>
         /// ctor
@@ -46,10 +43,14 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
             UserTokenRequestParameters? parameters = null)
         {
             parameters ??= new();
-
+            // Resolve the cache here because it needs to have a per-request
+            // lifetime. Sometimes the store itself is captured for longer than
+            // that inside an HttpClient.
+            var cache = _contextAccessor.HttpContext?.RequestServices.GetRequiredService<AuthenticateResultCache>();
+         
             // check the cache in case the cookie was re-issued via StoreTokenAsync
             // we use String.Empty as the key for a null SignInScheme
-            if (!_cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
+            if (!cache!.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
             {
                 result = await _contextAccessor!.HttpContext!.AuthenticateAsync(parameters.SignInScheme).ConfigureAwait(false);
             }
@@ -80,9 +81,14 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
         {
             parameters ??= new();
 
+            // Resolve the cache here because it needs to have a per-request
+            // lifetime. Sometimes the store itself is captured for longer than
+            // that inside an HttpClient.
+            var cache = _contextAccessor.HttpContext?.RequestServices.GetRequiredService<AuthenticateResultCache>();
+
             // check the cache in case the cookie was re-issued via StoreTokenAsync
             // we use String.Empty as the key for a null SignInScheme
-            if (!_cache.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
+            if (!cache!.TryGetValue(parameters.SignInScheme ?? String.Empty, out var result))
             {
                 result = await _contextAccessor.HttpContext!.AuthenticateAsync(parameters.SignInScheme)!.ConfigureAwait(false);
             }
@@ -103,7 +109,7 @@ namespace Duende.AccessTokenManagement.OpenIdConnect
 
             // add to the cache so if GetTokenAsync is called again, we will use the updated property values
             // we use String.Empty as the key for a null SignInScheme
-            _cache[parameters.SignInScheme ?? String.Empty] = AuthenticateResult.Success(new AuthenticationTicket(transformedPrincipal, result.Properties, scheme!));
+            cache[parameters.SignInScheme ?? String.Empty] = AuthenticateResult.Success(new AuthenticationTicket(transformedPrincipal, result.Properties, scheme!));
         }
 
         /// <inheritdoc/>

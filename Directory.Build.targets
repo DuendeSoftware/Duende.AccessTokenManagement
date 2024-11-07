@@ -3,7 +3,7 @@
         <FrameworkVersion>8.0.1</FrameworkVersion>
         <ExtensionsVersion>8.0.0</ExtensionsVersion>
         <WilsonVersion>7.1.2</WilsonVersion>
-        <IdentityServerVersion>7.0.6</IdentityServerVersion>
+        <IdentityServerVersion>7.0.8</IdentityServerVersion>
     </PropertyGroup>
 
     <ItemGroup>

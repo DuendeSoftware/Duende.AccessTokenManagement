@@ -2,9 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using Duende.AccessTokenManagement;
 using Duende.AccessTokenManagement.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -46,8 +48,10 @@ public static class OpenIdConnectTokenManagementServiceCollectionExtensions
         // context, and we register different ones in blazor
         
         services.TryAddScoped<IUserAccessor, HttpContextUserAccessor>();
-        // scoped since it will be caching per-request authentication results
         services.TryAddScoped<IUserTokenStore, AuthenticationSessionUserAccessTokenStore>();
+        
+        // scoped since it will be caching per-request authentication results
+        services.AddScoped<AuthenticateResultCache>();
 
         return services;
     }

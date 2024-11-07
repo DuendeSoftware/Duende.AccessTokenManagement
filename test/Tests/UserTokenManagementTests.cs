@@ -183,10 +183,18 @@ public class UserTokenManagementTests : IntegrationTestBase
     [Fact]
     public async Task Short_token_lifetime_should_trigger_refresh()
     {
+        // This test makes an initial token request using code flow and then
+        // refreshes the token a couple of times.
+        
+        // We mock the expiration of the first few token responses to be short
+        // enough that we will automatically refresh immediately when attempting
+        // to use the tokens, while the final response gets a long refresh time,
+        // allowing us to verify that the token is not refreshed. 
+
         var mockHttp = new MockHttpMessageHandler();
         AppHost.IdentityServerHttpHandler = mockHttp;
 
-        // short token lifetime should trigger refresh on 1st use
+        // Respond to code flow with a short token lifetime so that we trigger refresh on 1st use
         var initialTokenResponse = new
         {
             id_token = IdentityServerHost.CreateIdToken("1", "web"),
@@ -195,13 +203,11 @@ public class UserTokenManagementTests : IntegrationTestBase
             expires_in = 10,
             refresh_token = "initial_refresh_token",
         };
-
-        // response for re-deeming code
         mockHttp.When("/connect/token")
             .WithFormData("grant_type", "authorization_code")
             .Respond("application/json", JsonSerializer.Serialize(initialTokenResponse));
 
-        // short token lifetime should trigger refresh on 1st use
+        // Respond to refresh with a short token lifetime so that we trigger another refresh on 2nd use
         var refreshTokenResponse = new
         {
             access_token = "refreshed1_access_token",
@@ -209,14 +215,12 @@ public class UserTokenManagementTests : IntegrationTestBase
             expires_in = 10,
             refresh_token = "refreshed1_refresh_token",
         };
-
-        // response for refresh 1
         mockHttp.When("/connect/token")
             .WithFormData("grant_type", "refresh_token")
             .WithFormData("refresh_token", "initial_refresh_token")
             .Respond("application/json", JsonSerializer.Serialize(refreshTokenResponse));
 
-        // short token lifetime should trigger refresh on 2nd use
+        // Respond to second refresh with a long token lifetime so that we don't trigger another refresh on 3rd use
         var refreshTokenResponse2 = new
         {
             access_token = "refreshed2_access_token",
@@ -224,8 +228,6 @@ public class UserTokenManagementTests : IntegrationTestBase
             expires_in = 3600,
             refresh_token = "refreshed2_refresh_token",
         };
-
-        // response for refresh 1
         mockHttp.When("/connect/token")
             .WithFormData("grant_type", "refresh_token")
             .WithFormData("refresh_token", "refreshed1_refresh_token")
@@ -396,5 +398,30 @@ public class UserTokenManagementTests : IntegrationTestBase
         token.ShouldNotBeNull();
         token.IsError.ShouldBeFalse();
         token.RefreshToken.ShouldBe("initial_refresh_token");
+    }
+
+    [Fact]
+    public async Task Multiple_users_have_distinct_tokens_across_refreshes()
+    {
+        // setup host
+        AppHost.ClientId = "web.short";
+        await AppHost.InitializeAsync();
+        await AppHost.LoginAsync("alice");
+
+        var firstResponse = await AppHost.BrowserClient.GetAsync(AppHost.Url("/call_api"));
+        var firstToken = await firstResponse.Content.ReadFromJsonAsync<TokenEchoResponse>();
+        var secondResponse = await AppHost.BrowserClient.GetAsync(AppHost.Url("/call_api"));
+        var secondToken = await secondResponse.Content.ReadFromJsonAsync<TokenEchoResponse>();
+        firstToken.ShouldNotBeNull();
+        secondToken.ShouldNotBeNull();
+        secondToken.sub.ShouldBe(firstToken.sub);
+        secondToken.token.ShouldNotBe(firstToken.token);
+
+        await AppHost.LoginAsync("bob");
+        var thirdResponse = await AppHost.BrowserClient.GetAsync(AppHost.Url("/call_api"));
+        var thirdToken = await thirdResponse.Content.ReadFromJsonAsync<TokenEchoResponse>();
+        thirdToken.ShouldNotBeNull(); 
+        thirdToken.sub.ShouldNotBe(secondToken.sub);
+        thirdToken.token.ShouldNotBe(firstToken.token);
     }
 }
