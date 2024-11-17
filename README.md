@@ -1,4 +1,8 @@
 ## About Duende.AccessTokenManagement
+
+> [!IMPORTANT]  
+> This project is now managed in our [FOSS repository](https://github.com/DuendeSoftware/foss/tree/main/access-token-management).
+
 This is the repository for a set of .NET libraries that manage OAuth and OpenId
 Connect access tokens. These tools automatically acquire new tokens when old
 tokens are about to expire, provide conveniences for using the current token
